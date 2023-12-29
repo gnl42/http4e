@@ -42,210 +42,215 @@ import org.roussev.http4e.httpclient.core.util.shared.Exported;
  */
 public class Translator {
 
-   public static Item httppacketToItem( String packet){
-      String LN = System.getProperty("line.separator"); // "\r\n"
+    public static Item httppacketToItem(String packet) {
+        final String LN = System.lineSeparator(); // "\r\n"
 
-      String str;
+        String str;
 
-      packet = packet.trim();
-      String line = "";
-      StringBuilder headers = new StringBuilder();
-      StringBuilder body = new StringBuilder();
-      BufferedReader reader = new BufferedReader(new StringReader(packet));
-      try {
+        packet = packet.trim();
+        String line = "";
+        final StringBuilder headers = new StringBuilder();
+        final StringBuilder body = new StringBuilder();
+        final BufferedReader reader = new BufferedReader(new StringReader(packet));
+        try {
 
-         int cnt = 0;
-         boolean isbody = false;
-         while ((str = reader.readLine()) != null) {
-            if (str.length() == 0) {
-               isbody = true;
-            }
-            if (cnt == 0) {
-               line = str;
-            } else if (!isbody) {
-               headers.append(str);
-               headers.append(LN);
+            int cnt = 0;
+            boolean isbody = false;
+            while ((str = reader.readLine()) != null) {
+                if (str.length() == 0) {
+                    isbody = true;
+                }
+                if (cnt == 0) {
+                    line = str;
+                } else if (!isbody) {
+                    headers.append(str);
+                    headers.append(LN);
 
-            } else {
-               body.append(str);
-               body.append(LN);
-            }
-            cnt++;
-         }
-
-      } catch (IOException e) {
-         ExceptionHandler.handle(e);
-      }
-
-      Properties headersMap = new Properties();
-      try {
-         headersMap.load(new ByteArrayInputStream(headers.toString().getBytes("UTF8")));
-
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-
-      // /////////////////////////////////////////////////
-      Item item = new Item();
-      item.headers = new HashMap<String, List<String>>();
-
-      // Convert properties to HashMap
-      Enumeration<?> en = headersMap.keys();
-      while (en.hasMoreElements()) {
-         String key = en.nextElement().toString();
-         String value = headersMap.getProperty(key);
-         List<String> valueList = new ArrayList<String>();
-         valueList.add(value);
-         item.headers.put(key, valueList);
-
-      }
-      try {
-         item.name = Utils.trimProtocol(item.url);
-      } catch (Exception ignore) {
-      }
-
-      StringTokenizer lineST = new StringTokenizer(line, " ");
-
-      String method = "";
-      String uri = "";
-      try {
-         method = BaseUtils.noNull(lineST.nextToken());
-         uri = BaseUtils.noNull(lineST.nextToken());
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-      item.httpMethod = method.toUpperCase();
-      item.url = "http://" + getHeader("Host", item.headers) + uri;
-
-      String contentType = getHeader("Content-type", item.headers);
-      boolean isXwwwFormType = "application/x-www-form-urlencoded".equalsIgnoreCase(contentType);
-
-      if (isXwwwFormType) {
-         StringTokenizer st = new StringTokenizer(body.toString().trim(), "&");
-         while (st.hasMoreTokens()) {
-            String param = "";
-            try {
-               param = st.nextToken();
-               param = URLDecoder.decode(param, "UTF8");
-            } catch (UnsupportedEncodingException ignore) {
+                } else {
+                    body.append(str);
+                    body.append(LN);
+                }
+                cnt++;
             }
 
-            StringTokenizer st2 = new StringTokenizer(param, "=");
-            String p1 = "";
-            String v1 = "";
-            try {
-               p1 = st2.nextToken();
-               v1 = st2.nextToken();
-            } catch (Exception ignore) {
+        } catch (final IOException e) {
+            ExceptionHandler.handle(e);
+        }
+
+        final Properties headersMap = new Properties();
+        try {
+            headersMap.load(new ByteArrayInputStream(headers.toString().getBytes("UTF8")));
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
+        // /////////////////////////////////////////////////
+        final Item item = new Item();
+        item.headers = new HashMap<>();
+
+        // Convert properties to HashMap
+        final Enumeration<?> en = headersMap.keys();
+        while (en.hasMoreElements()) {
+            final String key = en.nextElement().toString();
+            final String value = headersMap.getProperty(key);
+            final List<String> valueList = new ArrayList<>();
+            valueList.add(value);
+            item.headers.put(key, valueList);
+
+        }
+        try {
+            item.name = Utils.trimProtocol(item.url);
+        } catch (final Exception ignore) {
+        }
+
+        final StringTokenizer lineST = new StringTokenizer(line, " ");
+
+        String method = "";
+        String uri = "";
+        try {
+            method = BaseUtils.noNull(lineST.nextToken());
+            uri = BaseUtils.noNull(lineST.nextToken());
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+        item.httpMethod = method.toUpperCase();
+        item.url = "http://" + getHeader("Host", item.headers) + uri;
+
+        final String contentType = getHeader("Content-type", item.headers);
+        final boolean isXwwwFormType = "application/x-www-form-urlencoded".equalsIgnoreCase(contentType);
+
+        if (isXwwwFormType) {
+            final StringTokenizer st = new StringTokenizer(body.toString().trim(), "&");
+            while (st.hasMoreTokens()) {
+                String param = "";
+                try {
+                    param = st.nextToken();
+                    param = URLDecoder.decode(param, "UTF8");
+                } catch (final UnsupportedEncodingException ignore) {
+                }
+
+                final StringTokenizer st2 = new StringTokenizer(param, "=");
+                String p1 = "";
+                String v1 = "";
+                try {
+                    p1 = st2.nextToken();
+                    v1 = st2.nextToken();
+                } catch (final Exception ignore) {
+                }
+                if (!BaseUtils.isEmpty(p1)) {
+                    final ArrayList<String> parameters = new ArrayList<>();
+                    parameters.add(v1);
+                    item.parameters.put(p1, parameters);
+                }
             }
-            if (!BaseUtils.isEmpty(p1)) {
-               ArrayList<String> parameters = new ArrayList<String>();
-               parameters.add(v1);
-               item.parameters.put(p1, parameters);
-            }
-         }
-      } else {
-         item.body = BaseUtils.noNull(body.toString().trim());
-      }
+        } else {
+            item.body = BaseUtils.noNull(body.toString().trim());
+        }
 
-      return item;
-   }
+        return item;
+    }
 
+    public static String foldertabToJavaSource(final ItemModel model) {
 
-   public static String foldertabToJavaSource( ItemModel model){
+        try {
+            final InputStream srcIN = ResourceUtils.getBundleResourceStream2(CoreConstants.PLUGIN_CORE, "resources/http-runner-src.txt");
+            final Exported exported = new Exported(srcIN, model.getHttpMethod(), model.getUrl(), model.getBody(), model.getHeaders(), model.getParameters());
 
-      try {
-         InputStream srcIN = ResourceUtils.getBundleResourceStream2(CoreConstants.PLUGIN_CORE, "resources/http-runner-src.txt");
-         Exported exported = new Exported(srcIN, model.getHttpMethod(), model.getUrl(), model.getBody(), model.getHeaders(), model.getParameters());
+            return exported.getSource();
 
-         return exported.getSource();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
 
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
+        return "";
+    }
 
-      return "";
-   }
+    public static void main(final String[] args) throws Exception {
+        final String packet = """
+                GET /authentication HTTP/1.1\r
+                Host: 10.10.78.56:8099\r
+                User-Agent: ColdFusion\r
+                Content-type: application/x-www-form-urlencoded\r
+                Content-length: 61\r
+                \r
+                username=qwe+qwe&password=rty&sjh slk\r
+                """;
+        // System.out.println(packet);
 
+        httppacketToItem(packet);
 
-   public static void main( String[] args) throws Exception{
-      String packet = "GET /authentication HTTP/1.1\r\n" + "Host: 10.10.78.56:8099\r\n" + "User-Agent: ColdFusion\r\n" + "Content-type: application/x-www-form-urlencoded\r\n" + "Content-length: 61\r\n" + "\r\n" + "username=qwe+qwe&password=rty&sjh slk\r\n";
-      // System.out.println(packet);
+        // System.out.println("------line------");
+        // String line = packet.substring(0, packet.indexOf("\n"));
+        // System.out.println(line);
+        //
+        // System.out.println("------headers------");
+        // String headers = packet.substring(packet.indexOf("\n")+1,
+        // packet.indexOf("\n\n"));
+        // System.out.println(headers);
+        // Properties headersMap = new Properties();
+        // try {
+        // headersMap.load(new ByteArrayInputStream(headers.getBytes("UTF8")));
+        // System.out.println(headersMap);
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
+        //
+        // System.out.println("------body------");
+        // String body = packet.substring(packet.indexOf("\n\n")+2,
+        // packet.length()-1);
+        // System.out.println(body);
+        //
+        // ///////////////////////////////////////////////////
+        // Item item = new Item();
+        // item.headers = headersMap;
+        //
+        // StringTokenizer lineST = new StringTokenizer(line, " ");
+        //
+        // String method = "";
+        // String uri = "";
+        // try {
+        // method = BaseUtils.noNull(lineST.nextToken());
+        // uri = BaseUtils.noNull(lineST.nextToken());
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
+        // item.httpMethod = method.toUpperCase();
+        // item.url = "http://" + getHeader("Host", item.headers) + uri;
+        //
+        // String contentType = getHeader("Content-type", item.headers);
+        // boolean isXwwwFormType =
+        // "application/x-www-form-urlencoded".equalsIgnoreCase(contentType);
+        //
+        // if(isXwwwFormType){
+        // StringTokenizer st = new StringTokenizer(body, "&");
+        // while (st.hasMoreTokens()) {
+        // String param = URLDecoder.decode(st.nextToken(), "UTF8");
+        // StringTokenizer st2 = new StringTokenizer(param, "=");
+        // String p1 = "";
+        // String v1 = "";
+        // try {
+        // p1 = st2.nextToken();
+        // v1 = st2.nextToken();
+        // } catch (Exception ignore) {}
+        // if(!BaseUtils.isEmpty(p1)){
+        // item.parameters.put(p1, v1);
+        // }
+        // }
+        // } else {
+        // item.body = BaseUtils.noNull(body);
+        // }
+        //
+        // System.out.println(item);
+    }
 
-      httppacketToItem(packet);
-
-      // System.out.println("------line------");
-      // String line = packet.substring(0, packet.indexOf("\n"));
-      // System.out.println(line);
-      //
-      // System.out.println("------headers------");
-      // String headers = packet.substring(packet.indexOf("\n")+1,
-      // packet.indexOf("\n\n"));
-      // System.out.println(headers);
-      // Properties headersMap = new Properties();
-      // try {
-      // headersMap.load(new ByteArrayInputStream(headers.getBytes("UTF8")));
-      // System.out.println(headersMap);
-      // } catch (Exception e) {
-      // e.printStackTrace();
-      // }
-      //
-      // System.out.println("------body------");
-      // String body = packet.substring(packet.indexOf("\n\n")+2,
-      // packet.length()-1);
-      // System.out.println(body);
-      //
-      // ///////////////////////////////////////////////////
-      // Item item = new Item();
-      // item.headers = headersMap;
-      //
-      // StringTokenizer lineST = new StringTokenizer(line, " ");
-      //
-      // String method = "";
-      // String uri = "";
-      // try {
-      // method = BaseUtils.noNull(lineST.nextToken());
-      // uri = BaseUtils.noNull(lineST.nextToken());
-      // } catch (Exception e) {
-      // e.printStackTrace();
-      // }
-      // item.httpMethod = method.toUpperCase();
-      // item.url = "http://" + getHeader("Host", item.headers) + uri;
-      //
-      // String contentType = getHeader("Content-type", item.headers);
-      // boolean isXwwwFormType =
-      // "application/x-www-form-urlencoded".equalsIgnoreCase(contentType);
-      //
-      // if(isXwwwFormType){
-      // StringTokenizer st = new StringTokenizer(body, "&");
-      // while (st.hasMoreTokens()) {
-      // String param = URLDecoder.decode(st.nextToken(), "UTF8");
-      // StringTokenizer st2 = new StringTokenizer(param, "=");
-      // String p1 = "";
-      // String v1 = "";
-      // try {
-      // p1 = st2.nextToken();
-      // v1 = st2.nextToken();
-      // } catch (Exception ignore) {}
-      // if(!BaseUtils.isEmpty(p1)){
-      // item.parameters.put(p1, v1);
-      // }
-      // }
-      // } else {
-      // item.body = BaseUtils.noNull(body);
-      // }
-      //
-      // System.out.println(item);
-   }
-
-
-   private static String getHeader( String header, Map<String, List<String>> headersMap){
-      String returnvalue = "";
-      if (headersMap.containsKey(header) && headersMap.get(header) != null && headersMap.get(header).size() > 0) {
-         // if available deliver first item
-         returnvalue = headersMap.get(header).get(0);
-      }
-      return returnvalue;
-   }
+    private static String getHeader(final String header, final Map<String, List<String>> headersMap) {
+        String returnvalue = "";
+        if (headersMap.containsKey(header) && headersMap.get(header) != null && headersMap.get(header).size() > 0) {
+            // if available deliver first item
+            returnvalue = headersMap.get(header).get(0);
+        }
+        return returnvalue;
+    }
 
 }

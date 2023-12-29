@@ -22,33 +22,29 @@ package org.roussev.http4e.httpclient.core;
  */
 public class ExceptionHandler {
 
-   private final static boolean WARN_ENABLED = false;
+    private final static boolean WARN_ENABLED = false;
 
+    public static void handle(final Throwable e) {
+        e.printStackTrace();
+        if (e.getCause() != null) {
+            handle(e.getCause());
+        }
+    }
 
-   public static void handle( Throwable e){
-      e.printStackTrace();
-      if (e.getCause() != null) {
-         handle(e.getCause());
-      }
-   }
+    public static void print(final String msg) {
+        System.out.println(">>>>" + msg);
+    }
 
+    public static void warn(final String msg) {
+        if (WARN_ENABLED) {
+            System.err.println(msg);
+        }
+    }
 
-   public static void print( String msg){
-      System.out.println(">>>>" + msg);
-   }
-
-
-   public static void warn( String msg){
-      if (WARN_ENABLED) {
-         System.err.println(msg);
-      }
-   }
-
-
-   public static void warn( Exception e){
-      if (WARN_ENABLED) {
-         System.err.println(e);
-      }
-   }
+    public static void warn(final Exception e) {
+        if (WARN_ENABLED) {
+            System.err.println(e);
+        }
+    }
 
 }

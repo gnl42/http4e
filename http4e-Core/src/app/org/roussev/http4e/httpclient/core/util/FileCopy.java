@@ -27,67 +27,67 @@ import java.util.List;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class FileCopy {
-   
 
-   public static void copy( String from, String to, List excludeList) throws IOException{
-      File src = new File(from);
+    public static void copy(final String from, final String to, final List<String> excludeList) throws IOException {
+        final File src = new File(from);
 
-      if (excludeList != null && excludeList.contains(src.getName())) {
-         return;
-      }
-      //System.out.println("-- Copying: " + from + " to: " + to);
+        if (excludeList != null && excludeList.contains(src.getName())) {
+            return;
+        }
+        // System.out.println("-- Copying: " + from + " to: " + to);
 
-      if (!src.exists()) {
-         throw new RuntimeException("File doesn't exist '" + from + "'");
-      }
-      if (src.isDirectory()) {
-         File dirCreate = new File(to);
-         if (!dirCreate.exists()) {
-            dirCreate.mkdirs();
-         }
-         File[] srcFiles = src.listFiles();
-         for (int i = 0; i < srcFiles.length; i++) {
-            File srcF = srcFiles[i];
-            if (srcF.isDirectory()) {
-               FileCopy.copy(srcF.getPath(), to, excludeList);
-            } else {
-               File fileCreate = new File(to + File.separator + srcF.getName());
-               FileCopy.copyFile(srcF, fileCreate);
+        if (!src.exists()) {
+            throw new RuntimeException("File doesn't exist '" + from + "'");
+        }
+        if (src.isDirectory()) {
+            final File dirCreate = new File(to);
+            if (!dirCreate.exists()) {
+                dirCreate.mkdirs();
             }
-         }
+            final File[] srcFiles = src.listFiles();
+            for (final File srcF : srcFiles) {
+                if (srcF.isDirectory()) {
+                    FileCopy.copy(srcF.getPath(), to, excludeList);
+                } else {
+                    final File fileCreate = new File(to + File.separator + srcF.getName());
+                    FileCopy.copyFile(srcF, fileCreate);
+                }
+            }
 
-      } else {
-         File fileCreate = new File(to);
-         fileCreate.getParentFile().mkdirs();
-         FileCopy.copyFile(src, fileCreate);
-      }
-   }
+        } else {
+            final File fileCreate = new File(to);
+            fileCreate.getParentFile().mkdirs();
+            FileCopy.copyFile(src, fileCreate);
+        }
+    }
 
-   public static void copyFile( File src, File dist) throws IOException{
+    public static void copyFile(final File src, final File dist) throws IOException {
 
-      InputStream in = null;
-      OutputStream out = null;
-      try {
-         dist.createNewFile();
-         in = new FileInputStream(src);
-         out = new FileOutputStream(dist);
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            dist.createNewFile();
+            in = new FileInputStream(src);
+            out = new FileOutputStream(dist);
 
-         // Transfer bytes from in to out
-         byte[] buf = new byte[1024];
-         int len;
-         while ((len = in.read(buf)) > 0) {
-            out.write(buf, 0, len);
-         }
+            // Transfer bytes from in to out
+            final byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
 
-      } finally {
-         try {
-            if (in != null)
-               in.close();
-            if (out != null)
-               out.close();
-         } catch (IOException ignore) {
-         }
-      }
-   }
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            } catch (final IOException ignore) {
+            }
+        }
+    }
 
 }

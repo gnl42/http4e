@@ -23,86 +23,78 @@ import java.util.List;
  */
 public class XMLTree {
 
-   private XMLElement rootElement;
-   private List<XMLElement>       allElements   = new ArrayList<XMLElement>();
-   private List<String>       allAttributes = new ArrayList<String>();
+    private XMLElement rootElement;
+    private final List<XMLElement> allElements = new ArrayList<>();
+    private final List<String> allAttributes = new ArrayList<>();
 
+    public XMLTree() {
 
-   public XMLTree() {
+        rootElement = new XMLElement("world");
+        final XMLElement continent = newDTDElement("continent");
+        rootElement.addChildElement(continent);
 
-      super();
-      rootElement = new XMLElement("world");
-      XMLElement continent = newDTDElement("continent");
-      rootElement.addChildElement(continent);
+        continent.addChildAttribute(new XMLAttribute("name")).addChildAttribute(new XMLAttribute("population"));
+        addAttribute("name");
+        addAttribute("population");
 
-      continent.addChildAttribute(new XMLAttribute("name")).addChildAttribute(new XMLAttribute("population"));
-      addAttribute("name");
-      addAttribute("population");
+        final XMLElement continentDescription = newDTDElement("description");
+        continent.addChildElement(continentDescription);
 
-      XMLElement continentDescription = newDTDElement("description");
-      continent.addChildElement(continentDescription);
+        final XMLElement country = newDTDElement("country");
+        country.addChildAttribute(new XMLAttribute("name")).addChildAttribute(new XMLAttribute("population"));
+        continent.addChildElement(country);
 
-      XMLElement country = newDTDElement("country");
-      country.addChildAttribute(new XMLAttribute("name")).addChildAttribute(new XMLAttribute("population"));
-      continent.addChildElement(country);
+        final XMLElement countryDescription = newDTDElement("description");
+        country.addChildElement(countryDescription);
+        final XMLElement countryAttraction = newDTDElement("attraction");
+        country.addChildElement(countryAttraction);
+        countryAttraction.addChildAttribute(new XMLAttribute("name"));
 
-      XMLElement countryDescription = newDTDElement("description");
-      country.addChildElement(countryDescription);
-      XMLElement countryAttraction = newDTDElement("attraction");
-      country.addChildElement(countryAttraction);
-      countryAttraction.addChildAttribute(new XMLAttribute("name"));
+        final XMLElement city = newDTDElement("city");
+        city.addChildAttribute(new XMLAttribute("name")).addChildAttribute(new XMLAttribute("population"));
+        country.addChildElement(city);
 
-      XMLElement city = newDTDElement("city");
-      city.addChildAttribute(new XMLAttribute("name")).addChildAttribute(new XMLAttribute("population"));
-      country.addChildElement(city);
+        final XMLElement cityDescription = newDTDElement("description");
+        city.addChildElement(cityDescription);
+        final XMLElement cityAttraction = newDTDElement("attraction");
+        cityAttraction.addChildAttribute(new XMLAttribute("name"));
+        cityAttraction.addChildAttribute(new XMLAttribute("cost"));
+        city.addChildElement(cityAttraction);
+        addAttribute("cost");
 
-      XMLElement cityDescription = newDTDElement("description");
-      city.addChildElement(cityDescription);
-      XMLElement cityAttraction = newDTDElement("attraction");
-      cityAttraction.addChildAttribute(new XMLAttribute("name"));
-      cityAttraction.addChildAttribute(new XMLAttribute("cost"));
-      city.addChildElement(cityAttraction);
-      addAttribute("cost");
+        final XMLElement ocean = newDTDElement("ocean");
+        continent.addChildElement(ocean);
+        ocean.addChildAttribute(new XMLAttribute("name"));
+        ocean.addChildAttribute(new XMLAttribute("depth"));
+        addAttribute("depth");
 
-      XMLElement ocean = newDTDElement("ocean");
-      continent.addChildElement(ocean);
-      ocean.addChildAttribute(new XMLAttribute("name"));
-      ocean.addChildAttribute(new XMLAttribute("depth"));
-      addAttribute("depth");
+    }
 
-   }
+    private XMLElement newDTDElement(final String elementName) {
+        final XMLElement element = new XMLElement(elementName);
+        allElements.add(element);
+        return element;
+    }
 
+    private void addAttribute(final String attributeName) {
+        if (!allAttributes.contains(attributeName)) {
+            allAttributes.add(attributeName);
+        }
+    }
 
-   private XMLElement newDTDElement( String elementName){
-      XMLElement element = new XMLElement(elementName);
-      allElements.add(element);
-      return element;
-   }
+    public List<XMLElement> getAllElements() {
+        return allElements;
+    }
 
+    public List<String> getAllAttributes() {
+        return allAttributes;
+    }
 
-   private void addAttribute( String attributeName){
-      if (!allAttributes.contains(attributeName)) {
-         allAttributes.add(attributeName);
-      }
-   }
+    public XMLElement getRootElement() {
+        return rootElement;
+    }
 
-
-   public List<XMLElement> getAllElements(){
-      return allElements;
-   }
-
-
-   public List<String> getAllAttributes(){
-      return allAttributes;
-   }
-
-
-   public XMLElement getRootElement(){
-      return rootElement;
-   }
-
-
-   public void setRootElement( XMLElement rootElement){
-      this.rootElement = rootElement;
-   }
+    public void setRootElement(final XMLElement rootElement) {
+        this.rootElement = rootElement;
+    }
 }

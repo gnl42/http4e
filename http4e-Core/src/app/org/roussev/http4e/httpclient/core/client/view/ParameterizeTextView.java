@@ -30,40 +30,39 @@ import org.roussev.http4e.httpclient.core.client.view.assist.HContentAssistProce
 
 public class ParameterizeTextView implements IControlView {
 
-   private StyledText styledText;
+    private final StyledText styledText;
 
+    public ParameterizeTextView(final Composite parent) {
+        styledText = buildEditorText(parent);
 
-   public ParameterizeTextView( Composite parent) {
-      styledText = buildEditorText(parent);
+        final Menu popupMenu = new Menu(styledText);
+        new ClipboardMenu(styledText, popupMenu);
+        styledText.setMenu(popupMenu);
+    }
 
-      Menu popupMenu = new Menu(styledText);
-      new ClipboardMenu(styledText, popupMenu);
-      styledText.setMenu(popupMenu);
-   }
+    private StyledText buildEditorText(final Composite parent) {
+        final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+        final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.PARAM_PROCESSOR);
+        sourceViewer.configure(sourceConf);
+        sourceViewer.setDocument(DocumentUtils.createDocument1());
 
+        sourceViewer.getControl().addKeyListener(new KeyAdapter() {
 
-   private StyledText buildEditorText( Composite parent){
-      final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-      final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.PARAM_PROCESSOR);
-      sourceViewer.configure(sourceConf);
-      sourceViewer.setDocument(DocumentUtils.createDocument1());
-
-      sourceViewer.getControl().addKeyListener(new KeyAdapter() {
-
-         public void keyPressed( KeyEvent e){
-            // if ((e.character == ' ') && ((e.stateMask & SWT.CTRL) != 0)) {
-            if (Utils.isAutoAssistInvoked(e)) {
-               IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
-               ca.showPossibleCompletions();
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                // if ((e.character == ' ') && ((e.stateMask & SWT.CTRL) != 0)) {
+                if (Utils.isAutoAssistInvoked(e)) {
+                    final IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
+                    ca.showPossibleCompletions();
+                }
             }
-         }
-      });
+        });
 
-      return sourceViewer.getTextWidget();
-   }
+        return sourceViewer.getTextWidget();
+    }
 
-
-   public Control getControl(){
-      return styledText;
-   }
+    @Override
+    public Control getControl() {
+        return styledText;
+    }
 }

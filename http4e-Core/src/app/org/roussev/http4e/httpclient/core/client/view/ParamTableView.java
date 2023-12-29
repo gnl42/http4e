@@ -19,19 +19,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.roussev.http4e.httpclient.core.client.model.ItemModel;
 
-
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 class ParamTableView implements IControlView {
 
-   Control control;
+    Control control;
 
-   ParamTableView( final ItemModel model, Composite parent) {
-      control = new ParamTable().createContents(parent);
-   }
+    ParamTableView(final ItemModel model, final Composite parent) {
+        control = new ParamTable().createContents(parent);
+    }
 
-   public Control getControl(){
-      return control;
-   }
+    @Override
+    public Control getControl() {
+        return control;
+    }
 }

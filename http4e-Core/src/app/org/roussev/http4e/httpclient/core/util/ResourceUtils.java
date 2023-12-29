@@ -46,120 +46,109 @@ import org.roussev.http4e.java6.Properties6;
  */
 public class ResourceUtils {
 
-   private static ResourceCache resourceCache;
+    private static ResourceCache resourceCache;
 
-   static {
-      resourceCache = (ResourceCache) CoreContext.getContext().getObject(CoreObjects.RESOURCE_CACHE);
-      if (resourceCache == null) {
-         resourceCache = new ResourceCache();
-         CoreContext.getContext().putObject(CoreObjects.RESOURCE_CACHE, resourceCache);
-      }
-   }
+    static {
+        resourceCache = (ResourceCache) CoreContext.getContext().getObject(CoreObjects.RESOURCE_CACHE);
+        if (resourceCache == null) {
+            resourceCache = new ResourceCache();
+            CoreContext.getContext().putObject(CoreObjects.RESOURCE_CACHE, resourceCache);
+        }
+    }
 
+    public static Image getImage(final String pluginID, final String image) {
+        /*--- create from class file location
+        ImageDescriptor iDescr = ImageDescriptor.createFromFile(CoreResources.class, name);
+        Image image = resourceCache.getImage(iDescr);
+        return image;
+        --- get workbench shared image
+        IWorkbench workbench = PlatformUI.getWorkbench();
+        ISharedImages images = workbench.getSharedImages();
+        image = images.getImage(ISharedImages.IMG_OBJ_FOLDER);
+        --- image from plugin
+        MyPlugin.getImageDescriptor("icons/a_image.gif").createImage();
+        AbstractUIPlugin.imageDescriptorFromPlugin(myPluginID, image)).createImage();
+         */
+        if (Utils.isIDE()) {
+            return resourceCache.getImage(AbstractUIPlugin.imageDescriptorFromPlugin(pluginID, image));
+        } else {
+            return resourceCache.getImage(image);
+        }
+    }
 
-   public static Image getImage( String pluginID, String image){
-      /*--- create from class file location
-      ImageDescriptor iDescr = ImageDescriptor.createFromFile(CoreResources.class, name);
-      Image image = resourceCache.getImage(iDescr);
-      return image;
-      --- get workbench shared image
-      IWorkbench workbench = PlatformUI.getWorkbench();
-      ISharedImages images = workbench.getSharedImages();
-      image = images.getImage(ISharedImages.IMG_OBJ_FOLDER);      
-      --- image from plugin
-      MyPlugin.getImageDescriptor("icons/a_image.gif").createImage();
-      AbstractUIPlugin.imageDescriptorFromPlugin(myPluginID, image)).createImage();
-       */
-      if (Utils.isIDE()) {
-         return resourceCache.getImage(AbstractUIPlugin.imageDescriptorFromPlugin(pluginID, image));
-      } else {
-         return resourceCache.getImage(image);
-      }
-   }
+    public static void disposeResources() {
+        resourceCache.dispose();
+    }
 
+    public static Font getFont(final FontStyle fontStyle) {
+        return resourceCache.getFont(fontStyle);
+    }
 
-   public static void disposeResources(){
-      resourceCache.dispose();
-   }
+    public static Color getColor(final RGB rgb) {
+        return resourceCache.getColor(rgb);
+    }
 
+    public static Cursor getCursor(final int id) {
+        return resourceCache.getCursor(id);
+    }
 
-   public static Font getFont( FontStyle fontStyle){
-      return resourceCache.getFont(fontStyle);
-   }
+    public static ResourceCache getResourceCache() {
+        return resourceCache;
+    }
 
+    public static String getBundleResourcePath(final String pluginID, final String uri) {
+        try {
+            final URL url = FileLocator.find(Platform.getBundle(pluginID), new Path(uri), null);
+            return FileLocator.resolve(url).toExternalForm();
+        } catch (final IOException e1) {
+            ExceptionHandler.handle(e1);
+        }
+        return null;
+    }
 
-   public static Color getColor( RGB rgb){
-      return resourceCache.getColor(rgb);
-   }
+    public static byte[] getBundleResourceBytes(final String pluginID, final String uri) {
+        byte[] data = {};
+        try {
+            final InputStream in = getBundleResourceStream(pluginID, uri);
+            data = new byte[in.available()];
+            in.read(data);
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+        return data;
+    }
 
+    public static InputStream getBundleResourceStream(final String pluginID, final String uri) {
+        try {
+            if (Utils.isIDE()) {
+                return FileLocator.openStream(Platform.getBundle(pluginID), new Path(uri), false);
+            } else {
+                return new FileInputStream(uri);
+            }
+        } catch (final Throwable e) {
+            ExceptionHandler.handle(e);
+        }
+        return null;
+    }
 
-   public static Cursor getCursor( int id){
-      return resourceCache.getCursor(id);
-   }
-
-
-   public static ResourceCache getResourceCache(){
-      return resourceCache;
-   }
-
-
-   public static String getBundleResourcePath( String pluginID, String uri){
-      try {
-         URL url = FileLocator.find(Platform.getBundle(pluginID), new Path(uri), null);
-         return FileLocator.resolve(url).toExternalForm();
-      } catch (IOException e1) {
-         ExceptionHandler.handle(e1);
-      }
-      return null;
-   }
-
-
-   public static byte[] getBundleResourceBytes( String pluginID, String uri){
-      byte[] data = {};
-      try {
-         InputStream in = getBundleResourceStream(pluginID, uri);
-         data = new byte[in.available()];
-         in.read(data);
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-      return data;
-   }
-
-
-   public static InputStream getBundleResourceStream( String pluginID, String uri){
-      try {
-         if (Utils.isIDE()) {
+    public static InputStream getBundleResourceStream2(final String pluginID, final String uri) throws IOException {
+        if (Utils.isIDE()) {
             return FileLocator.openStream(Platform.getBundle(pluginID), new Path(uri), false);
-         } else {
+        } else {
             return new FileInputStream(uri);
-         }
-      } catch (Throwable e) {
-         ExceptionHandler.handle(e);
-      }
-      return null;
-   }
+        }
+    }
 
-
-   public static InputStream getBundleResourceStream2( String pluginID, String uri) throws IOException{
-      if (Utils.isIDE()) {
-         return FileLocator.openStream(Platform.getBundle(pluginID), new Path(uri), false);
-      } else {
-         return new FileInputStream(uri);
-      }
-   }
-
-
-   public static Properties6 getBundleProperties( String pluginID, String uri){
-      Properties6 properties = new Properties6();
-      try {
-         InputStreamReader inR = new InputStreamReader(getBundleResourceStream(pluginID, uri), "UTF8");
-         BufferedReader bufR = new BufferedReader(inR);
-         properties.load(bufR);
-      } catch (Throwable e) {
-         ExceptionHandler.handle(e);
-      }
-      return properties;
-   }
+    public static Properties6 getBundleProperties(final String pluginID, final String uri) {
+        final Properties6 properties = new Properties6();
+        try {
+            final InputStreamReader inR = new InputStreamReader(getBundleResourceStream(pluginID, uri), "UTF8");
+            final BufferedReader bufR = new BufferedReader(inR);
+            properties.load(bufR);
+        } catch (final Throwable e) {
+            ExceptionHandler.handle(e);
+        }
+        return properties;
+    }
 
 }

@@ -27,35 +27,32 @@ import org.eclipse.swt.widgets.Shell;
 @SuppressWarnings("unchecked")
 public class CoreContext {
 
-   public final static String PRODUCT_USER_DIR = System.getProperty("user.home") + File.separator + ".http4e";
+    public final static String PRODUCT_USER_DIR = System.getProperty("user.home") + File.separator + ".http4e";
 
-   private static CoreContext context;
-   static {
-      context = new CoreContext();
-   }
+    private static CoreContext context;
+    static {
+        context = new CoreContext();
+    }
 
+    public static CoreContext getContext() {
+        return context;
+    }
 
-   public static CoreContext getContext(){
-      return context;
-   }
+    private final Map<Object, Object> objectMap = new HashMap<>();
 
-   private Map objectMap = new HashMap();
+    public Object getObject(final Object key) {
+        return objectMap.get(key);
+    }
 
+    public void putObject(final Object key, final Object value) {
+        objectMap.put(key, value);
+    }
 
-   public Object getObject( Object key){
-      return objectMap.get(key);
-   }
+    @Override
+    public String toString() {
+        return "CoreContext{" + "" + objectMap + "}";
+    }
 
-
-   public void putObject( Object key, Object value){
-      objectMap.put(key, value);
-   }
-
-
-   public String toString(){
-      return "CoreContext{" + "" + objectMap + "}";
-   }
-   
-   public static Shell SHELL;
+    public static Shell SHELL;
 
 }

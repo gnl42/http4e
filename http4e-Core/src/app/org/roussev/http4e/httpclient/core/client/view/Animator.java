@@ -27,32 +27,36 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 class Animator {
- 
-   private AnimatedGIFRunner gifRunner;
-   private Control parent;
-   private Image backgroundImage;
 
-   Animator( Control parent, Image backgroundImage) {
-      this.parent = parent;
-      this.backgroundImage = backgroundImage;
-   }
+    private AnimatedGIFRunner gifRunner;
+    private final Control parent;
+    private final Image backgroundImage;
 
-   void start(){
-      if(gifRunner != null) gifRunner.stop();
-      try {
-         ImageLoader imageLoader = new ImageLoader();
-         imageLoader.load( ResourceUtils.getBundleResourceStream(CoreConstants.PLUGIN_CORE, CoreImages.LOADING_ON));
-         gifRunner = new AnimatedGIFRunner(parent, imageLoader, backgroundImage);
-      } catch (Exception e) {
-         throw CoreException.getInstance(CoreException.GENERAL, e);
-      }
-      final Thread animeThread = new Thread(gifRunner);
-      animeThread.setDaemon(true);
-      animeThread.start();
-   }
+    Animator(final Control parent, final Image backgroundImage) {
+        this.parent = parent;
+        this.backgroundImage = backgroundImage;
+    }
 
-   void stop(){
-      if(gifRunner != null) gifRunner.stop();
-   }
+    void start() {
+        if (gifRunner != null) {
+            gifRunner.stop();
+        }
+        try {
+            final ImageLoader imageLoader = new ImageLoader();
+            imageLoader.load(ResourceUtils.getBundleResourceStream(CoreConstants.PLUGIN_CORE, CoreImages.LOADING_ON));
+            gifRunner = new AnimatedGIFRunner(parent, imageLoader, backgroundImage);
+        } catch (final Exception e) {
+            throw CoreException.getInstance(CoreException.GENERAL, e);
+        }
+        final Thread animeThread = new Thread(gifRunner);
+        animeThread.setDaemon(true);
+        animeThread.start();
+    }
+
+    void stop() {
+        if (gifRunner != null) {
+            gifRunner.stop();
+        }
+    }
 
 }

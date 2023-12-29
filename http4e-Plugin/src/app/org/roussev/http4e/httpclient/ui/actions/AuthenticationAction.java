@@ -21,25 +21,23 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class AuthenticationAction extends Action {
 
-   private HdViewPart view;
+    private final HdViewPart view;
 
+    public AuthenticationAction(final HdViewPart view) {
+        this.view = view;
+        setText("BASIC and DIGEST Authentication");
+        setDescription("BASIC and DIGEST Authentication");
+        setToolTipText("BASIC and DIGEST Authentication");
+    }
 
-   public AuthenticationAction( HdViewPart view) {
-      super();
-      this.view = view;
-      setText("BASIC and DIGEST Authentication");
-      setDescription("BASIC and DIGEST Authentication");
-      setToolTipText("BASIC and DIGEST Authentication");
-   }
-
-
-   public void run(){
-      try {         
-         AuthDialog dialog = new AuthDialog(view);
-         dialog.open();
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+    @Override
+    public void run() {
+        try {
+            final AuthDialog dialog = new AuthDialog(view);
+            dialog.open();
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+    }
 
 }

@@ -21,22 +21,21 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class TabCloseAction extends Action {
 
-   private HdViewPart view;
+    private final HdViewPart view;
 
-   public TabCloseAction( HdViewPart view) {
-      super();
-      this.view = view;
-      setText("Close all tabs tab");
-      setDescription("Close tab");
-      setToolTipText("Close tab");
-   }
+    public TabCloseAction(final HdViewPart view) {
+        this.view = view;
+        setText("Close all tabs tab");
+        setDescription("Close tab");
+        setToolTipText("Close tab");
+    }
 
-   public void run(){
-      FolderView folderView = view.getFolderView();
-      if(folderView.getModel().getItemCount() > 1){
-         folderView.removeTab();
-      }
-   }
-
+    @Override
+    public void run() {
+        final FolderView folderView = view.getFolderView();
+        if (folderView.getModel().getItemCount() > 1) {
+            folderView.removeTab();
+        }
+    }
 
 }

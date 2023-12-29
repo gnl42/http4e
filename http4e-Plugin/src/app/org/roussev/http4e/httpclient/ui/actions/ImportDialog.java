@@ -21,8 +21,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -38,89 +36,89 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 public class ImportDialog extends TitleAreaDialog {
 
-   private StyledText    text;
-   private static int    HEIGHT = 400;
-   private static int    WEIGHT = 300;
-   private MouseListener okListener;
-   private static final RGB       GRAY_NORMAL_TEXT       = new RGB(15, 15, 15);
-   private static final RGB       GRAY_RGB_TEXT       = new RGB(180, 180, 180);
+    private StyledText text;
+    private static int HEIGHT = 400;
+    private static int WEIGHT = 300;
+    private MouseListener okListener;
+    private static final RGB GRAY_NORMAL_TEXT = new RGB(15, 15, 15);
+    private static final RGB GRAY_RGB_TEXT = new RGB(180, 180, 180);
 
+    public ImportDialog(final ViewPart view) {
+        super(view.getViewSite().getShell());
+        setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
+    }
 
-   public ImportDialog( ViewPart view) {
-      super(view.getViewSite().getShell());
-      setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
-   }
+    public void setOkListener(final MouseListener okListener) {
+        this.okListener = okListener;
+    }
 
-   public void setOkListener( MouseListener okListener){
-      this.okListener = okListener;
-   }
+    @Override
+    public boolean close() {
+        return super.close();
+    }
 
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Control contents = super.createContents(parent);
+        setTitle("Import HTTP packet");
+        setMessage("Import a raw HTTP packet to Client.");
+        return contents;
+    }
 
-   public boolean close(){
-      return super.close();
-   }
+    @Override
+    protected Control createDialogArea(final Composite parent) {
+        final Composite composite = (Composite) super.createDialogArea(parent);
+        text = new StyledText(parent, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+        final GridData spec = new GridData();
+        spec.heightHint = HEIGHT;
+        spec.widthHint = WEIGHT;
+        spec.horizontalAlignment = GridData.FILL;
+        spec.grabExcessHorizontalSpace = true;
+        spec.verticalAlignment = GridData.FILL;
+        spec.grabExcessVerticalSpace = true;
+        text.setLayoutData(spec);
+        text.setForeground(ResourceUtils.getColor(GRAY_RGB_TEXT));
+        text.setText(
+                "POST /user/some HTTP/1.1\nContent-Type: application/xml\nUser-Agent: http4e/3.1.5\nHost: www.nextinterfaces.com\nContent-Length: 11\n\nsample body long data..");
 
+        final boolean[] isClicked = { false };
+        text.addMouseListener(new MouseListener() {
 
-   protected Control createContents( Composite parent){
-      Control contents = super.createContents(parent);
-      setTitle("Import HTTP packet");
-      setMessage("Import a raw HTTP packet to Client.");
-      return contents;
-   }
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                // TODO Auto-generated method stub
 
-
-   protected Control createDialogArea( Composite parent){
-      Composite composite = (Composite) super.createDialogArea(parent);
-      text = new StyledText(parent, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-      GridData spec = new GridData();
-      spec.heightHint = HEIGHT;
-      spec.widthHint = WEIGHT;
-      spec.horizontalAlignment = GridData.FILL;
-      spec.grabExcessHorizontalSpace = true;
-      spec.verticalAlignment = GridData.FILL;
-      spec.grabExcessVerticalSpace = true;
-      text.setLayoutData(spec);
-      text.setForeground(ResourceUtils.getColor(GRAY_RGB_TEXT));
-      text.setText("POST /user/some HTTP/1.1\nContent-Type: application/xml\nUser-Agent: http4e/3.1.5\nHost: www.nextinterfaces.com\nContent-Length: 11\n\nsample body long data..");
-
-      final boolean[] isClicked = {false};
-      text.addMouseListener(new MouseListener(){
-
-         public void mouseDoubleClick( MouseEvent e){
-            // TODO Auto-generated method stub
-            
-         }
-
-         public void mouseDown( MouseEvent e){
-            if(!isClicked[0]){
-               text.setText("");
-               text.setForeground(ResourceUtils.getColor(GRAY_NORMAL_TEXT));
             }
-            isClicked[0] = true;
-         }
 
-         public void mouseUp( MouseEvent e){
-         }         
-      });
-      return composite;
-   }
+            @Override
+            public void mouseDown(final MouseEvent e) {
+                if (!isClicked[0]) {
+                    text.setText("");
+                    text.setForeground(ResourceUtils.getColor(GRAY_NORMAL_TEXT));
+                }
+                isClicked[0] = true;
+            }
 
+            @Override
+            public void mouseUp(final MouseEvent e) {
+            }
+        });
+        return composite;
+    }
 
-   protected void createButtonsForButtonBar( Composite parent){
-      Button ok = createButton(parent, IDialogConstants.OK_ID, "Import Packet", true);
-      createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-      ok.addMouseListener(okListener);
-      ok.addTraverseListener(new TraverseListener() {
-
-         public void keyTraversed( TraverseEvent e){
+    @Override
+    protected void createButtonsForButtonBar(final Composite parent) {
+        final Button ok = createButton(parent, IDialogConstants.OK_ID, "Import Packet", true);
+        createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+        ok.addMouseListener(okListener);
+        ok.addTraverseListener(e -> {
             if (SWT.TRAVERSE_RETURN == e.detail) {
             }
-         }
-      });
-   }
-   
-   public String getText(){
-      return text.getText();
-   }
+        });
+    }
+
+    public String getText() {
+        return text.getText();
+    }
 
 }

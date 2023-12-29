@@ -42,80 +42,87 @@ import org.eclipse.ui.progress.IProgressConstants;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class EclipseHttpJob extends Job {
-    
-   /**
-    * A family identifier for all grouped jobs
-    */
-   public static final Object FAMILY_JOB = new Object();
 
-   /**
-    * Total duration that the test job should sleep, in milliseconds.
-    */
-   private long               duration;
+    /**
+     * A family identifier for all grouped jobs
+     */
+    public static final Object FAMILY_JOB = new Object();
 
-   /**
-    * Whether the test job should fail.
-    */
-   private boolean            failure;
+    /**
+     * Total duration that the test job should sleep, in milliseconds.
+     */
+    private final long duration;
 
-   /**
-    * Whether the job should report unknown progress.
-    */
-   private boolean            unknown;
+    /**
+     * Whether the test job should fail.
+     */
+    private boolean failure;
 
-   public EclipseHttpJob( long duration, boolean lock, /*boolean failure,*/ boolean indeterminate/*, boolean reschedule, long rescheduleWait*/) {
-      super("http4e loading..");
-      this.duration = duration;
+    /**
+     * Whether the job should report unknown progress.
+     */
+    private final boolean unknown;
+
+    public EclipseHttpJob(final long duration, final boolean lock,
+            /* boolean failure, */ final boolean indeterminate/* , boolean reschedule, long rescheduleWait */) {
+        super("http4e loading..");
+        this.duration = duration;
 //      this.failure = failure;
-      this.unknown = indeterminate;
+        unknown = indeterminate;
 //      this.reschedule = reschedule;
 //      this.rescheduleWait = rescheduleWait;
-      if (lock)
-         setRule(ResourcesPlugin.getWorkspace().getRoot());
-      
-      setProperty(IProgressConstants.KEEP_PROPERTY, Boolean.valueOf("true"));
-      setProperty(IProgressConstants.KEEPONE_PROPERTY, Boolean.valueOf("true"));
-      schedule(10);
-   }
+        if (lock) {
+            setRule(ResourcesPlugin.getWorkspace().getRoot());
+        }
 
-   public boolean belongsTo( Object family){
+        setProperty(IProgressConstants.KEEP_PROPERTY, Boolean.valueOf("true"));
+        setProperty(IProgressConstants.KEEPONE_PROPERTY, Boolean.valueOf("true"));
+        schedule(10);
+    }
+
+    @Override
+    public boolean belongsTo(final Object family) {
 //      if (family instanceof TestJob) {
 //         return true;
 //      }
-      return family == FAMILY_JOB;
-   }
+        return family == FAMILY_JOB;
+    }
 
-   protected IStatus run( IProgressMonitor monitor){
-      if (failure) {
-         MultiStatus result = new MultiStatus("org.eclipse.ui.examples.jobs", 1, "http4e MultiStatus message", new RuntimeException("http4e MultiStatus exception"));
-         result.add(new Status(IStatus.ERROR, "org.eclipse.ui.examples.jobs", 1, "http4e child status message", new RuntimeException("http4e child exception")));
-         return result;
-      }
-      final long sleep = 10;
-      int ticks = (int) (duration / sleep);
-      if (this.unknown)
-         monitor.beginTask(toString(), IProgressMonitor.UNKNOWN);
-      else
-         monitor.beginTask(toString(), ticks);
-      try {
-         for (int i = 0; i < ticks; i++) {
-            if (monitor.isCanceled()) {
-               return Status.CANCEL_STATUS;
+    @Override
+    protected IStatus run(final IProgressMonitor monitor) {
+        if (failure) {
+            final MultiStatus result = new MultiStatus("org.eclipse.ui.examples.jobs", 1, "http4e MultiStatus message",
+                    new RuntimeException("http4e MultiStatus exception"));
+            result.add(new Status(IStatus.ERROR, "org.eclipse.ui.examples.jobs", 1, "http4e child status message",
+                    new RuntimeException("http4e child exception")));
+            return result;
+        }
+        final long sleep = 10;
+        final int ticks = (int) (duration / sleep);
+        if (unknown) {
+            monitor.beginTask(toString(), IProgressMonitor.UNKNOWN);
+        } else {
+            monitor.beginTask(toString(), ticks);
+        }
+        try {
+            for (int i = 0; i < ticks; i++) {
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
+                monitor.subTask("Processing tick #" + i);
+                try {
+                    Thread.sleep(sleep);
+                } catch (final InterruptedException e) {
+                    return Status.CANCEL_STATUS;
+                }
+                monitor.worked(10);
             }
-            monitor.subTask("Processing tick #" + i);
-            try {
-               Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-               return Status.CANCEL_STATUS;
-            }
-            monitor.worked(10);
-         }
-      } finally {
+        } finally {
 //         if (reschedule)
 //            schedule(rescheduleWait);
-         monitor.done();
-      }
-      return Status.OK_STATUS;
-   }
+            monitor.done();
+        }
+        return Status.OK_STATUS;
+    }
 
 }

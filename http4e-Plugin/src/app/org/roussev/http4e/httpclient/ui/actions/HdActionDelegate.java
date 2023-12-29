@@ -22,7 +22,6 @@ import org.eclipse.ui.IViewPart;
 import org.roussev.http4e.httpclient.core.client.view.FolderView;
 import org.roussev.http4e.httpclient.ui.HdViewPart;
 
-
 /**
  * Action delegate for all toolbar push-buttons.
  * 
@@ -30,30 +29,33 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
  */
 public class HdActionDelegate implements IViewActionDelegate {
 
-   public HdViewPart hdPart = null;
+    public HdViewPart hdPart = null;
 
-   public void init( IViewPart viewPart){
-      if (viewPart instanceof HdViewPart) {
-         this.hdPart = (HdViewPart) viewPart;
-      }
-   }
+    @Override
+    public void init(final IViewPart viewPart) {
+        if (viewPart instanceof HdViewPart) {
+            hdPart = (HdViewPart) viewPart;
+        }
+    }
 
-   public void run( IAction action){
-      String id = action.getId();
-      FolderView folderView = hdPart.getFolderView();
+    @Override
+    public void run(final IAction action) {
+        final String id = action.getId();
+        final FolderView folderView = hdPart.getFolderView();
 
-      if (id.equals("add.tab")) {
-         folderView.addTab();
+        if (id.equals("add.tab")) {
+            folderView.addTab();
 
-      } else if (id.equals("remove.tab")) {
-         folderView.removeTab();
-      }
-   }
+        } else if (id.equals("remove.tab")) {
+            folderView.removeTab();
+        }
+    }
 
-   /**
-    * Not implemented.
-    */
-   public void selectionChanged( IAction action, ISelection selection){
-   }
+    /**
+     * Not implemented.
+     */
+    @Override
+    public void selectionChanged(final IAction action, final ISelection selection) {
+    }
 
 }

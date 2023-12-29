@@ -20,33 +20,32 @@ package org.roussev.http4e.httpclient.core.client.view.assist;
  */
 public interface AssistConstants {
 
-   char EQUAL = '=';
-   char SHARP = '#';
+    char EQUAL = '=';
+    char SHARP = '#';
 
-   String S_EQUAL = String.valueOf(EQUAL);
-   String S_SHARP = String.valueOf(SHARP);
+    String S_EQUAL = String.valueOf(EQUAL);
+    String S_SHARP = String.valueOf(SHARP);
 
-   String BRACKETS_COMPLETION = "=";
+    String BRACKETS_COMPLETION = "=";
 
-   String CONTENT_TYPE_MULTIPART    = "multipart/form-data";
-   String CONTENT_TYPE_X_WWW_FORM   = "application/x-www-form-urlencoded";
-   String HEADER_CONTENT_TYPE       = "content-type";
-   String HEADER_ACCEPT_CHARSET     = "accept-charset";
-   String HEADER_ACCEPT_LANGUAGE    = "accept-language";
-   String HEADER_DATE               = "date";
-   String HEADER_IF_MOD_SINCE       = "if-modified-since"; 
-   String HEADER_RETRY_AFTER        = "Retry-After";
-   String HEADER_LAST_MODIFIED      = "Last-Modified";
-   String HEADER_IF_UNMOD_SINCE     = "If-Unmodified-Since";
-   String HEADER_EXPIRES            = "Expires";
-   
-   
-   char LINE_DELIM_NL = '\n';   //10
-   char LINE_DELIM_CR = '\r';   //13
+    String CONTENT_TYPE_MULTIPART = "multipart/form-data";
+    String CONTENT_TYPE_X_WWW_FORM = "application/x-www-form-urlencoded";
+    String HEADER_CONTENT_TYPE = "content-type";
+    String HEADER_ACCEPT_CHARSET = "accept-charset";
+    String HEADER_ACCEPT_LANGUAGE = "accept-language";
+    String HEADER_DATE = "date";
+    String HEADER_IF_MOD_SINCE = "if-modified-since";
+    String HEADER_RETRY_AFTER = "Retry-After";
+    String HEADER_LAST_MODIFIED = "Last-Modified";
+    String HEADER_IF_UNMOD_SINCE = "If-Unmodified-Since";
+    String HEADER_EXPIRES = "Expires";
+
+    char LINE_DELIM_NL = '\n'; // 10
+    char LINE_DELIM_CR = '\r'; // 13
 //   String CRLF = System.getProperty("line.separator");
-   
-   String S_NL = String.valueOf(LINE_DELIM_NL);
-   String   PARAM_LINE_DELIM           = "\r\n&";
-   String   PARAM_DELIM_EQ             = "=";   
-   
+
+    String S_NL = String.valueOf(LINE_DELIM_NL);
+    String PARAM_LINE_DELIM = "\r\n&";
+    String PARAM_DELIM_EQ = "=";
+
 }

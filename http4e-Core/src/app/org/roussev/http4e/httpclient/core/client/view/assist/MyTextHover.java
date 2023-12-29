@@ -30,41 +30,42 @@ import org.roussev.http4e.httpclient.core.misc.LazyObjects;
  */
 public class MyTextHover implements ITextHover {
 
-   public IRegion getHoverRegion( ITextViewer textViewer, int offset){
-      Point selection = textViewer.getSelectedRange();
-      if (selection.x <= offset && offset < selection.x + selection.y)
-         return new Region(selection.x, selection.y);
-      return new Region(offset, 0);
-   }
+    @Override
+    public IRegion getHoverRegion(final ITextViewer textViewer, final int offset) {
+        final Point selection = textViewer.getSelectedRange();
+        if (selection.x <= offset && offset < selection.x + selection.y) {
+            return new Region(selection.x, selection.y);
+        }
+        return new Region(offset, 0);
+    }
 
-   public String getHoverInfo( ITextViewer textViewer, IRegion hoverRegion){
-      int offset = hoverRegion.getOffset();
-      if (hoverRegion != null) {
-         try {
-            if (hoverRegion.getLength() > -1) {
-               IDocument doc = textViewer.getDocument();
-               // String key = textViewer.getDocument().get(offset, hoverRegion.getLength());
-               // ITypedRegion region = doc.getPartition(offset);
-               ITypedRegion partitionType = textViewer.getDocument().getPartition(offset);
-               
-               IRegion reg2 = doc.getLineInformationOfOffset(offset);
-               String lineText = doc.get(reg2.getOffset(), reg2.getLength());
-               // if(BaseUtils.isEmpty(key)){
-               // key = BaseUtils.getKeyFromLine(lineText);
-               // return HAssistInfoMap.getInfo(key);
-               // }
-               String key = DocumentUtils.getKeyFromLine(lineText);
-               return LazyObjects.getInfoMap("Headers").getInfo(key);
+    @Override
+    public String getHoverInfo(final ITextViewer textViewer, final IRegion hoverRegion) {
+        final int offset = hoverRegion.getOffset();
+        if (hoverRegion != null) {
+            try {
+                if (hoverRegion.getLength() > -1) {
+                    final IDocument doc = textViewer.getDocument();
+                    // String key = textViewer.getDocument().get(offset, hoverRegion.getLength());
+                    // ITypedRegion region = doc.getPartition(offset);
+                    final ITypedRegion partitionType = textViewer.getDocument().getPartition(offset);
+
+                    final IRegion reg2 = doc.getLineInformationOfOffset(offset);
+                    final String lineText = doc.get(reg2.getOffset(), reg2.getLength());
+                    // if(BaseUtils.isEmpty(key)){
+                    // key = BaseUtils.getKeyFromLine(lineText);
+                    // return HAssistInfoMap.getInfo(key);
+                    // }
+                    final String key = DocumentUtils.getKeyFromLine(lineText);
+                    return LazyObjects.getInfoMap("Headers").getInfo(key);
+                }
+            } catch (final BadLocationException x) {
             }
-         } catch (BadLocationException x) {
-         }
-      }
+        }
 
-      return "JavaEditorMessages.getString(MyTextHover.emptySelection)";
-   }
+        return "JavaEditorMessages.getString(MyTextHover.emptySelection)";
+    }
 
-   
-   
 //   public static void main( String[] args){
 ////      String txt = "q w             e   =   [aaa]";
 ////      System.out.println("1: '" + DocumentUtils.getKeyFromLine(txt) + "'");
@@ -72,6 +73,5 @@ public class MyTextHover implements ITextHover {
 ////      int posBraket = txt.indexOf(AssistConstants.L_BRACKET);
 ////      int posEq = txt.indexOf(AssistConstants.EQUAL);
 //   }
-   
-   
+
 }

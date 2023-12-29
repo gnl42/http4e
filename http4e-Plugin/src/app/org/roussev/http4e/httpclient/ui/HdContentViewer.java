@@ -29,54 +29,51 @@ import org.roussev.http4e.httpclient.ui.preferences.PreferenceConstants;
  */
 public class HdContentViewer extends ContentViewer {
 
-   private FolderView folderView;
+    private final FolderView folderView;
 
+    public HdContentViewer(final Composite parent) {
+        final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+        final String proxyList = store.getString(PreferenceConstants.P_PROXY_LIST);
+        final String keystoreFile = store.getString(PreferenceConstants.P_KEYSTORE_LIST);
+        folderView = new FolderView(parent, new FolderModel(proxyList, keystoreFile));
+    }
 
-   public HdContentViewer( Composite parent) {
-      IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-      String proxyList = store.getString(PreferenceConstants.P_PROXY_LIST);
-      String keystoreFile = store.getString(PreferenceConstants.P_KEYSTORE_LIST);
-      folderView = new FolderView(parent, new FolderModel(proxyList, keystoreFile));
-   }
+    public FolderView getFolderView() {
+        return folderView;
+    }
 
+    /**
+     * @Override
+     */
+    @Override
+    public Control getControl() {
+        return folderView.getControl();
+    }
 
-   public FolderView getFolderView(){
-      return folderView;
-   }
+    /**
+     * @Override
+     */
+    @Override
+    public ISelection getSelection() {
+        return null;
+    }
 
+    /**
+     * @Override
+     */
+    @Override
+    public void refresh() {
+    }
 
-   /**
-    * @Override
-    */
-   public Control getControl(){
-      return folderView.getControl();
-   }
+    /**
+     * @Override
+     */
+    @Override
+    public void setSelection(final ISelection selection, final boolean arg1) {
+    }
 
-
-   /**
-    * @Override
-    */
-   public ISelection getSelection(){
-      return null;
-   }
-
-
-   /**
-    * @Override
-    */
-   public void refresh(){
-   }
-
-
-   /**
-    * @Override
-    */
-   public void setSelection( ISelection selection, boolean arg1){
-   }
-
-
-   public void doDispose(){
-      folderView.doDispose();
-   }
+    public void doDispose() {
+        folderView.doDispose();
+    }
 
 }

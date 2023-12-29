@@ -35,86 +35,72 @@ import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
 /**
- * In this class are only methods to copy a HttpMethod: 
- * PUT, GET, POST,DELETE, TRACE, ...
+ * In this class are only methods to copy a HttpMethod: PUT, GET, POST,DELETE, TRACE, ...
  *
  * @author <a href="mailto:mathis@vtg.at">Thomas Mathis</a>
  * 
  * @deprecated
  * 
- * DISCLAIMER: HttpClient developers DO NOT actively support this component.
- * The component is provided as a reference material, which may be inappropriate
- * to be used without additional customization.
+ *             DISCLAIMER: HttpClient developers DO NOT actively support this component. The
+ *             component is provided as a reference material, which may be inappropriate to be used
+ *             without additional customization.
  */
 
+@Deprecated
 public class HttpMethodCloner {
 
-    private static void copyEntityEnclosingMethod(
-      EntityEnclosingMethod m, EntityEnclosingMethod copy )
-        throws java.io.IOException
-     {
-         copy.setRequestEntity(m.getRequestEntity());
-     }
- 
-    private static void copyHttpMethodBase(
-      HttpMethodBase m, HttpMethodBase copy) {
+    private static void copyEntityEnclosingMethod(final EntityEnclosingMethod m, final EntityEnclosingMethod copy) throws java.io.IOException {
+        copy.setRequestEntity(m.getRequestEntity());
+    }
+
+    private static void copyHttpMethodBase(final HttpMethodBase m, final HttpMethodBase copy) {
         try {
-            copy.setParams((HttpMethodParams)m.getParams().clone());
-        } catch (CloneNotSupportedException e) {
+            copy.setParams((HttpMethodParams) m.getParams().clone());
+        } catch (final CloneNotSupportedException e) {
             // Should never happen
         }
     }
 
     /**
      * Clones a HttpMethod. <br>
-     * <b>Attention:</b> You have to clone a method before it has 
-     * been executed, because the URI can change if followRedirects 
-     * is set to true.
+     * <b>Attention:</b> You have to clone a method before it has been executed, because the URI can
+     * change if followRedirects is set to true.
      *
      * @param m the HttpMethod to clone
      *
-     * @return the cloned HttpMethod, null if the HttpMethod could 
-     * not be instantiated
+     * @return the cloned HttpMethod, null if the HttpMethod could not be instantiated
      *
      * @throws java.io.IOException if the request body couldn't be read
      */
-    public static HttpMethod clone(HttpMethod m) 
-      throws java.io.IOException
-    {
+    public static HttpMethod clone(final HttpMethod m) throws java.io.IOException {
         HttpMethod copy = null;
 
         // copy the HttpMethod
         try {
-            copy = (HttpMethod) m.getClass().newInstance();
-        } catch (InstantiationException iEx) {
-        } catch (IllegalAccessException iaEx) {
+            copy = m.getClass().newInstance();
+        } catch (final InstantiationException | IllegalAccessException iaEx) {
         }
-        if ( copy == null ) {
+        if (copy == null) {
             return null;
         }
         copy.setDoAuthentication(m.getDoAuthentication());
         copy.setFollowRedirects(m.getFollowRedirects());
-        copy.setPath( m.getPath() );
+        copy.setPath(m.getPath());
         copy.setQueryString(m.getQueryString());
 
         // clone the headers
-        Header[] h = m.getRequestHeaders();
-        int size = (h == null) ? 0 : h.length;
+        final Header[] h = m.getRequestHeaders();
+        final int size = h == null ? 0 : h.length;
 
         for (int i = 0; i < size; i++) {
-            copy.setRequestHeader(
-              new Header(h[i].getName(), h[i].getValue()));
+            copy.setRequestHeader(new Header(h[i].getName(), h[i].getValue()));
         }
         copy.setStrictMode(m.isStrictMode());
         if (m instanceof HttpMethodBase) {
-            copyHttpMethodBase(
-              (HttpMethodBase)m, 
-              (HttpMethodBase)copy);
+            copyHttpMethodBase((HttpMethodBase) m, (HttpMethodBase) copy);
         }
         if (m instanceof EntityEnclosingMethod) {
-            copyEntityEnclosingMethod(
-              (EntityEnclosingMethod)m,
-              (EntityEnclosingMethod)copy);
+            copyEntityEnclosingMethod((EntityEnclosingMethod) m, (EntityEnclosingMethod) copy);
         }
         return copy;
     }

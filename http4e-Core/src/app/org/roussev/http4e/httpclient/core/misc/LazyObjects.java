@@ -27,7 +27,6 @@ import org.roussev.http4e.httpclient.core.CoreImages;
 import org.roussev.http4e.httpclient.core.CoreObjects;
 import org.roussev.http4e.httpclient.core.client.view.assist.HAssistInfoMap;
 import org.roussev.http4e.httpclient.core.client.view.assist.Tracker;
-import org.roussev.http4e.httpclient.core.client.view.assist.Tracker.BlacklistStrategy;
 import org.roussev.http4e.httpclient.core.util.BaseUtils;
 import org.roussev.http4e.httpclient.core.util.ResourceUtils;
 
@@ -35,82 +34,72 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class LazyObjects {
-   
-   private final static Collection EMPTY_LIST = new ArrayList();
-   
-   public static Tracker getHeaderTracker(){
-      CoreContext ctx = CoreContext.getContext();
-      Tracker headerTracker = (Tracker)ctx.getObject(CoreObjects.HEADER_TYPE_TRACKER);
-      if(headerTracker == null){
-         headerTracker = new Tracker(Tracker.MASTER_ID, CoreConstants.MAX_TRACKS_HEADER_KEYS);
-         ctx.putObject(CoreObjects.HEADER_TYPE_TRACKER, headerTracker);
-         Tracker.BlacklistStrategy blacklistStrategy = new BlacklistStrategy(){
-            public boolean isBlacklisted(String word){
-               return getHttpHeaders().contains(word);
+
+    private final static Collection<String> EMPTY_LIST = new ArrayList<>();
+
+    public static Tracker getHeaderTracker() {
+        final CoreContext ctx = CoreContext.getContext();
+        Tracker headerTracker = (Tracker) ctx.getObject(CoreObjects.HEADER_TYPE_TRACKER);
+        if (headerTracker == null) {
+            headerTracker = new Tracker(Tracker.MASTER_ID, CoreConstants.MAX_TRACKS_HEADER_KEYS);
+            ctx.putObject(CoreObjects.HEADER_TYPE_TRACKER, headerTracker);
+            final Tracker.BlacklistStrategy blacklistStrategy = word -> getHttpHeaders().contains(word);
+            headerTracker.setBlacklistStrategy(blacklistStrategy);
+        }
+        return headerTracker;
+    }
+
+    public static List getHttpHeaders() {
+        final CoreContext ctx = CoreContext.getContext();
+        List httpHeaders = (List) ctx.getObject(CoreObjects.HTTP_HEADERS);
+
+        if (httpHeaders == null) {
+            httpHeaders = BaseUtils.loadList(ResourceUtils.getBundleResourceStream(CoreConstants.PLUGIN_CORE, CoreImages.FILE_HEADERS));
+            ctx.putObject(CoreObjects.HTTP_HEADERS, httpHeaders);
+        }
+        return httpHeaders;
+    }
+
+    public static Map getHeaderValues() {
+        final CoreContext ctx = CoreContext.getContext();
+        Map headerValuesMap = (Map) ctx.getObject(CoreObjects.HTTP_HEADER_VALUES);
+        if (headerValuesMap == null) {
+            headerValuesMap = ResourceUtils.getBundleProperties(CoreConstants.PLUGIN_CORE, CoreImages.FILE_HEADERS_VALUES);
+            ctx.putObject(CoreObjects.HTTP_HEADER_VALUES, headerValuesMap);
+        }
+        return headerValuesMap;
+    }
+
+    public static Collection<String> getValuesForHeader(final String header) {
+        final CoreContext ctx = CoreContext.getContext();
+        Collection<String> valsForHeader = (Collection<String>) ctx.getObject(CoreObjects.HTTP_HEADER_VALUES + header);
+        if (valsForHeader == null) {
+            final String linekeyVal = BaseUtils.noNull((String) LazyObjects.getHeaderValues().get(header));
+            if (linekeyVal.length() > 0) {
+                final StringTokenizer st = new StringTokenizer(linekeyVal, ",");
+                valsForHeader = new ArrayList<>();
+                while (st.hasMoreTokens()) {
+                    final String val = st.nextToken();
+                    valsForHeader.add(val);
+                }
+                ctx.putObject(CoreObjects.HTTP_HEADER_VALUES + header, valsForHeader);
             }
-         };
-         headerTracker.setBlacklistStrategy(blacklistStrategy);
-      }
-      return headerTracker;
-   }
-   
-   
-   public static List getHttpHeaders(){
-      CoreContext ctx = CoreContext.getContext();
-      List httpHeaders = (List)ctx.getObject(CoreObjects.HTTP_HEADERS);
-      
-      if (httpHeaders == null) {
-         httpHeaders = BaseUtils.loadList( ResourceUtils.getBundleResourceStream(CoreConstants.PLUGIN_CORE, CoreImages.FILE_HEADERS));
-         ctx.putObject(CoreObjects.HTTP_HEADERS, httpHeaders);
-      }
-      return httpHeaders;
-   }
-   
-   
-   public static Map getHeaderValues(){
-      CoreContext ctx = CoreContext.getContext();
-      Map headerValuesMap = (Map)ctx.getObject(CoreObjects.HTTP_HEADER_VALUES);
-      if (headerValuesMap == null) {
-         headerValuesMap = ResourceUtils.getBundleProperties(CoreConstants.PLUGIN_CORE, CoreImages.FILE_HEADERS_VALUES);
-         ctx.putObject(CoreObjects.HTTP_HEADER_VALUES, headerValuesMap);
-      }
-      return headerValuesMap;
-   }
-   
-   
-   public static Collection getValuesForHeader(String header){
-      CoreContext ctx = CoreContext.getContext();
-      Collection valsForHeader = (Collection)ctx.getObject(CoreObjects.HTTP_HEADER_VALUES + header);
-      if(valsForHeader == null){
-         String linekeyVal = BaseUtils.noNull((String)LazyObjects.getHeaderValues().get(header));
-         if(linekeyVal.length() > 0){
-            StringTokenizer st = new StringTokenizer(linekeyVal, ",");
-            valsForHeader = new ArrayList();
-            while(st.hasMoreTokens()){
-               String val = st.nextToken();
-               valsForHeader.add(val);
-            }
-            ctx.putObject(CoreObjects.HTTP_HEADER_VALUES + header, valsForHeader);
-         }
-      }      
-      if(valsForHeader == null) {
-         valsForHeader = EMPTY_LIST;
-      }
-      return valsForHeader;
-   }
-   
-   
-   public static HAssistInfoMap getInfoMap(String headerKey){
-      String prefix = "assist-info-";
-      CoreContext ctx = CoreContext.getContext();
-      HAssistInfoMap infoMap = (HAssistInfoMap)ctx.getObject(prefix+headerKey);
-      if (infoMap == null) {
-         infoMap = new HAssistInfoMap(CoreImages.FILE_HEADERS_ROOT + "Info-" + headerKey + ".properties");
-         ctx.putObject(prefix+headerKey, infoMap);
-      }
-      return infoMap;
-   }
-   
-   
-   
+        }
+        if (valsForHeader == null) {
+            valsForHeader = EMPTY_LIST;
+        }
+        return valsForHeader;
+    }
+
+    public static HAssistInfoMap getInfoMap(final String headerKey) {
+        final String prefix = "assist-info-";
+        final CoreContext ctx = CoreContext.getContext();
+        HAssistInfoMap infoMap = (HAssistInfoMap) ctx.getObject(prefix + headerKey);
+        if (infoMap == null) {
+            infoMap = new HAssistInfoMap(CoreImages.FILE_HEADERS_ROOT + "Info-" + headerKey + ".properties");
+            ctx.putObject(prefix + headerKey, infoMap);
+        }
+        return infoMap;
+    }
+
 }

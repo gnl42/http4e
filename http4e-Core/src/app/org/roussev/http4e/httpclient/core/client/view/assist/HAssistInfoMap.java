@@ -26,29 +26,30 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
-public class HAssistInfoMap {   
-   
-   private Properties data;
-   
-   public HAssistInfoMap(String file){
-      data = new Properties();
-      try {
-         InputStream in = ResourceUtils.getBundleResourceStream2(CoreConstants.PLUGIN_CORE, file);
-         if(in != null) data.load(in);
-      } catch (IOException ignore) {
-         ExceptionHandler.warn(ignore);
-      }
-   }
-   
-   public String getInfo(String key){
-      String val = data.getProperty(key);
-      return val;
-   }
+public class HAssistInfoMap {
 
-   public String toString(){
-      return "HAssistInfoMap:" + data;
-   }
-   
-   
-   
+    private final Properties data;
+
+    public HAssistInfoMap(final String file) {
+        data = new Properties();
+        try {
+            final InputStream in = ResourceUtils.getBundleResourceStream2(CoreConstants.PLUGIN_CORE, file);
+            if (in != null) {
+                data.load(in);
+            }
+        } catch (final IOException ignore) {
+            ExceptionHandler.warn(ignore);
+        }
+    }
+
+    public String getInfo(final String key) {
+        final String val = data.getProperty(key);
+        return val;
+    }
+
+    @Override
+    public String toString() {
+        return "HAssistInfoMap:" + data;
+    }
+
 }

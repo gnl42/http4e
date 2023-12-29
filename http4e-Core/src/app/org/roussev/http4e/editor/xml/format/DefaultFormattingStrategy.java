@@ -23,24 +23,22 @@ import org.eclipse.jface.text.formatter.IFormattingStrategy;
  */
 public class DefaultFormattingStrategy implements IFormattingStrategy {
 
-   protected static final String lineSeparator = System.getProperty("line.separator");
+    protected static final String lineSeparator = System.lineSeparator();
 
+    public DefaultFormattingStrategy() {
+    }
 
-   public DefaultFormattingStrategy() {
-      super();
-   }
+    @Override
+    public void formatterStarts(final String initialIndentation) {
+    }
 
+    @Override
+    public String format(final String content, final boolean isLineStart, final String indentation, final int[] positions) {
+        return "";
+    }
 
-   public void formatterStarts( String initialIndentation){
-   }
-
-
-   public String format( String content, boolean isLineStart, String indentation, int[] positions){
-      return "";
-   }
-
-
-   public void formatterStops(){
-   }
+    @Override
+    public void formatterStops() {
+    }
 
 }

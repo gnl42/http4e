@@ -25,74 +25,63 @@ import org.eclipse.jface.text.Position;
  */
 public class XMLElement {
 
-   private List<XMLElement>       elementChildren   = new ArrayList<XMLElement>();
-   private List<XMLAttribute>     attributeChildren = new ArrayList<XMLAttribute>();
+    private final List<XMLElement> elementChildren = new ArrayList<>();
+    private final List<XMLAttribute> attributeChildren = new ArrayList<>();
 
-   private String     name;
-   private XMLElement parent;
-   private Position   position;
+    private final String name;
+    private XMLElement parent;
+    private Position position;
 
+    public XMLElement(final String name) {
+        this.name = name;
+    }
 
-   public XMLElement( String name) {
-      super();
-      this.name = name;
-   }
+    public List<XMLElement> getChildrenDTDElements() {
+        return elementChildren;
+    }
 
+    public XMLElement addChildElement(final XMLElement element) {
+        elementChildren.add(element);
+        element.setParent(this);
+        return this;
+    }
 
-   public List<XMLElement> getChildrenDTDElements(){
-      return elementChildren;
-   }
+    public void setParent(final XMLElement element) {
+        parent = element;
+    }
 
+    public XMLElement getParent() {
+        return parent;
+    }
 
-   public XMLElement addChildElement( XMLElement element){
-      elementChildren.add(element);
-      element.setParent(this);
-      return this;
-   }
+    public XMLElement addChildAttribute(final XMLAttribute attribute) {
+        attributeChildren.add(attribute);
+        return this;
+    }
 
+    public String getName() {
+        return name;
+    }
 
-   public void setParent( XMLElement element){
-      this.parent = element;
-   }
+    public String getAttributeValue(final String localName) {
+        for (final XMLAttribute attribute : attributeChildren) {
+            if (attribute.getName().equals(localName)) {
+                return attribute.getValue();
+            }
+        }
+        return null;
+    }
 
+    public void clear() {
+        elementChildren.clear();
+        attributeChildren.clear();
+    }
 
-   public XMLElement getParent(){
-      return parent;
-   }
+    public void setPosition(final Position position) {
+        this.position = position;
+    }
 
-
-   public XMLElement addChildAttribute( XMLAttribute attribute){
-      attributeChildren.add(attribute);
-      return this;
-   }
-
-
-   public String getName(){
-      return name;
-   }
-
-
-   public String getAttributeValue( String localName){
-      for (XMLAttribute attribute : attributeChildren) {
-         if (attribute.getName().equals(localName))
-            return attribute.getValue();
-      }
-      return null;
-   }
-
-
-   public void clear(){
-      elementChildren.clear();
-      attributeChildren.clear();
-   }
-
-
-   public void setPosition( Position position){
-      this.position = position;
-   }
-
-
-   public Position getPosition(){
-      return position;
-   }
+    public Position getPosition() {
+        return position;
+    }
 }

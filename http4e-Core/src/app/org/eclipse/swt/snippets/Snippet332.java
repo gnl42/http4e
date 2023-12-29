@@ -18,41 +18,43 @@ package org.eclipse.swt.snippets;
  * 
  * @since 3.6
  */
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.custom.*;
-import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class Snippet332 {
-   
-   public static void main(String [] args) {
-       final Display display = new Display();
-       Shell shell = new Shell(display);
-       FillLayout layout = new FillLayout();
-       layout.marginHeight = layout.marginWidth = 10;
-       shell.setLayout(layout);
-       StyledText text = new StyledText(shell, SWT.MULTI | SWT.BORDER);
-       final String segment = "Eclipse";
-       String string = "Force RTL direction on this segment \""+segment+"\".";
-       text.setText(string);
-       int[] segments = {string.indexOf(segment), segment.length()};
-       StyleRange[] ranges = {new StyleRange(0, 0, display.getSystemColor(SWT.COLOR_RED), null)};
-       text.setStyleRanges(segments, ranges);
-       text.setFont(new Font(display, "Tahoma", 16, 0));
-       text.addBidiSegmentListener(new BidiSegmentListener() {
-         public void lineGetSegments(BidiSegmentEvent event) {
-            String string = event.lineText;
-            int start = string.indexOf(segment);
-            event.segments = new int []{start, start + segment.length()};
+
+    public static void main(final String[] args) {
+        final Display display = new Display();
+        final Shell shell = new Shell(display);
+        final FillLayout layout = new FillLayout();
+        layout.marginHeight = layout.marginWidth = 10;
+        shell.setLayout(layout);
+        final StyledText text = new StyledText(shell, SWT.MULTI | SWT.BORDER);
+        final String segment = "Eclipse";
+        final String string = "Force RTL direction on this segment \"" + segment + "\".";
+        text.setText(string);
+        final int[] segments = { string.indexOf(segment), segment.length() };
+        final StyleRange[] ranges = { new StyleRange(0, 0, display.getSystemColor(SWT.COLOR_RED), null) };
+        text.setStyleRanges(segments, ranges);
+        text.setFont(new Font(display, "Tahoma", 16, 0));
+        text.addBidiSegmentListener(event -> {
+            final String string1 = event.lineText;
+            final int start = string1.indexOf(segment);
+            event.segments = new int[] { start, start + segment.length() };
 //            event.data = new char[] {'\u202e', '\u202C'};
-         }
-      });
-       shell.setSize(500, 200);
-       shell.open();
-       while (!shell.isDisposed()) {
-           if (!display.readAndDispatch()) display.sleep();
-       }
-       display.dispose();
-   }
+        });
+        shell.setSize(500, 200);
+        shell.open();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        display.dispose();
+    }
 }

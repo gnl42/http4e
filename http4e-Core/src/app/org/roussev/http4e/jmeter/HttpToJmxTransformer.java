@@ -19,100 +19,95 @@ import org.roussev.http4e.httpclient.core.util.HttpBean;
 
 public class HttpToJmxTransformer {
 
-   private String               templateFile;
-   private Collection<HttpBean> httpBeans;
+    private final String templateFile;
+    private final Collection<HttpBean> httpBeans;
 
-   // private boolean parameterizeJSessionIds;
+    // private boolean parameterizeJSessionIds;
 
-   public HttpToJmxTransformer( String templateFile, Collection<HttpBean> httpBeans) {
-      this.templateFile = templateFile;
-      this.httpBeans = httpBeans;
-   }
+    public HttpToJmxTransformer(final String templateFile, final Collection<HttpBean> httpBeans) {
+        this.templateFile = templateFile;
+        this.httpBeans = httpBeans;
+    }
 
+    public void doWrite(final Writer writer) {
+        try {
 
-   public void doWrite( Writer writer){
-      try {
+            final Properties p = new Properties();
+            // p.setProperty( "resource.loader", "file" );
+            // p.setProperty( "file.resource.loader.path", "./src" );
+            // p.setProperty( "file.resource.loader.class",
+            // "org.apache.velocity.runtime.resource.loader.FileResourceLoader" );
 
-         Properties p = new Properties();
-         // p.setProperty( "resource.loader", "file" );
-         // p.setProperty( "file.resource.loader.path", "./src" );
-         // p.setProperty( "file.resource.loader.class",
-         // "org.apache.velocity.runtime.resource.loader.FileResourceLoader" );
+            p.setProperty("resource.loader", "class");
+            p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 
-         p.setProperty("resource.loader", "class");
-         p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+            Velocity.init(p);
 
-         Velocity.init(p);
+            final VelocityContext context = new VelocityContext();
+            context.put("httpbeans", httpBeans);
 
-         VelocityContext context = new VelocityContext();
-         context.put("httpbeans", httpBeans);
+            Template template = null;
 
-         Template template = null;
+            try {
+                template = Velocity.getTemplate(templateFile);
+            } catch (final ResourceNotFoundException | ParseErrorException e) {
+                ExceptionHandler.handle(e);
+            }
 
-         try {
-            template = Velocity.getTemplate(templateFile);
-         } catch (ResourceNotFoundException e) {
+            if (template != null) {
+                template.merge(context, writer);
+            }
+            /*
+             * flush and cleanup
+             */
+
+            writer.flush();
+            writer.close();
+        } catch (final Exception e) {
             ExceptionHandler.handle(e);
-         } catch (ParseErrorException e) {
-            ExceptionHandler.handle(e);
-         }
+        }
+    }
 
-         if (template != null) {
-            template.merge(context, writer);
-         }
-         /*
-          * flush and cleanup
-          */
+    // public void doRead(Collection<HttpBean> beans) {
+    // System.out.println("Parsing http ...");
+    //
+    // // LiveHttpHeadersParser t = new LiveHttpHeadersParser();
+    // try {
+    // // t.parse(fileIn);
+    // // Collection<HttpBean> bList = t.getHttpBeans();
+    // for (HttpBean b : beans) {
+    // // if (b.getHeaders().get("Cookie") == null) {
+    // // throw new RuntimeException("'Cookie' is missing..");
+    // // }
+    // if (parameterizeJSessionIds) {
+    // b.getHeaders().put("Cookie", "${jsessionid}");
+    // //"${__CSVRead(jsessions.csv,${__counter(,cnt)})}");
+    // }
+    // System.out.println(b);
+    // }
+    // httpBeans.addAll(t.getHttpBeans());
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // }
 
-         writer.flush();
-         writer.close();
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+    public static void main(final String[] args) throws FileNotFoundException {
 
+        final Collection<HttpBean> httpBeans = new ArrayList<>();
 
-   // public void doRead(Collection<HttpBean> beans) {
-   // System.out.println("Parsing http ...");
-   //
-   // // LiveHttpHeadersParser t = new LiveHttpHeadersParser();
-   // try {
-   // // t.parse(fileIn);
-   // // Collection<HttpBean> bList = t.getHttpBeans();
-   // for (HttpBean b : beans) {
-   // // if (b.getHeaders().get("Cookie") == null) {
-   // // throw new RuntimeException("'Cookie' is missing..");
-   // // }
-   // if (parameterizeJSessionIds) {
-   // b.getHeaders().put("Cookie", "${jsessionid}");
-   // //"${__CSVRead(jsessions.csv,${__counter(,cnt)})}");
-   // }
-   // System.out.println(b);
-   // }
-   // httpBeans.addAll(t.getHttpBeans());
-   // } catch (Exception e) {
-   // e.printStackTrace();
-   // }
-   // }
+        final HttpBean bean = new HttpBean();
+        bean.setBody("tBody");
+        bean.setDomain("www.nextinterfaces.com");
+        bean.setMethod("GET");
+        bean.setPath("/");
+        bean.setProtocol("http");
+        httpBeans.add(bean);
 
-   public static void main( String[] args) throws FileNotFoundException{
+        final HttpToJmxTransformer t = new HttpToJmxTransformer("./resources/jmx.vm", httpBeans);
 
-      Collection<HttpBean> httpBeans = new ArrayList<HttpBean>();
+        // t.doRead("C:/packets.http");
+        final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:/http4e1.jmx")));
 
-      HttpBean bean = new HttpBean();
-      bean.setBody("tBody");
-      bean.setDomain("www.nextinterfaces.com");
-      bean.setMethod("GET");
-      bean.setPath("/");
-      bean.setProtocol("http");
-      httpBeans.add(bean);
-
-      HttpToJmxTransformer t = new HttpToJmxTransformer("./resources/jmx.vm", httpBeans);
-
-      // t.doRead("C:/packets.http");
-      BufferedWriter writer = writer = new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream("C:/http4e1.jmx")));
-
-      t.doWrite(writer);
-   }
+        t.doWrite(writer);
+    }
 }

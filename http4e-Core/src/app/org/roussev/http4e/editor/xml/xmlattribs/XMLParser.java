@@ -15,15 +15,14 @@
  */
 package org.roussev.http4e.editor.xml.xmlattribs;
 
-
 /**
  * Performs DTD validation on supplied XML document
  * 
  * @deprecated
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
-public class XMLParser
-{
+@Deprecated
+public class XMLParser {
 
 //	private ErrorHandler errorHandler;
 //	private ContentHandler contentHandler;
@@ -107,4 +106,3 @@ public class XMLParser
 //	}
 
 }
-

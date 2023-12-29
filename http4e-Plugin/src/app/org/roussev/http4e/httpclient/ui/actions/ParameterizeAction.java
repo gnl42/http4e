@@ -36,60 +36,59 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
  */
 public class ParameterizeAction extends Action {
 
-   private HdViewPart         view;
-   private ParameterizeDialog dialog;
+    private final HdViewPart view;
+    private ParameterizeDialog dialog;
 
+    public ParameterizeAction(final HdViewPart view) {
+        this.view = view;
+        setText("Parameterize your call");
+        setDescription("Parameterize your call");
+        setToolTipText("Parameterize your call");
+    }
 
-   public ParameterizeAction( HdViewPart view) {
-      super();
-      this.view = view;
-      setText("Parameterize your call");
-      setDescription("Parameterize your call");
-      setToolTipText("Parameterize your call");
-   }
+    // public void dispose(){
+    // // action is reused, can be called several times.
+    // if (fMenu != null) {
+    // fMenu.dispose();
+    // fMenu = null;
+    // }
+    // }
 
+    @Override
+    public void run() {
+        if (dialog == null) {
+            dialog = new ParameterizeDialog(view);
+        }
+        try {
+            final MouseAdapter okListener = new MouseAdapter() {
 
-   // public void dispose(){
-   // // action is reused, can be called several times.
-   // if (fMenu != null) {
-   // fMenu.dispose();
-   // fMenu = null;
-   // }
-   // }
+                @Override
+                public void mouseUp(final MouseEvent e) {
+                    final String dialogText = dialog.getText();
+                    final Properties props = new Properties();
 
-   public void run(){
-      if (dialog == null) {
-         dialog = new ParameterizeDialog(view);
-      }
-      try {
-         MouseAdapter okListener = new MouseAdapter() {
+                    try {
+                        final InputStream is = new ByteArrayInputStream(dialogText.getBytes("UTF-8"));
+                        props.load(is);
+                    } catch (final IOException e1) {
+                        ExceptionHandler.handle(e1);
+                    }
 
-            public void mouseUp( MouseEvent e){
-               String dialogText = dialog.getText();
-               Properties props = new Properties();
+                    final CoreContext ctx = CoreContext.getContext();
+                    ctx.putObject(CoreObjects.PARAMETERIZE_ARGS, props);
+                    final FolderView folderView = view.getFolderView();
+                    folderView.getModel().fireExecute(new ModelEvent(ModelEvent.PARAMETERIZE_CHANGE, CoreConstants.NULL_MODEL));
+                    // ItemModel iModel = new ItemModel(folderView.getModel(), item);
+                    // HdViewPart hdViewPart = (HdViewPart) view;
+                    // hdViewPart.getFolderView().buildTab(iModel);
+                }
+            };
+            dialog.setOkListener(okListener);
+            dialog.open();
 
-               try {
-                  InputStream is = new ByteArrayInputStream(dialogText.getBytes("UTF-8"));
-                  props.load(is);
-               } catch (IOException e1) {
-                  ExceptionHandler.handle(e1);
-               }
-
-               CoreContext ctx = CoreContext.getContext();
-               ctx.putObject(CoreObjects.PARAMETERIZE_ARGS, props);
-               FolderView folderView = ((HdViewPart) view).getFolderView();
-               folderView.getModel().fireExecute(new ModelEvent(ModelEvent.PARAMETERIZE_CHANGE, CoreConstants.NULL_MODEL));
-               // ItemModel iModel = new ItemModel(folderView.getModel(), item);
-               // HdViewPart hdViewPart = (HdViewPart) view;
-               // hdViewPart.getFolderView().buildTab(iModel);
-            }
-         };
-         dialog.setOkListener(okListener);
-         dialog.open();
-
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+    }
 
 }

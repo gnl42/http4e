@@ -3,79 +3,66 @@ package org.json.me.test;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import org.json.me.*;
+
+import org.json.me.JSONArray;
+import org.json.me.JSONObject;
+import org.json.me.JSONString;
+import org.json.me.JSONStringer;
+import org.json.me.JSONTokener;
+import org.json.me.StringWriter;
 
 /**
- * Test class. This file is not formally a member of the org.json library.
- * It is just a casual test tool.
+ * Test class. This file is not formally a member of the org.json library. It is just a casual test
+ * tool.
  */
 public class Test {
 
     /**
      * Entry point.
+     *
      * @param args
      */
-    public static void main(String args[]) {
+    public static void main(final String args[]) {
         Enumeration it;
         JSONArray a;
         JSONObject j;
         JSONStringer jj;
         String s;
-        
-// Obj is a typical class that implements JSONString.        
+
+// Obj is a typical class that implements JSONString.
 
         class Obj implements JSONString {
-        	public String aString;
-        	public double aNumber;
-        	public boolean aBoolean;
-        	
-            public Obj(String string, double n, boolean b) {
-                this.aString = string;
-                this.aNumber = n;
-                this.aBoolean = b;
+            public String aString;
+            public double aNumber;
+            public boolean aBoolean;
+
+            public Obj(final String string, final double n, final boolean b) {
+                aString = string;
+                aNumber = n;
+                aBoolean = b;
             }
-            
+
+            @Override
             public String toJSONString() {
-            	return "{" + JSONObject.quote(this.aString) + ":" + 
-            	JSONObject.doubleToString(this.aNumber) + "}";
-            }            
-            public String toString() {
-            	return this.aString + " " + this.aNumber + " " + this.aBoolean;
+                return "{" + JSONObject.quote(aString) + ":" + JSONObject.doubleToString(aNumber) + "}";
             }
-        }      
-        
-        
-        try {     	
-        	String sa[] = {"aString", "aNumber", "aBoolean"};
-        	Obj obj = new Obj("A string, a number, and a boolean", 42, true);
-            
+
+            @Override
+            public String toString() {
+                return aString + " " + aNumber + " " + aBoolean;
+            }
+        }
+
+        try {
+            final String sa[] = { "aString", "aNumber", "aBoolean" };
+            final Obj obj = new Obj("A string, a number, and a boolean", 42, true);
+
             jj = new JSONStringer();
-            s = jj.object()
-                .key("foo")
-                .value("bar")
-                .key("baz")
-                .array()
-                    .object()
-                        .key("quux")
-                        .value("Thanks, Josh!")
-                    .endObject()
-                .endArray()
-                .endObject()
-                .toString();
+            s = jj.object().key("foo").value("bar").key("baz").array().object().key("quux").value("Thanks, Josh!").endObject().endArray().endObject()
+                    .toString();
             System.out.println(s);
 
-            System.out.println(new JSONStringer()
-                .object()
-                .key("a")
-                .array()
-                .array()
-                .array()
-                .value("b")
-                .endArray()
-                .endArray()
-                .endArray()
-                .endObject()
-                .toString());
+            System.out.println(new JSONStringer().object().key("a").array().array().array().value("b").endArray().endArray().endArray().endObject().toString());
 
             jj = new JSONStringer();
             jj.array();
@@ -114,15 +101,13 @@ public class Test {
             System.out.println(new JSONArray(jj.toString()).toString(4));
             System.out.println("");
 
-            j = new JSONObject("{slashes: '///', closetag: '</script>', backslash:'\\\\', ei: {quotes: '\"\\''},eo: {a: '\"quoted\"', b:\"don't\"}, quotes: [\"'\", '\"']}");
+            j = new JSONObject(
+                    "{slashes: '///', closetag: '</script>', backslash:'\\\\', ei: {quotes: '\"\\''},eo: {a: '\"quoted\"', b:\"don't\"}, quotes: [\"'\", '\"']}");
             System.out.println(j.toString(2));
             System.out.println("");
 
-            j = new JSONObject(
-                "/*comment*/{foo: [true, false,9876543210,    0.0, 1.00000001,  1.000000000001, 1.00000000000000001," +
-                " .00000000000000001, 2.00, 0.1, 2e100, -32,[],{}, \"string\"], " +
-                "  to   : null, op : 'Good'," +
-                "ten:10} postfix comment");
+            j = new JSONObject("/*comment*/{foo: [true, false,9876543210,    0.0, 1.00000001,  1.000000000001, 1.00000000000000001,"
+                    + " .00000000000000001, 2.00, 0.1, 2e100, -32,[],{}, \"string\"], " + "  to   : null, op : 'Good'," + "ten:10} postfix comment");
             j.put("String", "98.6");
             j.put("JSONObject", new JSONObject());
             j.put("JSONArray", new JSONArray());
@@ -155,11 +140,11 @@ public class Test {
             System.out.println("  oops: " + j.optBoolean("oops"));
             System.out.println("");
 
-            JSONTokener jt = new JSONTokener("{op:'test', to:'session', pre:1}{op:'test', to:'session', pre:2}");
+            final JSONTokener jt = new JSONTokener("{op:'test', to:'session', pre:1}{op:'test', to:'session', pre:2}");
             j = new JSONObject(jt);
             System.out.println(j.toString());
             System.out.println("pre: " + j.optInt("pre"));
-            int i = jt.skipTo('{');
+            final int i = jt.skipTo('{');
             System.out.println(i);
             j = new JSONObject(jt);
             System.out.println(j.toString());
@@ -169,7 +154,8 @@ public class Test {
             System.out.println(a.toString());
             System.out.println("");
 
-            j = new JSONObject("{ fun => with non-standard forms ; forgiving => This package can be used to parse formats that are similar to but not stricting conforming to JSON; why=To make it easier to migrate existing data to JSON,one = [[1.00]]; uno=[[{1=>1}]];'+':+6e66 ;pluses=+++;empty = '' , 'double':0.666,true: TRUE, false: FALSE, null=NULL;[true] = [[!,@;*]]; string=>  o. k. ; # comment\r oct=0666; hex=0x666; dec=666; o=0999; noh=0x0x}");
+            j = new JSONObject(
+                    "{ fun => with non-standard forms ; forgiving => This package can be used to parse formats that are similar to but not stricting conforming to JSON; why=To make it easier to migrate existing data to JSON,one = [[1.00]]; uno=[[{1=>1}]];'+':+6e66 ;pluses=+++;empty = '' , 'double':0.666,true: TRUE, false: FALSE, null=NULL;[true] = [[!,@;*]]; string=>  o. k. ; # comment\r oct=0666; hex=0x666; dec=666; o=0999; noh=0x0x}");
             System.out.println(j.toString(4));
             System.out.println("");
             if (j.getBoolean("true") && !j.getBoolean("false")) {
@@ -177,7 +163,7 @@ public class Test {
             }
 
             System.out.println("");
-            j = new JSONObject(j, new String[]{"dec", "oct", "hex", "missing"});
+            j = new JSONObject(j, new String[] { "dec", "oct", "hex", "missing" });
             System.out.println(j.toString(4));
 
             System.out.println("");
@@ -216,10 +202,9 @@ public class Test {
             System.out.println("\nKeys: ");
             it = j.keys();
             while (it.hasMoreElements()) {
-                s = (String)it.nextElement();
+                s = (String) it.nextElement();
                 System.out.println(s + ": " + j.getString(s));
             }
-
 
             System.out.println("\naccumulate: ");
             j = new JSONObject();
@@ -234,9 +219,9 @@ public class Test {
             System.out.println(j.write(new StringWriter()));
             System.out.println("");
 
-            Vector c = null;
-            Hashtable m = null;
-            
+            final Vector<?> c = null;
+            final Hashtable<?, ?> m = null;
+
             j = new JSONObject(m);
             a = new JSONArray(c);
             j.append("stooge", "Joe DeRita");
@@ -246,46 +231,46 @@ public class Test {
             a.put(m);
             a.put(c);
             System.out.println(j.toString(4));
-            
+
             System.out.println("\nTesting Exceptions: ");
 
             System.out.print("Exception: ");
             try {
                 System.out.println(j.getDouble("stooge"));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println(e);
             }
             System.out.print("Exception: ");
             try {
                 System.out.println(j.getDouble("howard"));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println(e);
             }
             System.out.print("Exception: ");
             try {
                 System.out.println(j.put(null, "howard"));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println(e);
             }
             System.out.print("Exception: ");
             try {
                 System.out.println(a.getDouble(0));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println(e);
             }
             System.out.print("Exception: ");
             try {
                 System.out.println(a.get(-1));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println(e);
             }
             System.out.print("Exception: ");
             try {
                 System.out.println(a.put(Double.NaN));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.out.println(e);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.out.println(e.toString());
         }
     }

@@ -23,8 +23,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.roussev.http4e.httpclient.core.ExceptionHandler;
@@ -35,70 +33,57 @@ import org.roussev.http4e.httpclient.core.util.SwtUtils;
  */
 class PayloadMenu {
 
-   private String filename;
+    private String filename;
 
+    public String getFilename() {
+        return filename;
+    }
 
-   public String getFilename(){
-      return filename;
-   }
+    public void setFilename(final String filename) {
+        this.filename = filename;
+    }
 
+    PayloadMenu(final StyledText styledText, final Menu menu) {
 
-   public void setFilename( String filename){
-      this.filename = filename;
-   }
+        styledText.addKeyListener(new KeyAdapter() {
 
-
-   PayloadMenu( final StyledText styledText, Menu menu) {
-
-      styledText.addKeyListener(new KeyAdapter() {
-
-         public void keyPressed( KeyEvent e){
-            if (e.stateMask == SWT.CTRL || e.stateMask == SWT.COMMAND) {
-               if (e.character == 1) { // ^A
-                  styledText.selectAll();
-               } else if (e.character == 3) { // ^C
-                  styledText.copy();
-               } else if (e.character == 111) { // ^O
-                  openFile(getFilename());
-               }
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                if (e.stateMask == SWT.CTRL || e.stateMask == SWT.COMMAND) {
+                    if (e.character == 1) { // ^A
+                        styledText.selectAll();
+                    } else if (e.character == 3) { // ^C
+                        styledText.copy();
+                    } else if (e.character == 111) { // ^O
+                        openFile(getFilename());
+                    }
+                }
             }
-         }
-      });
+        });
 
-      MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
-      boolean isMac = SwtUtils.isMac();
-      String ctrlName = isMac ? "CMD" : "CTRL";
-      copyItem.setText("Copy   " + ctrlName + "+C");
-      copyItem.addListener(SWT.Selection, new Listener() {
+        final MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
+        final boolean isMac = SwtUtils.isMac();
+        final String ctrlName = isMac ? "CMD" : "CTRL";
+        copyItem.setText("Copy   " + ctrlName + "+C");
+        copyItem.addListener(SWT.Selection, event -> styledText.copy());
+        final MenuItem payloadItem = new MenuItem(menu, SWT.PUSH);
+        payloadItem.setText("View in Text editor   " + ctrlName + "+O");
+        payloadItem.addListener(SWT.Selection, event -> openFile(getFilename()));
+    }
 
-         public void handleEvent( Event event){
-            styledText.copy();
-         }
-      });
-      MenuItem payloadItem = new MenuItem(menu, SWT.PUSH);
-      payloadItem.setText("View in Text editor   " + ctrlName + "+O");
-      payloadItem.addListener(SWT.Selection, new Listener() {
-
-         public void handleEvent( Event event){
-            openFile(getFilename());
-         }
-      });
-   }
-
-
-   public static void openFile( String fileName){
-      if (Desktop.isDesktopSupported()) {
-         Desktop desktop = Desktop.getDesktop();
-         try {
-            fileName = fileName.replace('\\', '/');
-            File f = new File(fileName);
-            if (f.exists()) {
-               desktop.open(f);
+    public static void openFile(String fileName) {
+        if (Desktop.isDesktopSupported()) {
+            final Desktop desktop = Desktop.getDesktop();
+            try {
+                fileName = fileName.replace('\\', '/');
+                final File f = new File(fileName);
+                if (f.exists()) {
+                    desktop.open(f);
+                }
+            } catch (final IOException e) {
+                ExceptionHandler.handle(e);
             }
-         } catch (IOException e) {
-            ExceptionHandler.handle(e);
-         }
-      }
-   }
+        }
+    }
 
 }

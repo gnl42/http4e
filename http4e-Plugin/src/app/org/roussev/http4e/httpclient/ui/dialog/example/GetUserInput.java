@@ -34,74 +34,79 @@ import org.eclipse.swt.widgets.Shell;
  * @deprecated
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
+@Deprecated
 public class GetUserInput extends ApplicationWindow {
 
-   public GetUserInput() {
-      super(null);
-   }
+    public GetUserInput() {
+        super(null);
+    }
 
-   public void run(){
-      // Don't return from open() until window closes
-      setBlockOnOpen(true);
+    public void run() {
+        // Don't return from open() until window closes
+        setBlockOnOpen(true);
 
-      // Open the main window
-      open();
+        // Open the main window
+        open();
 
-      // Dispose the display
-      Display.getCurrent().dispose();
-   }
+        // Dispose the display
+        Display.getCurrent().dispose();
+    }
 
-   protected void configureShell( Shell shell){
-      super.configureShell(shell);
+    @Override
+    protected void configureShell(final Shell shell) {
+        super.configureShell(shell);
 
-      // Set the title bar text
-      shell.setText("Get Input");
-   }
+        // Set the title bar text
+        shell.setText("Get Input");
+    }
 
-   protected Control createContents( Composite parent){
-      Composite composite = new Composite(parent, SWT.NONE);
-      composite.setLayout(new GridLayout(1, false));
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout(1, false));
 
-      // Create a label to display what the user typed in
-      final Label label = new Label(composite, SWT.NONE);
-      label.setText("This will display the user input from InputDialog");
+        // Create a label to display what the user typed in
+        final Label label = new Label(composite, SWT.NONE);
+        label.setText("This will display the user input from InputDialog");
 
-      // Create the button to launch the error dialog
-      Button show = new Button(composite, SWT.PUSH);
-      show.setText("Get Input");
-      show.addSelectionListener(new SelectionAdapter() {
-         public void widgetSelected( SelectionEvent event){
-            InputDialog dlg = new InputDialog(
-                  Display.getCurrent().getActiveShell(), 
-                  "Enter Input", "Enter Input", 
-                  label.getText(), new LengthValidator());
-            if (dlg.open() == Window.OK) {
-               // User clicked OK; update the label with the input
-               label.setText(dlg.getValue());
+        // Create the button to launch the error dialog
+        final Button show = new Button(composite, SWT.PUSH);
+        show.setText("Get Input");
+        show.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(final SelectionEvent event) {
+                final InputDialog dlg = new InputDialog(Display.getCurrent().getActiveShell(), "Enter Input", "Enter Input", label.getText(),
+                        new LengthValidator());
+                if (dlg.open() == Window.OK) {
+                    // User clicked OK; update the label with the input
+                    label.setText(dlg.getValue());
+                }
             }
-         }
-      });
+        });
 
-      parent.pack();
-      return composite;
-   }
+        parent.pack();
+        return composite;
+    }
 
-   public static void main( String[] args){
-      new GetUserInput().run();
-   }
+    public static void main(final String[] args) {
+        new GetUserInput().run();
+    }
 }
 
 class LengthValidator implements IInputValidator {
 
-   public String isValid( String newText){
-      int len = newText.length();
+    @Override
+    public String isValid(final String newText) {
+        final int len = newText.length();
 
-      if (newText.equals("hellohttp4e"))
-         return "Thank you. Enjoy your product.";
-      if (len > 8)
-         return "Http4e couldn't identify your password";
+        if (newText.equals("hellohttp4e")) {
+            return "Thank you. Enjoy your product.";
+        }
+        if (len > 8) {
+            return "Http4e couldn't identify your password";
+        }
 
-      // Input must be OK
-      return null;
-   }
+        // Input must be OK
+        return null;
+    }
 }

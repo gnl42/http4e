@@ -20,16 +20,16 @@ package org.roussev.http4e.httpclient.core.client.misc;
  */
 public interface JobListener {
 
-   /**
-    * Starts buz operation, result is passed into update() method.
-    */
-   Object execute();
+    /**
+     * Starts buz operation, result is passed into update() method.
+     */
+    Object execute();
 
-   /**
-    * A callback update with result after job execution.
-    */
-   void update( Object value);
+    /**
+     * A callback update with result after job execution.
+     */
+    void update(Object value);
 
-   boolean isDisposed();
+    boolean isDisposed();
 
 }

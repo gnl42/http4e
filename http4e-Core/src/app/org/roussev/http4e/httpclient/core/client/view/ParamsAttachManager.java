@@ -37,101 +37,95 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 class ParamsAttachManager {
 
-   // private final Menu menu;
-   // private final ToolItem addBody;
-   private final ToolBar  toolBar;
-   private final ToolItem i_open;
-   private boolean        isMultipart = false;
+    // private final Menu menu;
+    // private final ToolItem addBody;
+    private final ToolBar toolBar;
+    private final ToolItem i_open;
+    private boolean isMultipart = false;
 
+    // private final StyledText swtText;
+    // private final MenuItem m_attachPart;
 
-   // private final StyledText swtText;
-   // private final MenuItem m_attachPart;
+    ParamsAttachManager(final ItemModel model, final StyledText styledText, final ToolBar toolbar) {
+        // this.swtText = swtText;
+        toolBar = toolbar;
 
-   ParamsAttachManager( final ItemModel model, final StyledText styledText, final ToolBar toolbar) {
-      // this.swtText = swtText;
-      this.toolBar = toolbar;
+        final ParamsOpen open = new ParamsOpen(this, model, styledText);
 
-      ParamsOpen open = new ParamsOpen(this, model, styledText);
+        i_open = new ToolItem(toolBar, SWT.PUSH);
+        i_open.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN));
+        i_open.setDisabledImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN_DIS));
+        i_open.setToolTipText("Add File");
+        i_open.addSelectionListener(open);
+    }
 
-      i_open = new ToolItem(toolBar, SWT.PUSH);
-      i_open.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN));
-      i_open.setDisabledImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN_DIS));
-      i_open.setToolTipText("Add File");
-      i_open.addSelectionListener(open);
-   }
+    public void setEnabled(final boolean enabled) {
+        i_open.setEnabled(enabled);
+    }
 
+    public boolean isMultipart() {
+        return isMultipart;
+    }
 
-   public void setEnabled( boolean enabled){
-      i_open.setEnabled(enabled);
-   }
-
-
-   public boolean isMultipart(){
-      return isMultipart;
-   }
-
-
-   public void setMultipart( boolean isMultipart){
-      this.isMultipart = isMultipart;
-   }
+    public void setMultipart(final boolean isMultipart) {
+        this.isMultipart = isMultipart;
+    }
 
 }
 
 class ParamsOpen implements SelectionListener {
 
-   private StyledText          st;
-   private Model               model;
-   private ParamsAttachManager manager;
+    private final StyledText st;
+    private final Model model;
+    private final ParamsAttachManager manager;
 
+    public ParamsOpen(final ParamsAttachManager manager, final ItemModel model, final StyledText st) {
+        this.st = st;
+        this.model = model;
+        this.manager = manager;
+    }
 
-   public ParamsOpen( ParamsAttachManager manager, ItemModel model, StyledText st) {
-      this.st = st;
-      this.model = model;
-      this.manager = manager;
-   }
+    @Override
+    public void widgetSelected(final SelectionEvent event) {
+        final FileDialog fd = new FileDialog(st.getShell(), SWT.OPEN);
+        fd.setText("Add File Parameter");
+        fd.setFilterExtensions(CoreConstants.FILE_FILTER_EXT);
+        final String file = fd.open();
 
-
-   public void widgetSelected( SelectionEvent event){
-      FileDialog fd = new FileDialog(st.getShell(), SWT.OPEN);
-      fd.setText("Add File Parameter");
-      fd.setFilterExtensions(CoreConstants.FILE_FILTER_EXT);
-      String file = fd.open();
-
-      if (file != null) {
-         if (manager.isMultipart()) {
-            st.setText(st.getText() + CoreConstants.FILE_PREFIX + file);
-         } else {
-            try {
-               st.setText(readFileAsString(file));
-            } catch (IOException e) {
-               // ignore
+        if (file != null) {
+            if (manager.isMultipart()) {
+                st.setText(st.getText() + CoreConstants.FILE_PREFIX + file);
+            } else {
+                try {
+                    st.setText(readFileAsString(file));
+                } catch (final IOException e) {
+                    // ignore
+                }
             }
-         }
-         // model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST,
-         // model));
-         // // force body to refresh itself
-         // model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST,
-         // model));
-      }
-   }
+            // model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST,
+            // model));
+            // // force body to refresh itself
+            // model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST,
+            // model));
+        }
+    }
 
+    private static String readFileAsString(final String filePath) throws java.io.IOException {
+        final StringBuilder fileData = new StringBuilder(1000);
+        final BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        char[] buf = new char[1024];
+        int numRead = 0;
+        while ((numRead = reader.read(buf)) != -1) {
+            final String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+            buf = new char[1024];
+        }
+        reader.close();
+        return fileData.toString();
+    }
 
-   private static String readFileAsString( String filePath) throws java.io.IOException{
-      StringBuilder fileData = new StringBuilder(1000);
-      BufferedReader reader = new BufferedReader(new FileReader(filePath));
-      char[] buf = new char[1024];
-      int numRead = 0;
-      while ((numRead = reader.read(buf)) != -1) {
-         String readData = String.valueOf(buf, 0, numRead);
-         fileData.append(readData);
-         buf = new char[1024];
-      }
-      reader.close();
-      return fileData.toString();
-   }
-
-
-   public void widgetDefaultSelected( SelectionEvent event){
-   }
+    @Override
+    public void widgetDefaultSelected(final SelectionEvent event) {
+    }
 
 }

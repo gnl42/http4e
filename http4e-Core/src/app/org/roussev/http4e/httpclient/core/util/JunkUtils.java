@@ -17,15 +17,10 @@ package org.roussev.http4e.httpclient.core.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
-
-import nu.xom.Builder;
-import nu.xom.Serializer;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.eclipse.swt.custom.StyledText;
 import org.json.me.JSONArray;
@@ -39,6 +34,9 @@ import org.roussev.http4e.httpclient.core.client.model.ItemModel;
 import org.roussev.http4e.httpclient.core.client.view.assist.AssistConstants;
 import org.roussev.http4e.httpclient.core.misc.CoreException;
 
+import nu.xom.Builder;
+import nu.xom.Serializer;
+
 /**
  * A class with misc utils.
  *
@@ -46,183 +44,181 @@ import org.roussev.http4e.httpclient.core.misc.CoreException;
  */
 public class JunkUtils {
 
-   private static String XML_LINE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    private static String XML_LINE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
-   private final static ApacheHttpListener httpListener = new ApacheHttpListener(){
-      public void write( byte[] data){
-         // blank
-      }
+    private final static ApacheHttpListener httpListener = new ApacheHttpListener() {
+        @Override
+        public void write(final byte[] data) {
+            // blank
+        }
 
-      public void close(){
-         // blank
-      }
-   };
+        @Override
+        public void close() {
+            // blank
+        }
+    };
 
-
-   private final static ResponseReader responseReader = new ResponseReader() {
-
-      public void read(HttpMethod httpMethod) {
+    private final static ResponseReader responseReader = httpMethod -> {
 //          HttpUtils.dumpResponse(httpMethod, System.out);
-      }
-   };
+    };
 
+    public static boolean isXwwwFormType(final ItemModel model) {
+        final List<String> headers = model.getHeaderValuesIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE);
+        if (headers == null) {
+            return false;
+        }
+        try {
+            final String lastContType = headers.get(headers.size() - 1);
+            return AssistConstants.CONTENT_TYPE_X_WWW_FORM.equalsIgnoreCase(lastContType);
 
-   public static boolean isXwwwFormType(ItemModel model){
-      List<String> headers = model.getHeaderValuesIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE);
-      if(headers == null){
-         return false;
-      }
-      try {
-         String lastContType = (String)headers.get(headers.size()-1);
-         return AssistConstants.CONTENT_TYPE_X_WWW_FORM.equalsIgnoreCase(lastContType);
+        } catch (final Exception ignore) {
+        }
 
-      } catch (Exception ignore) {}
+        return false;
+    }
 
-      return false;
-   }
+    public static boolean isMultiartFormType(final ItemModel model) {
+        final List<String> headers = model.getHeaderValuesIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE);
+        if (headers == null) {
+            return false;
+        }
+        try {
+            final String lastContType = headers.get(headers.size() - 1);
+            return AssistConstants.CONTENT_TYPE_MULTIPART.equalsIgnoreCase(lastContType);
 
+        } catch (final Exception ignore) {
+        }
 
-   public static boolean isMultiartFormType(ItemModel model){
-      List<String> headers = model.getHeaderValuesIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE);
-      if(headers == null){
-         return false;
-      }
-      try {
-         String lastContType = (String)headers.get(headers.size()-1);
-         return AssistConstants.CONTENT_TYPE_MULTIPART.equalsIgnoreCase(lastContType);
+        return false;
+    }
 
-      } catch (Exception ignore) {}
+    public static void hexText(final StyledText styledText, final String text) {
+        try {
+            styledText.setText(HexUtils.toHex(text.getBytes(CoreConstants.UTF8)));
+        } catch (final IOException e) {
+            throw CoreException.getInstance(CoreException.UNSUPPORTED_ENCODING, e);
+        }
+    }
 
-      return false;
-   }
+    public static String prettyText(String text) {
 
+        final int inx = text.indexOf(CoreConstants.CRLF + CoreConstants.CRLF);
+        if (inx > 5) {
+            text = text.substring(inx + 4);
+        }
 
-   public static void hexText(StyledText styledText, String text){
-      try {
-         styledText.setText( HexUtils.toHex(text.getBytes(CoreConstants.UTF8)));
-      } catch (IOException e) {
-         throw CoreException.getInstance(CoreException.UNSUPPORTED_ENCODING, e);
-      }
-   }
+        text = text.trim();
 
-   public static String prettyText(String text){
-
-         int inx = text.indexOf(CoreConstants.CRLF+CoreConstants.CRLF);
-         if(inx > 5){
-            text = text.substring(inx+4, text.length());
-         }
-
-         text = text.trim();
-
-         if(text.startsWith("<?xml")){
+        if (text.startsWith("<?xml")) {
             return prettyXml(text, null);
 
-         } else if(text.startsWith("<")){
+        } else if (text.startsWith("<")) {
             return prettyXml(text, XML_LINE);
 
-         } else if(text.startsWith("[") || text.startsWith("{")){
+        } else if (text.startsWith("[") || text.startsWith("{")) {
             return jsonText(text, true);
 
-         }  else {
+        } else {
             return text;
-         }
-   }
+        }
+    }
 
-   public static String jsonText( String txt, boolean bypassXML){
+    public static String jsonText(String txt, final boolean bypassXML) {
 
-      try {
-         boolean isGWTok = txt.startsWith("//OK");
-         boolean isGWTerr = txt.startsWith("//EX");
-         if (isGWTok || isGWTerr) {
-            txt = txt.substring(4, txt.length());
-         }
-         return toJSON(txt, isGWTok, isGWTerr);
+        try {
+            final boolean isGWTok = txt.startsWith("//OK");
+            final boolean isGWTerr = txt.startsWith("//EX");
+            if (isGWTok || isGWTerr) {
+                txt = txt.substring(4);
+            }
+            return toJSON(txt, isGWTok, isGWTerr);
 
-      } catch (JSONException e) {
+        } catch (final JSONException e) {
 //         ExceptionHandler.handle(e);
-         if(bypassXML){
-            return txt;
-         } else {
-            String line = txt.startsWith("<?xml")? null:XML_LINE;
-            return prettyXml(txt, line);
-         }
+            if (bypassXML) {
+                return txt;
+            } else {
+                final String line = txt.startsWith("<?xml") ? null : XML_LINE;
+                return prettyXml(txt, line);
+            }
 
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-         if(bypassXML){
-            return txt;
-         } else {
-            String line = txt.startsWith("<?xml")? null:XML_LINE;
-            return prettyXml(txt, line);
-         }
-      }
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+            if (bypassXML) {
+                return txt;
+            } else {
+                final String line = txt.startsWith("<?xml") ? null : XML_LINE;
+                return prettyXml(txt, line);
+            }
+        }
 
-   }
+    }
 
-   private static String toJSON(String txt, boolean isGWTok, boolean isGWTerr) throws JSONException{
+    private static String toJSON(final String txt, final boolean isGWTok, final boolean isGWTerr) throws JSONException {
 
-      String res = null;
+        String res = null;
 
-      if(txt.startsWith("[")){
-         JSONArray arr = new JSONArray(txt);
-         res = arr.toString(4);
-      } else {
-         JSONObject obj = new JSONObject(txt);
-         res = obj.toString(4);
-      }
-      if (isGWTok) {
-         return "//OK" + res;
-      } else if (isGWTerr) {
-         return "//EX" + res;
-      } else {
-         return res;
-      }
-   }
+        if (txt.startsWith("[")) {
+            final JSONArray arr = new JSONArray(txt);
+            res = arr.toString(4);
+        } else {
+            final JSONObject obj = new JSONObject(txt);
+            res = obj.toString(4);
+        }
+        if (isGWTok) {
+            return "//OK" + res;
+        } else if (isGWTerr) {
+            return "//EX" + res;
+        } else {
+            return res;
+        }
+    }
 
+    public static String prettyXml(final String xml, final String firstLine) {
+        try {
 
-   public static String prettyXml(String xml, String firstLine){
-      try {
-
-         ByteArrayOutputStream out = new ByteArrayOutputStream();
-         Serializer serializer = new Serializer(out);
-         serializer.setIndent(2);
-         if(firstLine != null){
-            serializer.write(new Builder().build(firstLine + xml, ""));
-         } else {
-            serializer.write(new Builder().build(xml, ""));
-         }
-         String ret =  out.toString("UTF-8");
-         if(firstLine != null){
-            return ret.substring(firstLine.length() , ret.length()).trim();
-         } else {
-            return ret;
-         }
-      } catch (Exception e) {
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final Serializer serializer = new Serializer(out);
+            serializer.setIndent(2);
+            if (firstLine != null) {
+                serializer.write(new Builder().build(firstLine + xml, ""));
+            } else {
+                serializer.write(new Builder().build(xml, ""));
+            }
+            final String ret = out.toString("UTF-8");
+            if (firstLine != null) {
+                return ret.substring(firstLine.length()).trim();
+            } else {
+                return ret;
+            }
+        } catch (final Exception e) {
 //         ExceptionHandler.handle(e);
-         return xml;
-      }
-   }
+            return xml;
+        }
+    }
 
-   public static String getHdToken(String url, String md){
-      final HttpClient client = new HttpClient();
-      PostMethod post = new PostMethod(url);
-      post.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-      post.setParameter("v", md);
+    public static String getHdToken(final String url, final String md) {
+        final HttpClient client = new HttpClient();
+        final PostMethod post = new PostMethod(url);
+        post.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+        post.setParameter("v", md);
 
-      post.setApacheHttpListener(httpListener);
-      try {
-         HttpUtils.execute(client, post, responseReader);
-         Header header = post.getResponseHeader("hd-token");
-         if(header != null){
+        post.setApacheHttpListener(httpListener);
+        try {
+            HttpUtils.execute(client, post, responseReader);
+            final Header header = post.getResponseHeader("hd-token");
+            if (header != null) {
 //            System.out.println("hd-token:" + header.getValue() + "'");
-            return header.getValue();
-         }
-      } catch (Exception ignore) {
-         ExceptionHandler.handle(ignore);
-      } finally {
-         if(post != null) post.releaseConnection();
-      }
-      return null;
-   }
+                return header.getValue();
+            }
+        } catch (final Exception ignore) {
+            ExceptionHandler.handle(ignore);
+        } finally {
+            if (post != null) {
+                post.releaseConnection();
+            }
+        }
+        return null;
+    }
 
 }

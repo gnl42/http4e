@@ -20,18 +20,18 @@ package org.roussev.http4e.httpclient.core;
  */
 public interface CoreObjects {
 
-   String RESOURCE_CACHE      = "resource.cache";
-   String ROOT_PATH_CORE      = "root.core";
-   String ROOT_PATH_UI        = "root.ui";
+    String RESOURCE_CACHE = "resource.cache";
+    String ROOT_PATH_CORE = "root.core";
+    String ROOT_PATH_UI = "root.ui";
 
-   String HTTP_HEADERS        = "http.headers";
-   String HTTP_HEADER_VALUES  = "http.header.values";
-   String HEADER_TYPE_TRACKER = "header.type.tracker";
-   String PARAM_TYPE_TRACKER  = "param.type.tracker";
-   String IS_STANDALONE       = "is.standalone";
-   String AUTH_ITEM           = "auth.bean";
-   String PROXY_ITEM          = "proxy.bean";
-   String PARAMETERIZE_ARGS   = "parameterize.args";
-   String RESPONSE_VIEW_SIZE  = "resp.size";
+    String HTTP_HEADERS = "http.headers";
+    String HTTP_HEADER_VALUES = "http.header.values";
+    String HEADER_TYPE_TRACKER = "header.type.tracker";
+    String PARAM_TYPE_TRACKER = "param.type.tracker";
+    String IS_STANDALONE = "is.standalone";
+    String AUTH_ITEM = "auth.bean";
+    String PROXY_ITEM = "proxy.bean";
+    String PARAMETERIZE_ARGS = "parameterize.args";
+    String RESPONSE_VIEW_SIZE = "resp.size";
 
 }

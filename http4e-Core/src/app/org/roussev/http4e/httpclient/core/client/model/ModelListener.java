@@ -20,6 +20,6 @@ package org.roussev.http4e.httpclient.core.client.model;
  */
 public interface ModelListener {
 
-   public void executed( ModelEvent e);
+    void executed(ModelEvent e);
 
 }

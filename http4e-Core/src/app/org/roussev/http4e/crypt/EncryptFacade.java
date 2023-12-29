@@ -19,316 +19,276 @@ import org.apache.commons.codec.binary.Base64;
 
 public class EncryptFacade {
 
-   private Cipher                 ecipher;
-   private Cipher                 dcipher;
+    private Cipher ecipher;
+    private Cipher dcipher;
 
-   private int                    SYMMETRIC            = 1;
-   private int                    SYMMETRIC_PARAM_SPEC = 2;
-   private int                    SYMMETRIC_PASSPHRASE = 3;
-   private int                    ASYMMETRIC           = 4;
-   private int                    type                 = SYMMETRIC;
+    private final int SYMMETRIC = 1;
+    private final int SYMMETRIC_PARAM_SPEC = 2;
+    private final int SYMMETRIC_PASSPHRASE = 3;
+    private final int ASYMMETRIC = 4;
+    private int type = SYMMETRIC;
 
-   private Key                    privateKey;
-   private Key                    publicKey;
-   private Key                    key;
-   private AlgorithmParameterSpec parameterSpec;
-   private String                 passPhrase;
+    private Key privateKey;
+    private Key publicKey;
+    private Key key;
+    private AlgorithmParameterSpec parameterSpec;
+    private String passPhrase;
 
+    /**
+     * EncryptFacade constructor that initializes asymmetric ciphers
+     */
+    public EncryptFacade(final Key privateKey, final Key publicKey) {
+        type = ASYMMETRIC;
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+    }
 
-   /**
-    * EncryptFacade constructor that initializes asymmetric ciphers
-    */
-   public EncryptFacade( Key privateKey, Key publicKey) {
-      this.type = ASYMMETRIC;
-      this.privateKey = privateKey;
-      this.publicKey = publicKey;
-   }
+    /**
+     * Constructor used to create this object. Responsible for setting and initializing this object's
+     * encrypter and decrypter Chipher instances given a Secret Key and algorithm.
+     * 
+     * @param key       Secret Key used to initialize both the encrypter and decrypter instances.
+     * @param algorithm Which algorithm to use for creating the encrypter and decrypter instances.
+     */
+    public EncryptFacade(final Key key) {
+        type = SYMMETRIC;
+        this.key = key;
+    }
 
+    /**
+     * Constructor used to create this object. Responsible for setting and initializing this object's
+     * encrypter and decrypter Chipher instances given a Secret Key and AlgorithmParameterSpec.
+     * 
+     * @param key           Secret Key used to initialize both the encrypter and decrypter instances.
+     * @param parameterSpec AlgorithmParameterSpec.
+     */
+    public EncryptFacade(final Key key, final AlgorithmParameterSpec parameterSpec) {
+        type = SYMMETRIC_PARAM_SPEC;
+        this.key = key;
+        this.parameterSpec = parameterSpec;
+    }
 
-   /**
-    * Constructor used to create this object. Responsible for setting and
-    * initializing this object's encrypter and decrypter Chipher instances given
-    * a Secret Key and algorithm.
-    * 
-    * @param key
-    *           Secret Key used to initialize both the encrypter and decrypter
-    *           instances.
-    * @param algorithm
-    *           Which algorithm to use for creating the encrypter and decrypter
-    *           instances.
-    */
-   public EncryptFacade( Key key) {
-      this.type = SYMMETRIC;
-      this.key = key;
-   }
+    /**
+     * Constructor used to create this object. Responsible for setting and initializing this object's
+     * encrypter and decrypter Chipher instances given a Pass Phrase and algorithm.
+     * 
+     * @param passPhrase Pass Phrase used to initialize both the encrypter and decrypter instances.
+     */
+    public EncryptFacade(final String passPhrase) {
+        type = SYMMETRIC_PASSPHRASE;
+        this.passPhrase = passPhrase;
 
+        Key key = null;
+        final KeySpec keySpec = new PBEKeySpec(passPhrase.toCharArray(), CryptConstants.SALT, CryptConstants.ITERATION_COUNT);
+        try {
+            key = SecretKeyFactory.getInstance(CryptConstants.SECRET_KEY_ALGORITHM).generateSecret(keySpec);
+        } catch (final Exception e) {
+            // System.err.println("Failed to instantiate Key of type '" + type +
+            // "', passPhrase '" + passPhrase + "'");
+            throw new RuntimeException(e);
+        }
 
-   /**
-    * Constructor used to create this object. Responsible for setting and
-    * initializing this object's encrypter and decrypter Chipher instances given
-    * a Secret Key and AlgorithmParameterSpec.
-    * 
-    * @param key
-    *           Secret Key used to initialize both the encrypter and decrypter
-    *           instances.
-    * @param parameterSpec
-    *           AlgorithmParameterSpec.
-    */
-   public EncryptFacade( Key key, AlgorithmParameterSpec parameterSpec) {
-      this.type = SYMMETRIC_PARAM_SPEC;
-      this.key = key;
-      this.parameterSpec = parameterSpec;
-   }
+        // Prepare the parameters to the ciphers
+        final AlgorithmParameterSpec paramSpec = new PBEParameterSpec(CryptConstants.SALT, CryptConstants.ITERATION_COUNT);
+        this.key = key;
+        parameterSpec = paramSpec;
+    }
 
+    /**
+     * Lazy loader
+     */
+    private Cipher getEncryptCypher() {
+        if (ecipher != null) {
+            return ecipher;
+        }
 
-   /**
-    * Constructor used to create this object. Responsible for setting and
-    * initializing this object's encrypter and decrypter Chipher instances given
-    * a Pass Phrase and algorithm.
-    * 
-    * @param passPhrase
-    *           Pass Phrase used to initialize both the encrypter and decrypter
-    *           instances.
-    */
-   public EncryptFacade( String passPhrase) {
-      this.type = SYMMETRIC_PASSPHRASE;
-      this.passPhrase = passPhrase;
+        Key mKey = null;
+        AlgorithmParameterSpec mParameterSpec = null;
 
-      KeySpec keySpec = null;
-      Key key = null;
-      AlgorithmParameterSpec paramSpec = null;
+        if (type == SYMMETRIC) {
+            mKey = key;
 
-      keySpec = new PBEKeySpec(passPhrase.toCharArray(), CryptConstants.SALT, CryptConstants.ITERATION_COUNT);
-      try {
-         key = SecretKeyFactory.getInstance(CryptConstants.SECRET_KEY_ALGORITHM).generateSecret(keySpec);
-      } catch (Exception e) {
-         // System.err.println("Failed to instantiate Key of type '" + type +
-         // "', passPhrase '" + passPhrase + "'");
-         throw new RuntimeException(e);
-      }
+        } else if (type == SYMMETRIC_PARAM_SPEC || type == SYMMETRIC_PASSPHRASE) {
+            mKey = key;
+            mParameterSpec = parameterSpec;
 
-      // Prepare the parameters to the ciphers
-      paramSpec = new PBEParameterSpec(CryptConstants.SALT, CryptConstants.ITERATION_COUNT);
-      this.key = key;
-      this.parameterSpec = paramSpec;
-   }
+        } else if (type == ASYMMETRIC) {
+            mKey = publicKey;
 
+        } else {
+            throw new IllegalArgumentException("EncryptFacade 'type' not provided!");
+        }
 
-   /**
-    * Lazy loader
-    */
-   private Cipher getEncryptCypher(){
-      if (ecipher != null) {
-         return ecipher;
-      }
+        try {
+            ecipher = Cipher.getInstance(mKey.getAlgorithm());
+            if (mParameterSpec == null) {
+                ecipher.init(Cipher.ENCRYPT_MODE, mKey);
+            } else {
+                ecipher.init(Cipher.ENCRYPT_MODE, mKey, mParameterSpec);
+            }
 
-      Key mKey = null;
-      AlgorithmParameterSpec mParameterSpec = null;
+        } catch (final Exception e) {
+            // System.err.println("Failed to instantiate (Encrypt)Cipher of type '"
+            // + type + "', key '" + Utils.getKeyInfo(key) + "', passPhrase '" +
+            // passPhrase + "', paramSpec '" + parameterSpec + "'");
+            throw new RuntimeException(e);
+        }
 
-      if (type == SYMMETRIC) {
-         mKey = key;
+        return ecipher;
+    }
 
-      } else if (type == SYMMETRIC_PARAM_SPEC) {
-         mKey = key;
-         mParameterSpec = parameterSpec;
+    /**
+     * Lazy loader
+     */
+    private Cipher getDecryptCypher() {
+        if (dcipher != null) {
+            return dcipher;
+        }
 
-      } else if (type == SYMMETRIC_PASSPHRASE) {
-         mKey = key;
-         mParameterSpec = parameterSpec;
+        Key mKey = null;
+        AlgorithmParameterSpec mParameterSpec = null;
 
-      } else if (type == ASYMMETRIC) {
-         mKey = publicKey;
+        if (type == SYMMETRIC) {
+            mKey = key;
 
-      } else {
-         throw new IllegalArgumentException("EncryptFacade 'type' not provided!");
-      }
+        } else if (type == SYMMETRIC_PARAM_SPEC || type == SYMMETRIC_PASSPHRASE) {
+            mKey = key;
+            mParameterSpec = parameterSpec;
 
-      try {
-         ecipher = Cipher.getInstance(mKey.getAlgorithm());
-         if (mParameterSpec == null) {
-            ecipher.init(Cipher.ENCRYPT_MODE, mKey);
-         } else {
-            ecipher.init(Cipher.ENCRYPT_MODE, mKey, mParameterSpec);
-         }
+        } else if (type == ASYMMETRIC) {
+            mKey = privateKey;
 
-      } catch (Exception e) {
-         // System.err.println("Failed to instantiate (Encrypt)Cipher of type '"
-         // + type + "', key '" + Utils.getKeyInfo(key) + "', passPhrase '" +
-         // passPhrase + "', paramSpec '" + parameterSpec + "'");
-         throw new RuntimeException(e);
-      }
+        } else {
+            throw new IllegalArgumentException("EncryptFacade 'type' not provided!");
+        }
 
-      return ecipher;
-   }
+        try {
+            dcipher = Cipher.getInstance(mKey.getAlgorithm());
+            if (mParameterSpec == null) {
+                dcipher.init(Cipher.DECRYPT_MODE, mKey);
+            } else {
+                dcipher.init(Cipher.DECRYPT_MODE, mKey, mParameterSpec);
+            }
 
+        } catch (final Exception e) {
+            // System.err.println("Failed to instantiate (Decrypt)Cipher of " +
+            // "type '" + type + "', key '" + Utils.getKeyInfo(key) + "',
+            // passPhrase '" + passPhrase + "', paramSpec '" + parameterSpec +
+            // "'");
+            throw new RuntimeException(e);
+        }
+        return dcipher;
+    }
 
-   /**
-    * Lazy loader
-    */
-   private Cipher getDecryptCypher(){
-      if (dcipher != null) {
-         return dcipher;
-      }
+    public byte[] encrypt(final byte[] data) {
+        try {
+            return getEncryptCypher().doFinal(data);
 
-      Key mKey = null;
-      AlgorithmParameterSpec mParameterSpec = null;
+        } catch (final Exception e) {
+            // System.err.println("Failed to encrypt data: '" +
+            // HexUtils.prettyHex(data) + "' using CipherInfo: " +
+            // Utils.getCipherInfo(getEncryptCypher()));
+            throw new RuntimeException(e);
+        }
+    }
 
-      if (type == SYMMETRIC) {
-         mKey = key;
+    /**
+     * Takes a encrypted String as an argument, decrypts and returns the decrypted String.
+     * 
+     * @param str Encrypted String to be decrypted
+     * @return <code>String</code> Decrypted version of the provided String
+     */
+    public byte[] decrypt(final byte[] encrData) {
 
-      } else if (type == SYMMETRIC_PARAM_SPEC) {
-         mKey = key;
-         mParameterSpec = parameterSpec;
+        try {
+            return getDecryptCypher().doFinal(encrData);
 
-      } else if (type == SYMMETRIC_PASSPHRASE) {
-         mKey = key;
-         mParameterSpec = parameterSpec;
+        } catch (final Exception e) {
+            // System.err.println("Failed to decrypt data: '" +
+            // HexUtils.prettyHex(encrData) + "' using CipherInfo: " +
+            // Utils.getCipherInfo(getDecryptCypher()));
+            throw new RuntimeException(e);
+        }
+    }
 
-      } else if (type == ASYMMETRIC) {
-         mKey = privateKey;
+    /**
+     * Takes a single String as an argument and returns an Encrypted version of that String.
+     * 
+     * @param str String to be encrypted
+     * @return <code>String</code> Encrypted version of the provided String
+     */
+    public String encrypt(final String str) {
+        try {
+            // Encode the string into bytes using utf-8
+            final byte[] utf8 = str.getBytes(CryptConstants.UTF8);
 
-      } else {
-         throw new IllegalArgumentException("EncryptFacade 'type' not provided!");
-      }
+            // Encrypt
+            final byte[] enc = getEncryptCypher().doFinal(utf8);
 
-      try {
-         dcipher = Cipher.getInstance(mKey.getAlgorithm());
-         if (mParameterSpec == null) {
-            dcipher.init(Cipher.DECRYPT_MODE, mKey);
-         } else {
-            dcipher.init(Cipher.DECRYPT_MODE, mKey, mParameterSpec);
-         }
+            // Encode bytes to base64 to get a string
+            return new String(Base64.encodeBase64(enc));// new sun.misc.BASE64Encoder().encode(enc);
 
-      } catch (Exception e) {
-         // System.err.println("Failed to instantiate (Decrypt)Cipher of " +
-         // "type '" + type + "', key '" + Utils.getKeyInfo(key) + "',
-         // passPhrase '" + passPhrase + "', paramSpec '" + parameterSpec +
-         // "'");
-         throw new RuntimeException(e);
-      }
-      return dcipher;
-   }
+        } catch (final Exception e) {
+            // System.err.println("Failed to encrypt: '" + str + "' using
+            // CipherInfo: " + Utils.getCipherInfo(getEncryptCypher()));
+            throw new RuntimeException(e);
+        }
+    }
 
+    /**
+     * Takes a encrypted String as an argument, decrypts and returns the decrypted String.
+     * 
+     * @param str Encrypted String to be decrypted
+     * @return <code>String</code> Decrypted version of the provided String
+     */
+    public String decrypt(final String str) {
 
-   public byte[] encrypt( byte[] data){
-      try {
-         return getEncryptCypher().doFinal(data);
+        try {
 
-      } catch (Exception e) {
-         // System.err.println("Failed to encrypt data: '" +
-         // HexUtils.prettyHex(data) + "' using CipherInfo: " +
-         // Utils.getCipherInfo(getEncryptCypher()));
-         throw new RuntimeException(e);
-      }
-   }
+            // Decode base64 to get bytes
+            final byte[] dec = Base64.decodeBase64(str.getBytes()); // new sun.misc.BASE64Decoder().decodeBuffer(str);
 
+            // Decrypt
+            final byte[] utf8 = getDecryptCypher().doFinal(dec);
 
-   /**
-    * Takes a encrypted String as an argument, decrypts and returns the
-    * decrypted String.
-    * 
-    * @param str
-    *           Encrypted String to be decrypted
-    * @return <code>String</code> Decrypted version of the provided String
-    */
-   public byte[] decrypt( byte[] encrData){
+            // Decode using utf-8
+            return new String(utf8, CryptConstants.UTF8);
 
-      try {
-         return getDecryptCypher().doFinal(encrData);
+        } catch (final Exception e) {
+            // System.err.println("Failed to decrypt '" + str + "' using
+            // CipherInfo: " + Utils.getCipherInfo(getDecryptCypher()));
+            throw new RuntimeException(e);
+        }
+    }
 
-      } catch (Exception e) {
-         // System.err.println("Failed to decrypt data: '" +
-         // HexUtils.prettyHex(encrData) + "' using CipherInfo: " +
-         // Utils.getCipherInfo(getDecryptCypher()));
-         throw new RuntimeException(e);
-      }
-   }
+    static class Utils {
 
+        static String getKeyInfo(final Key key) {
+            if (key == null) {
+                return "{null key}";
+            }
+            final StringBuilder sb = new StringBuilder(key.toString());
+            sb.append("{Algorithm:" + key.getAlgorithm());
+            sb.append(",Format:" + key.getFormat());
+            sb.append(",Encoded:" + HexUtils.prettyHex(key.getEncoded()));
+            sb.append("}");
 
-   /**
-    * Takes a single String as an argument and returns an Encrypted version of
-    * that String.
-    * 
-    * @param str
-    *           String to be encrypted
-    * @return <code>String</code> Encrypted version of the provided String
-    */
-   public String encrypt( String str){
-      try {
-         // Encode the string into bytes using utf-8
-         byte[] utf8 = str.getBytes(CryptConstants.UTF8);
+            return sb.toString();
+        }
 
-         // Encrypt
-         byte[] enc = getEncryptCypher().doFinal(utf8);
+        static String getCipherInfo(final Cipher cipher) {
+            if (cipher == null) {
+                return "{null cipher}";
+            }
+            final StringBuilder sb = new StringBuilder(cipher.toString());
+            sb.append("{Algorithm:" + cipher.getAlgorithm());
+            sb.append(",Provider:" + cipher.getProvider());
+            sb.append(",Parameters:" + cipher.getParameters());
+            sb.append(",IV:" + HexUtils.prettyHex(cipher.getIV()));
+            sb.append("}");
 
-         // Encode bytes to base64 to get a string
-         return new String(Base64.encodeBase64(enc));// new sun.misc.BASE64Encoder().encode(enc);
-
-      } catch (Exception e) {
-         // System.err.println("Failed to encrypt: '" + str + "' using
-         // CipherInfo: " + Utils.getCipherInfo(getEncryptCypher()));
-         throw new RuntimeException(e);
-      }
-   }
-
-
-   /**
-    * Takes a encrypted String as an argument, decrypts and returns the
-    * decrypted String.
-    * 
-    * @param str
-    *           Encrypted String to be decrypted
-    * @return <code>String</code> Decrypted version of the provided String
-    */
-   public String decrypt( String str){
-
-      try {
-
-         // Decode base64 to get bytes
-         byte[] dec = Base64.decodeBase64(str.getBytes()); //new sun.misc.BASE64Decoder().decodeBuffer(str);
-
-         // Decrypt
-         byte[] utf8 = getDecryptCypher().doFinal(dec);
-
-         // Decode using utf-8
-         return new String(utf8, CryptConstants.UTF8);
-
-      } catch (Exception e) {
-         // System.err.println("Failed to decrypt '" + str + "' using
-         // CipherInfo: " + Utils.getCipherInfo(getDecryptCypher()));
-         throw new RuntimeException(e);
-      }
-   }
-
-   static class Utils {
-
-      static String getKeyInfo( Key key){
-         if (key == null) {
-            return "{null key}";
-         }
-         StringBuffer sb = new StringBuffer(key.toString());
-         sb.append("{Algorithm:" + key.getAlgorithm());
-         sb.append(",Format:" + key.getFormat());
-         sb.append(",Encoded:" + HexUtils.prettyHex(key.getEncoded()));
-         sb.append("}");
-
-         return sb.toString();
-      }
-
-
-      static String getCipherInfo( Cipher cipher){
-         if (cipher == null) {
-            return "{null cipher}";
-         }
-         StringBuffer sb = new StringBuffer(cipher.toString());
-         sb.append("{Algorithm:" + cipher.getAlgorithm());
-         sb.append(",Provider:" + cipher.getProvider());
-         sb.append(",Parameters:" + cipher.getParameters());
-         sb.append(",IV:" + HexUtils.prettyHex(cipher.getIV()));
-         sb.append("}");
-
-         return sb.toString();
-      }
-   }
+            return sb.toString();
+        }
+    }
 
 }

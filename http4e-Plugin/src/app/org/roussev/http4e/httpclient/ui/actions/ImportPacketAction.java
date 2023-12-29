@@ -14,53 +14,53 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class ImportPacketAction extends Action {
 
-   private ViewPart view;
-   private Menu     fMenu;
+    private final ViewPart view;
+    private Menu fMenu;
 
+    public ImportPacketAction(final ViewPart view) {
+        this.view = view;
+        fMenu = null;
+        setToolTipText("Import raw HTTP packet");
+        setText("Import raw HTTP packet");
+    }
 
-   public ImportPacketAction( ViewPart view) {
-      this.view = view;
-      fMenu = null;
-      setToolTipText("Import raw HTTP packet");
-      setText("Import raw HTTP packet");
-   }
+    public void dispose() {
+        // action is reused, can be called several times.
+        if (fMenu != null) {
+            fMenu.dispose();
+            fMenu = null;
+        }
+    }
 
+    @Override
+    public void run() {
 
-   public void dispose(){
-      // action is reused, can be called several times.
-      if (fMenu != null) {
-         fMenu.dispose();
-         fMenu = null;
-      }
-   }
+        try {
 
-   public void run(){
+            final ImportDialog dialog = new ImportDialog(view);
+            final MouseAdapter okListener = new MouseAdapter() {
 
-      try {
+                @Override
+                public void mouseUp(final MouseEvent e) {
+                    Item item = new Item();
+                    try {
+                        item = Translator.httppacketToItem(dialog.getText());
 
-         final ImportDialog dialog = new ImportDialog(view);
-         MouseAdapter okListener = new MouseAdapter() {
+                    } catch (final Exception exc) {
+                        exc.printStackTrace();
+                    }
 
-            public void mouseUp( MouseEvent e){
-               Item item = new Item();
-               try {
-                  item = Translator.httppacketToItem(dialog.getText());
+                    final FolderView folderView = ((HdViewPart) view).getFolderView();
+                    final ItemModel iModel = new ItemModel(folderView.getModel(), item);
+                    final HdViewPart hdViewPart = (HdViewPart) view;
+                    hdViewPart.getFolderView().buildTab(iModel);
+                }
+            };
+            dialog.setOkListener(okListener);
+            dialog.open();
 
-               } catch (Exception exc) {
-                  exc.printStackTrace();
-               }
-
-               FolderView folderView = ((HdViewPart) view).getFolderView();
-               ItemModel iModel = new ItemModel(folderView.getModel(), item);
-               HdViewPart hdViewPart = (HdViewPart) view;
-               hdViewPart.getFolderView().buildTab(iModel);
-            }
-         };
-         dialog.setOkListener(okListener);
-         dialog.open();
-
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+    }
 }

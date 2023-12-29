@@ -19,26 +19,24 @@ import org.eclipse.jface.action.Action;
 import org.roussev.http4e.httpclient.core.client.view.FolderView;
 import org.roussev.http4e.httpclient.ui.HdViewPart;
 
-
-/** 
+/**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class AddTabAction extends Action {
 
-   private HdViewPart view;
+    private final HdViewPart view;
 
-   public AddTabAction( HdViewPart view) {
-      super();
-      this.view = view;
-      setText("Open a new tab");
-      setDescription("Open a new tab");
-      setToolTipText("Open a new tab");
-   }
+    public AddTabAction(final HdViewPart view) {
+        this.view = view;
+        setText("Open a new tab");
+        setDescription("Open a new tab");
+        setToolTipText("Open a new tab");
+    }
 
-   public void run(){
-      FolderView folderView = view.getFolderView();
-      folderView.addTab();
-   }
-
+    @Override
+    public void run() {
+        final FolderView folderView = view.getFolderView();
+        folderView.addTab();
+    }
 
 }

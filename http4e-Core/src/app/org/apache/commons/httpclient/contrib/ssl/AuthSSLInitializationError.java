@@ -36,11 +36,11 @@ package org.apache.commons.httpclient.contrib.ssl;
  * 
  * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
  * 
- * <p>
- * DISCLAIMER: HttpClient developers DO NOT actively support this component.
- * The component is provided as a reference material, which may be inappropriate
- * for use without additional customization.
- * </p>
+ *         <p>
+ *         DISCLAIMER: HttpClient developers DO NOT actively support this component. The component
+ *         is provided as a reference material, which may be inappropriate for use without
+ *         additional customization.
+ *         </p>
  */
 
 public class AuthSSLInitializationError extends Error {
@@ -49,7 +49,6 @@ public class AuthSSLInitializationError extends Error {
      * Creates a new AuthSSLInitializationError.
      */
     public AuthSSLInitializationError() {
-        super();
     }
 
     /**
@@ -57,7 +56,7 @@ public class AuthSSLInitializationError extends Error {
      *
      * @param message error message
      */
-    public AuthSSLInitializationError(String message) {
+    public AuthSSLInitializationError(final String message) {
         super(message);
     }
 }

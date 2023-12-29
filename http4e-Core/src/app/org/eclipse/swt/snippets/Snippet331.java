@@ -18,45 +18,53 @@ package org.eclipse.swt.snippets;
  * 
  * @since 3.2
  */
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.custom.*;
-import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.Bullet;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.GlyphMetrics;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class Snippet331 {
 
-   static String text = 
-      "The first paragraph has an indentation of fifty pixels and zero indentation for wrapped lines. If this paragraph wraps to several lines you will see the indentation only on the first line.\n\n" +
-      "The second paragraph has an indentation of fifty pixels for all lines in the paragraph. Visually this paragraph has a fifty pixel left margin.\n\n" +
-      "The third paragraph has wrap indentation of fifty pixels and zero indentation for the first line. If this paragraph wraps to several lines you should see the indentation for all the lines but the first.\n\n" +
-      "This paragraph starts with a bullet and does not have any kind of indentation. If this paragraph wraps to several lines, the wrapped lines will start on the lead edge of the editor.\n\n" +
-      "This paragraph starts with a bullet and has wrap indentation with the same width as the bullet. If this paragraph wraps to several lines, all the wrapped lines will line up with the first one.";
-   
-   public static void main(String [] args) {
-      Display display = new Display();
-      Shell shell = new Shell(display);
-      shell.setLayout(new FillLayout());
-      StyledText styledText = new StyledText(shell, SWT.WRAP | SWT.BORDER);
-      styledText.setText(text);
-      styledText.setLineIndent(0, 1, 50);
-      styledText.setLineIndent(2, 1, 50);
-      styledText.setLineIndent(2, 1, 50);
-      styledText.setLineIndent(4, 1, 50);
-      
-      StyleRange style = new StyleRange();
-      style.metrics = new GlyphMetrics(0, 0, 50);
-      Bullet bullet = new Bullet (style);
-      styledText.setLineBullet(6, 1, bullet);
-      styledText.setLineBullet(8, 1, bullet);
-      styledText.setLineIndent(8, 1, 50);
+    static String text = """
+            The first paragraph has an indentation of fifty pixels and zero indentation for wrapped lines. If this paragraph wraps to several lines you will see the indentation only on the first line.
 
-      shell.setSize(350, 550);
-      shell.open();
-      while (!shell.isDisposed()) {
-         if (!display.readAndDispatch())
-            display.sleep();
-      }
-      display.dispose();
-   }
+            The second paragraph has an indentation of fifty pixels for all lines in the paragraph. Visually this paragraph has a fifty pixel left margin.
+
+            The third paragraph has wrap indentation of fifty pixels and zero indentation for the first line. If this paragraph wraps to several lines you should see the indentation for all the lines but the first.
+
+            This paragraph starts with a bullet and does not have any kind of indentation. If this paragraph wraps to several lines, the wrapped lines will start on the lead edge of the editor.
+
+            This paragraph starts with a bullet and has wrap indentation with the same width as the bullet. If this paragraph wraps to several lines, all the wrapped lines will line up with the first one.""";
+
+    public static void main(final String[] args) {
+        final Display display = new Display();
+        final Shell shell = new Shell(display);
+        shell.setLayout(new FillLayout());
+        final StyledText styledText = new StyledText(shell, SWT.WRAP | SWT.BORDER);
+        styledText.setText(text);
+        styledText.setLineIndent(0, 1, 50);
+        styledText.setLineIndent(2, 1, 50);
+        styledText.setLineIndent(2, 1, 50);
+        styledText.setLineIndent(4, 1, 50);
+
+        final StyleRange style = new StyleRange();
+        style.metrics = new GlyphMetrics(0, 0, 50);
+        final Bullet bullet = new Bullet(style);
+        styledText.setLineBullet(6, 1, bullet);
+        styledText.setLineBullet(8, 1, bullet);
+        styledText.setLineIndent(8, 1, 50);
+
+        shell.setSize(350, 550);
+        shell.open();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        display.dispose();
+    }
 }

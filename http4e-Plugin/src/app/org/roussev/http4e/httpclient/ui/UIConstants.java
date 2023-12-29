@@ -15,10 +15,10 @@
  */
 package org.roussev.http4e.httpclient.ui;
 
-/** 
+/**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public interface UIConstants {
 
-   String PLUGIN_ID = "org.roussev.http4e.ui";
+    String PLUGIN_ID = "org.roussev.http4e.ui";
 }

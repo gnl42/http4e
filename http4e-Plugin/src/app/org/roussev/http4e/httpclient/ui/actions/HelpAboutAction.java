@@ -25,22 +25,22 @@ import org.eclipse.ui.part.ViewPart;
  */
 public class HelpAboutAction extends Action {
 
-   private ViewPart view;
+    private final ViewPart view;
 
-   public HelpAboutAction( ViewPart view, String title) {
-      super();
-      this.view = view;
-      setText(title);
-      // setImageDescriptor(ImageDescriptor.createFromImage(ResourceUtils.getImage(CoreImages.HELP)));
-      // setDisabledImageDescriptor(PDEPluginImages.DESC_PLUGIN_OBJ);
+    public HelpAboutAction(final ViewPart view, final String title) {
+        this.view = view;
+        setText(title);
+        // setImageDescriptor(ImageDescriptor.createFromImage(ResourceUtils.getImage(CoreImages.HELP)));
+        // setDisabledImageDescriptor(PDEPluginImages.DESC_PLUGIN_OBJ);
 
-      setDescription(title);
-      setToolTipText(title);
-   }
+        setDescription(title);
+        setToolTipText(title);
+    }
 
-   public void run(){
-      AboutDialog dialog = new AboutDialog(view.getViewSite().getShell());
-      dialog.open();
-   }
+    @Override
+    public void run() {
+        final AboutDialog dialog = new AboutDialog(view.getViewSite().getShell());
+        dialog.open();
+    }
 
 }

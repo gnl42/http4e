@@ -22,7 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.ConnectException;
 import java.security.GeneralSecurityException;
 
 import org.apache.commons.codec.binary.Base64;
@@ -52,366 +51,353 @@ import com.gargoylesoftware.htmlunit.ssl.InsecureSSLProtocolSocketFactory;
 @SuppressWarnings("deprecation")
 public class HttpPerformer {
 
-   // private final static int LIMIT_BYTES = 100 * 1024;
+    // private final static int LIMIT_BYTES = 100 * 1024;
 
-   private Integer             maxSize;
-   private final StringBuilder requestBuff = new StringBuilder();
-   private final StringBuilder respBuff    = new StringBuilder();
-   private HttpMethod          httpmethod;
-   private ProxyItem           proxy;
-   private AuthItem            authItem;
-   private String              reqPayloadFile;
-   private String              respPayloadFile;
+    private Integer maxSize;
+    private final StringBuilder requestBuff = new StringBuilder();
+    private final StringBuilder respBuff = new StringBuilder();
+    private final HttpMethod httpmethod;
+    private final ProxyItem proxy;
+    private final AuthItem authItem;
+    private final String reqPayloadFile;
+    private final String respPayloadFile;
 
-   private ApacheHttpListener  httpListener;
+    private ApacheHttpListener httpListener;
 
-   private class MyApacheListener implements ApacheHttpListener {
+    private class MyApacheListener implements ApacheHttpListener {
 
-      int              currentReqSize = 0;
-      Boolean          reachedLimit   = null;
-      // String packetFilePath;
-      FileOutputStream packetFile     = null;
+        int currentReqSize = 0;
+        Boolean reachedLimit = null;
+        // String packetFilePath;
+        FileOutputStream packetFile = null;
 
+        // String getPacketFilePath(){
+        // if (packetFilePath == null) {
+        // packetFilePath = generateFilePath("req");
+        // }
+        // return packetFilePath;
+        // }
 
-      // String getPacketFilePath(){
-      // if (packetFilePath == null) {
-      // packetFilePath = generateFilePath("req");
-      // }
-      // return packetFilePath;
-      // }
+        public FileOutputStream getOutputStream() {
+            if (packetFile == null) {
+                try {
+                    final File dir = new File(CoreContext.PRODUCT_USER_DIR);
+                    dir.mkdirs();
+                    packetFile = new FileOutputStream(new File(reqPayloadFile));
+                } catch (final FileNotFoundException e) {
+                    ExceptionHandler.handle(e);
+                }
+            }
+            return packetFile;
+        }
 
-      public FileOutputStream getOutputStream(){
-         if (packetFile == null) {
+        @Override
+        public void write(final byte[] data) {
+            currentReqSize = currentReqSize + data.length;
             try {
-               File dir = new File(CoreContext.PRODUCT_USER_DIR);
-               dir.mkdirs();
-               packetFile = new FileOutputStream(new File(reqPayloadFile));
-            } catch (FileNotFoundException e) {
-               ExceptionHandler.handle(e);
+                getOutputStream().write(data);
+            } catch (final IOException e1) {
+                ExceptionHandler.handle(e1);
             }
-         }
-         return packetFile;
-      }
 
+            if (isReachedLimit()) {
+                return;
 
-      public void write( byte[] data){
-         currentReqSize = currentReqSize + data.length;
-         try {
-            getOutputStream().write(data);
-         } catch (IOException e1) {
-            ExceptionHandler.handle(e1);
-         }
+            } else if (currentReqSize > getSize()) {
+                int delta = currentReqSize - getSize();
+                delta = delta > getSize() ? getSize() : delta;
+                final byte[] deltaArr = new byte[delta];
+                for (int i = 0; i < delta; i++) {
+                    deltaArr[i] = data[i];
+                }
+                try {
+                    requestBuff.append(new String(deltaArr, "UTF8"));
+                } catch (final UnsupportedEncodingException e) {
+                    throw new CoreException(CoreException.UNSUPPORTED_ENCODING, e);
+                }
 
-         if (isReachedLimit()) {
-            return;
-
-         } else if (currentReqSize > getSize()) {
-            int delta = currentReqSize - getSize();
-            delta = delta > getSize() ? getSize() : delta;
-            byte[] deltaArr = new byte[delta];
-            for (int i = 0; i < delta; i++) {
-               deltaArr[i] = data[i];
+                reachedLimit = true;
+                final String cmd = SwtUtils.isMac() ? "  [CMD + O] to open\n\n" : "";
+                requestBuff.append(
+                        "...........................................................................\n\n#############################################\n\n  Payload too big. Raw packet saved at \n\n You can increase the view size at About/Preferences drop menu \n\n file:///"
+                                + reqPayloadFile + "\n\n" + cmd + "#############################################\n\n");
+                return;
             }
             try {
-               requestBuff.append(new String(deltaArr, "UTF8"));
-            } catch (UnsupportedEncodingException e) {
-               throw new CoreException(CoreException.UNSUPPORTED_ENCODING, e);
+                requestBuff.append(new String(data, "UTF8"));
+            } catch (final UnsupportedEncodingException e) {
+                throw new CoreException(CoreException.UNSUPPORTED_ENCODING, e);
+            }
+        }
+
+        @Override
+        public void close() {
+            try {
+                getOutputStream().close();
+            } catch (final IOException e) {
+                ExceptionHandler.handle(e);
             }
 
-            reachedLimit = true;
-            String cmd = SwtUtils.isMac() ? "  [CMD + O] to open\n\n" : "";
-            requestBuff.append("...........................................................................\n\n#############################################\n\n  Payload too big. Raw packet saved at \n\n You can increase the view size at About/Preferences drop menu \n\n file:///" + reqPayloadFile
-                  + "\n\n" + cmd + "#############################################\n\n");
-            return;
-         }
-         try {
-            requestBuff.append(new String(data, "UTF8"));
-         } catch (UnsupportedEncodingException e) {
-            throw new CoreException(CoreException.UNSUPPORTED_ENCODING, e);
-         }
-      }
+            // if (!isReachedLimit()) {
+            // File fileToClean = new File(reqPayloadFile);
+            // fileToClean.delete();
+            // }
+        }
 
+        private boolean isReachedLimit() {
+            return reachedLimit != null && reachedLimit;
+        }
+    }
 
-      public void close(){
-         try {
-            getOutputStream().close();
-         } catch (IOException e) {
-            ExceptionHandler.handle(e);
-         }
+    public HttpPerformer(final HttpMethod httpmethod, final ProxyItem proxy, final AuthItem authItem, final String[] payloadFiles) {
+        this.httpmethod = httpmethod;
+        this.proxy = proxy;
+        this.authItem = authItem;
+        httpmethod.setApacheHttpListener(getHttpListener());
+        reqPayloadFile = payloadFiles[0];
+        respPayloadFile = payloadFiles[1];
+    }
 
-         // if (!isReachedLimit()) {
-         // File fileToClean = new File(reqPayloadFile);
-         // fileToClean.delete();
-         // }
-      }
+    public void execute() throws IOException {
 
+        final HostConfiguration hostConf = httpmethod.getHostConfiguration();
+        final String host = hostConf.getHost();
+        final int port = hostConf.getPort();
+        final HttpClient client = new HttpClient();
 
-      private boolean isReachedLimit(){
-         return (reachedLimit != null && reachedLimit);
-      }
-   }
+        doSSL(client, hostConf, host, 443);
 
+        doAuthentication(client, host, port);
 
-   public HttpPerformer( HttpMethod httpmethod, ProxyItem proxy, AuthItem authItem, String[] payloadFiles) {
-      this.httpmethod = httpmethod;
-      this.proxy = proxy;
-      this.authItem = authItem;
-      httpmethod.setApacheHttpListener(getHttpListener());
-      this.reqPayloadFile = payloadFiles[0];
-      this.respPayloadFile = payloadFiles[1];
-   }
-
-
-   public void execute() throws IOException{
-
-      HostConfiguration hostConf = httpmethod.getHostConfiguration();
-      String host = hostConf.getHost();
-      int port = hostConf.getPort();
-      HttpClient client = new HttpClient();
-
-      doSSL(client, hostConf, host, 443);
-
-      doAuthentication(client, host, port);
-
-      try {
-         // set proxy, if one is configured
-         if (proxy.isProxy()) {
-            client.getHostConfiguration().setProxy(proxy.getHost(), proxy.getPort());
-         }
-
-         // client.getHttpConnectionManager().getParams().setConnectionTimeout(3000);
-         httpmethod.getParams().setBooleanParameter(HttpMethodParams.USE_EXPECT_CONTINUE, false);
-
-         // Execute the POST method
-         int statusCode = client.executeMethod(httpmethod);
-         respBuff.append(httpmethod.getStatusLine().toString());
-         respBuff.append("\r\n");
-
-         if (statusCode != -1) {
-            Header[] h = httpmethod.getResponseHeaders();
-            for (int i = 0; i < h.length; i++) {
-               respBuff.append(h[i].getName() + CoreConstants._COL + CoreConstants._SPACE + h[i].getValue());
-               respBuff.append("\r\n");
+        try {
+            // set proxy, if one is configured
+            if (proxy.isProxy()) {
+                client.getHostConfiguration().setProxy(proxy.getHost(), proxy.getPort());
             }
-         }
-         respBuff.append("\r\n");
 
-         if (!"HEAD".equals(httpmethod.getName())) {
-            _writeResponse(respPayloadFile);
-            // InputStreamReader inR = new
-            // InputStreamReader(httpmethod.getResponseBodyAsStream(), "UTF8");
-            // BufferedReader buf = new BufferedReader(inR);
-            // String line;
-            // int counter = 0;
-            // while ((line = buf.readLine()) != null) {
-            // counter = counter + line.length();
-            // if (counter > LIMIT_BYTES) {
-            // respBuff.append("........................\n......\n###########################\n  Payload too big. Raw packet saved at\n  "
-            // + "getPacketFilePath()" + "\n###########################\n\n");
-            // break;
-            // } else {
-            // respBuff.append(line);
-            // respBuff.append("\r\n");
+            // client.getHttpConnectionManager().getParams().setConnectionTimeout(3000);
+            httpmethod.getParams().setBooleanParameter(HttpMethodParams.USE_EXPECT_CONTINUE, false);
+
+            // Execute the POST method
+            final int statusCode = client.executeMethod(httpmethod);
+            respBuff.append(httpmethod.getStatusLine().toString());
+            respBuff.append("\r\n");
+
+            if (statusCode != -1) {
+                final Header[] h = httpmethod.getResponseHeaders();
+                for (final Header element : h) {
+                    respBuff.append(element.getName() + CoreConstants._COL + CoreConstants._SPACE + element.getValue());
+                    respBuff.append("\r\n");
+                }
+            }
+            respBuff.append("\r\n");
+
+            if (!"HEAD".equals(httpmethod.getName())) {
+                _writeResponse(respPayloadFile);
+                // InputStreamReader inR = new
+                // InputStreamReader(httpmethod.getResponseBodyAsStream(), "UTF8");
+                // BufferedReader buf = new BufferedReader(inR);
+                // String line;
+                // int counter = 0;
+                // while ((line = buf.readLine()) != null) {
+                // counter = counter + line.length();
+                // if (counter > LIMIT_BYTES) {
+                // respBuff.append("........................\n......\n###########################\n Payload too big.
+                // Raw packet saved at\n "
+                // + "getPacketFilePath()" + "\n###########################\n\n");
+                // break;
+                // } else {
+                // respBuff.append(line);
+                // respBuff.append("\r\n");
+                // }
+                // }
+            }
+
+        } catch (final CircularRedirectException e) {
+            // redirecting .. TODO weird error. keep on eye on it.
+            throw new CoreException(CoreException.GENERAL, e);
+
+        } catch (final IllegalStateException | IOException e) { // Stream closed, socket closed
+            throw e;
+
+        } catch (final Exception e) {
+            throw CoreException.getInstance(CoreException.GENERAL, e);
+
+        } finally {
+            httpmethod.releaseConnection();
+            getHttpListener().close();
+        }
+    }
+
+    private void _writeResponse(final String filePath) throws UnsupportedEncodingException, IOException {
+
+        final BufferedInputStream bis = new BufferedInputStream(httpmethod.getResponseBodyAsStream());
+        // String filePath = generateFilePath("resp");
+        final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+
+        // System.out.println("respBuff.toString() '" + respBuff.toString() +
+        // "'");
+        bos.write(respBuff.toString().getBytes());
+        final int readSoFar = respBuff.length();
+        final int maxSize = getSize() > readSoFar ? getSize() - readSoFar : 0;
+
+        int bytesRead = 0;
+        byte[] buffer = new byte[1024];
+        int counter = 0;
+        Boolean limitReached = null;
+
+        try {
+
+            while ((bytesRead = bis.read(buffer)) != -1) {
+                bos.write(buffer);
+                counter = counter + bytesRead;
+                if (counter > maxSize) {
+                    if (limitReached == null) {
+                        final String cmd = SwtUtils.isMac() ? "  [CMD + O] to open\n\n" : "";
+                        respBuff.append(
+                                "...........................................................................\n\n#############################################\n\n  Payload too big. Raw packet saved at \n\n  file:///"
+                                        + filePath + "\n\n" + cmd
+                                        + "  Increase the view size at (i)/Preferences drop menu \n\n#############################################\n\n");
+                        // respBuff.append("...........................................................................\n\n#############################################\n\n
+                        // Payload too big. Raw packet saved \n\n @"
+                        // + filePath + "\n\n [" + ctrlName +
+                        // " + O] to open\n\n#############################################\n\n");
+                    }
+                    limitReached = true;
+
+                } else {
+                    final String chunk = new String(buffer, 0, bytesRead);
+                    respBuff.append(chunk);
+                    // respBuff.append("\r\n");
+                }
+                buffer = new byte[1024];
+            }
+
+            if (bis != null) {
+                bis.close();
+            }
+            if (bos != null) {
+                bos.flush();
+                bos.close();
+            }
+
+            // try {
+            // if (limitReached == null || !limitReached) {
+            // File f = new File(filePath);
+            // if (f.exists()) {
+            // f.delete();
             // }
             // }
-         }
+            // } catch (Exception e) {
+            // ExceptionHandler.handle(e);
+            // }
+        } catch (final Exception e) {
+            // e.printStackTrace();
 
-      } catch (CircularRedirectException e) {
-         // redirecting .. TODO weird error. keep on eye on it.
-         throw new CoreException(CoreException.GENERAL, e);
-
-      } catch (ConnectException e) {
-         throw e;
-
-      } catch (IllegalStateException e) { // Connection is not open, Method has
-         // been aborted
-         throw e;
-
-      } catch (IOException e) { // Stream closed, socket closed
-         throw e;
-
-      } catch (Exception e) {
-         throw CoreException.getInstance(CoreException.GENERAL, e);
-
-      } finally {
-         httpmethod.releaseConnection();
-         getHttpListener().close();
-      }
-   }
-
-
-   private void _writeResponse( String filePath) throws UnsupportedEncodingException, IOException{
-
-      BufferedInputStream bis = new BufferedInputStream(httpmethod.getResponseBodyAsStream());
-      // String filePath = generateFilePath("resp");
-      BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-
-      // System.out.println("respBuff.toString() '" + respBuff.toString() +
-      // "'");
-      bos.write(respBuff.toString().getBytes());
-      int readSoFar = respBuff.length();
-      int maxSize = getSize() > readSoFar ? getSize() - readSoFar : 0;
-
-      int bytesRead = 0;
-      byte[] buffer = new byte[1024];
-      int counter = 0;
-      Boolean limitReached = null;
-
-      try {
-
-         while ((bytesRead = bis.read(buffer)) != -1) {
-            bos.write(buffer);
-            counter = counter + bytesRead;
-            if (counter > maxSize) {
-               if (limitReached == null) {
-                  String cmd = SwtUtils.isMac() ? "  [CMD + O] to open\n\n" : "";
-                  respBuff.append("...........................................................................\n\n#############################################\n\n  Payload too big. Raw packet saved at \n\n  file:///" + filePath + "\n\n" + cmd
-                        + "  Increase the view size at (i)/Preferences drop menu \n\n#############################################\n\n");
-                  // respBuff.append("...........................................................................\n\n#############################################\n\n  Payload too big. Raw packet saved \n\n @"
-                  // + filePath + "\n\n [" + ctrlName +
-                  // " + O] to open\n\n#############################################\n\n");
-               }
-               limitReached = true;
-
-            } else {
-               String chunk = new String(buffer, 0, bytesRead);
-               respBuff.append(chunk);
-               // respBuff.append("\r\n");
-            }
-            buffer = new byte[1024];
-         }
-
-         if (bis != null) {
-            bis.close();
-         }
-         if (bos != null) {
-            bos.flush();
-            bos.close();
-         }
-
-         // try {
-         // if (limitReached == null || !limitReached) {
-         // File f = new File(filePath);
-         // if (f.exists()) {
-         // f.delete();
-         // }
-         // }
-         // } catch (Exception e) {
-         // ExceptionHandler.handle(e);
-         // }
-      } catch (Exception e) {
-         // e.printStackTrace();
-    	  
-    	  // 304, etc empty body fails with IO exception, Can't connect to server
-         ExceptionHandler.handle(e);
-      }
-
-   }
-
-
-   private void doSSL( HttpClient client, HostConfiguration hostConf, String host, int port){
-      if (hostConf.getProtocol().isSecure()) {
-
-         // System.setProperty("javax.net.ssl.trustStore", sslKeystore);
-         // Protocol sslPprotocol = new Protocol("https", new
-         // org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory(),
-         // 443);
-         // client.getHostConfiguration().setHost(host, 443, sslPprotocol);
-
-         try {
-            ProtocolSocketFactory factory = new InsecureSSLProtocolSocketFactory();
-            Protocol https = new Protocol("https", factory, port);
-            Protocol.registerProtocol("https", https);
-            client.getHostConfiguration().setHost(host, port, https);
-
-         } catch (GeneralSecurityException e) {
-            throw new CoreException(CoreException.SSL, e);
-         }
-      }
-   }
-
-
-   private void doAuthentication( HttpClient client, String host_, Integer port_){
-      if (authItem == null) {
-         return;
-      }
-      String user = authItem.getUsername();
-      String pass = authItem.getPass();
-
-      if (BaseUtils.isEmpty(user) || BaseUtils.isEmpty(pass)) {
-         return;
-      }
-
-      if (authItem.isBasic()) {
-         try {
-            byte[] base64Str = Base64.encodeBase64((user + ":" + pass).getBytes("UTF8"));
-            httpmethod.setRequestHeader("Authorization", "Basic " + new String(base64Str, "UTF8"));
-         } catch (UnsupportedEncodingException e) {
+            // 304, etc empty body fails with IO exception, Can't connect to server
             ExceptionHandler.handle(e);
-         }
+        }
 
-      } else if (authItem.isDigest()) {
-         try {
-            String host = host_;
-            Integer port = null;
+    }
+
+    private void doSSL(final HttpClient client, final HostConfiguration hostConf, final String host, final int port) {
+        if (hostConf.getProtocol().isSecure()) {
+
+            // System.setProperty("javax.net.ssl.trustStore", sslKeystore);
+            // Protocol sslPprotocol = new Protocol("https", new
+            // org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory(),
+            // 443);
+            // client.getHostConfiguration().setHost(host, 443, sslPprotocol);
+
             try {
-               port = !BaseUtils.isEmpty(authItem.getPort()) ? Integer.valueOf(authItem.getPort()) : port_;
-            } catch (NumberFormatException ignore) {
+                final ProtocolSocketFactory factory = new InsecureSSLProtocolSocketFactory();
+                final Protocol https = new Protocol("https", factory, port);
+                Protocol.registerProtocol("https", https);
+                client.getHostConfiguration().setHost(host, port, https);
+
+            } catch (final GeneralSecurityException e) {
+                throw new CoreException(CoreException.SSL, e);
             }
-            String realm = !BaseUtils.isEmpty(authItem.getRealm()) ? authItem.getRealm() : AuthScope.ANY_REALM;
+        }
+    }
 
-            Credentials defaultcreds = new UsernamePasswordCredentials(user, pass);
-            client.getState().setCredentials(new AuthScope(host, port, realm), defaultcreds);
-         } catch (Exception e) {
-            ExceptionHandler.handle(e);
-         }
-      }
-   }
+    private void doAuthentication(final HttpClient client, final String host_, final Integer port_) {
+        if (authItem == null) {
+            return;
+        }
+        final String user = authItem.getUsername();
+        final String pass = authItem.getPass();
 
+        if (BaseUtils.isEmpty(user) || BaseUtils.isEmpty(pass)) {
+            return;
+        }
 
-   // private String generateFilePath( String ext){
-   //
-   // String urlPath = ParseUtils.toTitle(httpmethod.getPath());
-   // urlPath = urlPath.replace("/", "-");
-   // if (urlPath.startsWith("-")) {
-   // urlPath = urlPath.substring(1, urlPath.length());
-   // }
-   // SimpleDateFormat formatter = new SimpleDateFormat("MMddHHmmss");
-   // return CoreContext.PRODUCT_USER_DIR + File.separator + (urlPath + "-" +
-   // formatter.format(new Date())) + "." + ext;
-   //
-   // }
+        if (authItem.isBasic()) {
+            try {
+                final byte[] base64Str = Base64.encodeBase64((user + ":" + pass).getBytes("UTF8"));
+                httpmethod.setRequestHeader("Authorization", "Basic " + new String(base64Str, "UTF8"));
+            } catch (final UnsupportedEncodingException e) {
+                ExceptionHandler.handle(e);
+            }
 
-   public ApacheHttpListener getHttpListener(){
-      if (httpListener == null) {
-         httpListener = new MyApacheListener();
-      }
-      return httpListener;
-   }
+        } else if (authItem.isDigest()) {
+            try {
+                final String host = host_;
+                Integer port = null;
+                try {
+                    port = !BaseUtils.isEmpty(authItem.getPort()) ? Integer.valueOf(authItem.getPort()) : port_;
+                } catch (final NumberFormatException ignore) {
+                }
+                final String realm = !BaseUtils.isEmpty(authItem.getRealm()) ? authItem.getRealm() : AuthScope.ANY_REALM;
 
+                final Credentials defaultcreds = new UsernamePasswordCredentials(user, pass);
+                client.getState().setCredentials(new AuthScope(host, port, realm), defaultcreds);
+            } catch (final Exception e) {
+                ExceptionHandler.handle(e);
+            }
+        }
+    }
 
-   public String getResponse(){
-      return respBuff.toString();
-   }
+    // private String generateFilePath( String ext){
+    //
+    // String urlPath = ParseUtils.toTitle(httpmethod.getPath());
+    // urlPath = urlPath.replace("/", "-");
+    // if (urlPath.startsWith("-")) {
+    // urlPath = urlPath.substring(1, urlPath.length());
+    // }
+    // SimpleDateFormat formatter = new SimpleDateFormat("MMddHHmmss");
+    // return CoreContext.PRODUCT_USER_DIR + File.separator + (urlPath + "-" +
+    // formatter.format(new Date())) + "." + ext;
+    //
+    // }
 
+    public ApacheHttpListener getHttpListener() {
+        if (httpListener == null) {
+            httpListener = new MyApacheListener();
+        }
+        return httpListener;
+    }
 
-   public String getRequest(){
-      return requestBuff.toString();
-   }
+    public String getResponse() {
+        return respBuff.toString();
+    }
 
+    public String getRequest() {
+        return requestBuff.toString();
+    }
 
-   private int getSize(){
-      if (maxSize == null) {
-         maxSize = (Integer) CoreContext.getContext().getObject(CoreObjects.RESPONSE_VIEW_SIZE);
-         maxSize = maxSize * 1024;
-         // if(size == null){
-         // size = 10;
-         // }
-         // maxSize =
-      }
+    private int getSize() {
+        if (maxSize == null) {
+            maxSize = (Integer) CoreContext.getContext().getObject(CoreObjects.RESPONSE_VIEW_SIZE);
+            maxSize = maxSize * 1024;
+            // if(size == null){
+            // size = 10;
+            // }
+            // maxSize =
+        }
 
-      return maxSize;
-      // IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-   }
+        return maxSize;
+        // IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+    }
 
 }

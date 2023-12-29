@@ -39,73 +39,76 @@ public class HexUtils {
     /**
      * Converts a byte array to pretty hex formatted string.
      */
-    public static String formattedHex(byte[] b) {
+    public static String formattedHex(final byte[] b) {
         if (b == null) {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < b.length; ++i) {
             if (i % 16 == 0) {
-                sb.append(Integer.toHexString((i & 0xFFFF) | 0x10000).substring(1, 5) + "  ");
+                sb.append(Integer.toHexString(i & 0xFFFF | 0x10000).substring(1, 5) + "  ");
             }
-            sb.append((Integer.toHexString((b[i] & 0xFF) | 0x100).substring(1, 3) + " ").toUpperCase());
+            sb.append((Integer.toHexString(b[i] & 0xFF | 0x100).substring(1, 3) + " ").toUpperCase());
             if (i % 16 == 15 || i == b.length - 1) {
                 int j;
-                for (j = 16 - i % 16; j > 1; --j)
+                for (j = 16 - i % 16; j > 1; --j) {
                     sb.append("   ");
+                }
                 sb.append(" [");
-                int start = (i / 16) * 16;
-                int end = (b.length < i + 1) ? b.length : (i + 1);
-                for (j = start; j < end; ++j)
-                    if (b[j] >= 32 && b[j] <= 126)
+                final int start = i / 16 * 16;
+                final int end = b.length < i + 1 ? b.length : i + 1;
+                for (j = start; j < end; ++j) {
+                    if (b[j] >= 32 && b[j] <= 126) {
                         sb.append((char) b[j]);
-                    else
+                    } else {
                         sb.append(".");
+                    }
+                }
                 sb.append("]\n");
             }
         }
         return sb.toString();
     }
 
-    public static String toHexChars(byte[] data) {
+    public static String toHexChars(final byte[] data) {
         if (data == null) {
             return null;
         }
-        StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder();
         buf.append("hex:[");
-        for (int i = 0; i < data.length; i++) {
-            buf.append(byteToHex(data[i]));
+        for (final byte element : data) {
+            buf.append(byteToHex(element));
             buf.append("(");
-            if (data[i] == 13) {
+            if (element == 13) {
                 buf.append("\\r");
-            } else if (data[i] == 10) {
+            } else if (element == 10) {
                 buf.append("\\n");
             } else {
-                buf.append((char) data[i]);
+                buf.append((char) element);
             }
             buf.append(") ");
         }
         buf.append("]");
-        return (buf.toString());
+        return buf.toString();
     }
 
-    public static String toByteChars(byte[] data) {
+    public static String toByteChars(final byte[] data) {
         if (data == null) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("bytes:[");
-        for (int i = 0; i < data.length; i++) {
-            sb.append(data[i]);
+        for (final byte element : data) {
+            sb.append(element);
             sb.append("(");
-            if (data[i] == 13) {
+            if (element == 13) {
                 sb.append("\\r");
-            } else if (data[i] == 10) {
+            } else if (element == 10) {
                 sb.append("\\n");
             } else {
-                sb.append((char) data[i]);
+                sb.append((char) element);
             }
             sb.append(") ");
         }
@@ -119,15 +122,15 @@ public class HexUtils {
      * @param hexString the string to convert
      * @return the converted byte array
      */
-    public static byte[] hexToBytes(String hexString) {
+    public static byte[] hexToBytes(final String hexString) {
         if (hexString == null) {
             return null;
         }
         // TODO opitmize algorithm
         // new BigInteger(hexString,16).toByteArray() appends an extra byte
 
-        byte[] bts = new byte[hexString.length() / 2];
-        int len = bts.length;
+        final byte[] bts = new byte[hexString.length() / 2];
+        final int len = bts.length;
         for (int i = 0; i < len; i++) {
             bts[i] = (byte) Integer.parseInt(hexString.substring(2 * i, 2 * i + 2), 16);
         }
@@ -141,13 +144,14 @@ public class HexUtils {
      *
      * 0000 7A 78 63 76 62 6E 6D 2C 2E [zxcvbnm,.] ---------HEX end---------
      */
-    public static String prettyHex(byte[] data) {
-        if (data == null)
+    public static String prettyHex(final byte[] data) {
+        if (data == null) {
             return null;
+        }
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         String hexVal = HexUtils.bytesToHex(data);
-        hexVal = (hexVal != null) ? hexVal.toUpperCase() : hexVal;
+        hexVal = hexVal != null ? hexVal.toUpperCase() : hexVal;
         sb.append("\n--------------------------------------------------------HEX start--------\n");
         sb.append("[" + hexVal + "]");
         sb.append("\n\n");
@@ -160,25 +164,28 @@ public class HexUtils {
     /**
      * Prints the byte array into hex format to the provided stream
      */
-    public static void printHex(byte[] b, PrintStream out) {
+    public static void printHex(final byte[] b, final PrintStream out) {
 
         for (int i = 0; i < b.length; ++i) {
             if (i % 16 == 0) {
-                out.print(Integer.toHexString((i & 0xFFFF) | 0x10000).substring(1, 5) + " - ");
+                out.print(Integer.toHexString(i & 0xFFFF | 0x10000).substring(1, 5) + " - ");
             }
-            out.print(Integer.toHexString((b[i] & 0xFF) | 0x100).substring(1, 3) + " ");
+            out.print(Integer.toHexString(b[i] & 0xFF | 0x100).substring(1, 3) + " ");
             if (i % 16 == 15 || i == b.length - 1) {
                 int j;
-                for (j = 16 - i % 16; j > 1; --j)
+                for (j = 16 - i % 16; j > 1; --j) {
                     out.print("   ");
+                }
                 out.print(" - ");
-                int start = (i / 16) * 16;
-                int end = (b.length < i + 1) ? b.length : (i + 1);
-                for (j = start; j < end; ++j)
-                    if (b[j] >= 32 && b[j] <= 126)
+                final int start = i / 16 * 16;
+                final int end = b.length < i + 1 ? b.length : i + 1;
+                for (j = start; j < end; ++j) {
+                    if (b[j] >= 32 && b[j] <= 126) {
                         out.print((char) b[j]);
-                    else
+                    } else {
                         out.print(".");
+                    }
+                }
                 out.println();
             }
         }
@@ -191,9 +198,9 @@ public class HexUtils {
      * @param data the byte to convert
      * @return String the converted byte
      */
-    public static String byteToHex(byte data) {
-        StringBuilder buf = new StringBuilder();
-        buf.append(toHexChar((data >>> 4) & 0x0F));
+    public static String byteToHex(final byte data) {
+        final StringBuilder buf = new StringBuilder();
+        buf.append(toHexChar(data >>> 4 & 0x0F));
         buf.append(toHexChar(data & 0x0F));
         return buf.toString();
     }
@@ -204,45 +211,45 @@ public class HexUtils {
      * @param data the byte[] to convert
      * @return String the converted byte[]
      */
-    public static String bytesToHex(byte[] data) {
-        StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < data.length; i++) {
-            buf.append(byteToHex(data[i]));
+    public static String bytesToHex(final byte[] data) {
+        final StringBuilder buf = new StringBuilder();
+        for (final byte element : data) {
+            buf.append(byteToHex(element));
         }
-        return (buf.toString());
+        return buf.toString();
     }
 
-    public static String dumpHexChars(byte[] data) {
-        StringBuilder buf = new StringBuilder();
+    public static String dumpHexChars(final byte[] data) {
+        final StringBuilder buf = new StringBuilder();
         buf.append("hex:[");
-        for (int i = 0; i < data.length; i++) {
-            buf.append(byteToHex(data[i]));
+        for (final byte element : data) {
+            buf.append(byteToHex(element));
             buf.append("(");
-            if (data[i] == 13) {
+            if (element == 13) {
                 buf.append("\\r");
-            } else if (data[i] == 10) {
+            } else if (element == 10) {
                 buf.append("\\n");
             } else {
-                buf.append((char) data[i]);
+                buf.append((char) element);
             }
             buf.append(") ");
         }
         buf.append("]");
-        return (buf.toString());
+        return buf.toString();
     }
 
-    public static String dumpByteChars(byte[] data) {
-        StringBuilder sb = new StringBuilder();
+    public static String dumpByteChars(final byte[] data) {
+        final StringBuilder sb = new StringBuilder();
         sb.append("bytes:[");
-        for (int i = 0; i < data.length; i++) {
-            sb.append(data[i]);
+        for (final byte element : data) {
+            sb.append(element);
             sb.append("(");
-            if (data[i] == 13) {
+            if (element == 13) {
                 sb.append("\\r");
-            } else if (data[i] == 10) {
+            } else if (element == 10) {
                 sb.append("\\n");
             } else {
-                sb.append((char) data[i]);
+                sb.append((char) element);
             }
             sb.append(") ");
         }
@@ -256,19 +263,20 @@ public class HexUtils {
      * @param i the int to convert
      * @return char the converted char
      */
-    public static char toHexChar(int i) {
-        if ((0 <= i) && (i <= 9))
+    public static char toHexChar(final int i) {
+        if (0 <= i && i <= 9) {
             return (char) ('0' + i);
-        else
+        } else {
             return (char) ('a' + (i - 10));
+        }
     }
 
-    public static String printHex(InputStream in, OutputStream out) {
+    public static String printHex(final InputStream in, final OutputStream out) {
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         try {
-            int len = 16;
+            final int len = 16;
             byte[] ch = new byte[len];
             int i = 0;
             while (in.read(ch) > 0) {
@@ -280,22 +288,25 @@ public class HexUtils {
                     }
                     if (!prevRowNull) {
                         if (k % 16 == 0) {
-                            sb.append(Integer.toHexString((i * len & 0xFFFF) | 0x10000).substring(1, 5) + " - ");
+                            sb.append(Integer.toHexString(i * len & 0xFFFF | 0x10000).substring(1, 5) + " - ");
                         }
-                        sb.append(Integer.toHexString((ch[k] & 0xFF) | 0x100).substring(1, 3) + " ");
+                        sb.append(Integer.toHexString(ch[k] & 0xFF | 0x100).substring(1, 3) + " ");
                         // sb.append("("+prevRowNull+")");
                         if (k % 16 == 15 || k == ch.length - 1) {
                             int j;
-                            for (j = 16 - k % 16; j > 1; --j)
+                            for (j = 16 - k % 16; j > 1; --j) {
                                 sb.append(" ");
+                            }
                             sb.append(" - ");
-                            int start = (k / 16) * 16;
-                            int end = (ch.length < k + 1) ? ch.length : (k + 1);
-                            for (j = start; j < end; ++j)
-                                if (ch[j] >= 32 && ch[j] <= 126)
+                            final int start = k / 16 * 16;
+                            final int end = ch.length < k + 1 ? ch.length : k + 1;
+                            for (j = start; j < end; ++j) {
+                                if (ch[j] >= 32 && ch[j] <= 126) {
                                     sb.append((char) ch[j]);
-                                else
+                                } else {
                                     sb.append(".");
+                                }
+                            }
                             sb.append("\n");
                         }
                     }
@@ -306,7 +317,7 @@ public class HexUtils {
 
             System.out.println(sb.toString());
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
 
@@ -315,9 +326,10 @@ public class HexUtils {
 
     /**
      * Returns the byte array into hex format
+     *
      * @throws IOException
      */
-    public static String toHex(byte[] b) throws IOException {
+    public static String toHex(final byte[] b) throws IOException {
         try (OutputStream os = new ByteArrayOutputStream()) {
             HexDump.dump(b, 0, os, 0);
             return os.toString();

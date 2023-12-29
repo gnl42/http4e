@@ -31,329 +31,317 @@ import javax.crypto.spec.PBEKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- * Cryptography utilities including Encription/Decryption, Computing MAC
- * (message authentication code), Computing MessageDigest, etc.
- * 
+ * Cryptography utilities including Encription/Decryption, Computing MAC (message authentication
+ * code), Computing MessageDigest, etc.
+ *
  * @author Atanas Roussev
  */
 
 public class CryptUtils {
 
-   private CryptUtils() {
-   }
+    private CryptUtils() {
+    }
 
+    public static String encryptAndEncode(final String key, final String openText) {
+        String encrypted = null;
+        String encoded = null;
+        try {
+            encrypted = encrypt(key, openText);
+            encoded = URLEncoder.encode(encrypted, "UTF8");
+            return encoded;
 
-   public static String encryptAndEncode( String key, String openText){
-      String encrypted = null;
-      String encoded = null;
-      try {
-         encrypted = encrypt(key, openText);
-         encoded = URLEncoder.encode(encrypted, "UTF8");
-         return encoded;
+        } catch (final UnsupportedEncodingException e) {
+            // System.err.println("Failed to encode '" + encrypted + "' using
+            // charset '" + CryptConstants.UTF8 + "'");
+        }
+        return null;
+    }
 
-      } catch (UnsupportedEncodingException e) {
-         // System.err.println("Failed to encode '" + encrypted + "' using
-         // charset '" + CryptConstants.UTF8 + "'");
-      }
-      return null;
-   }
+    public static String decryptAndDecode(final String key, final String cipherText) {
+        String decrypted = null;
+        String decoded = null;
+        try {
+            decoded = URLDecoder.decode(cipherText, "UTF8");
+            decrypted = decrypt(key, decoded);
+            return decrypted;
 
+        } catch (final UnsupportedEncodingException e) {
+            // System.err.println("Failed to decode '" + cipherText + "' using
+            // charset '" + CryptConstants.UTF8 + "'");
+        }
+        return null;
+    }
 
-   public static String decryptAndDecode( String key, String cipherText){
-      String decrypted = null;
-      String decoded = null;
-      try {
-         decoded = URLDecoder.decode(cipherText, "UTF8");
-         decrypted = decrypt(key, decoded);
-         return decrypted;
+    public static String encrypt(final String key, final String openText) {
+        try {
+            final EncryptFacade desEncrypter = new EncryptFacade(key);
+            final String desEncrypted = desEncrypter.encrypt(openText);
+            return desEncrypted;
 
-      } catch (UnsupportedEncodingException e) {
-         // System.err.println("Failed to decode '" + cipherText + "' using
-         // charset '" + CryptConstants.UTF8 + "'");
-      }
-      return null;
-   }
+        } catch (final Exception e) {
+            // System.err.println("Failed to encrypt '" + openText + "' with key '"
+            // + key + "'");
+        }
+        return null;
+    }
 
+    public static String decrypt(final String key, final String cipherText) {
+        try {
+            final EncryptFacade desEncrypter = new EncryptFacade(key);
+            final String desDecrypted = desEncrypter.decrypt(cipherText);
+            return desDecrypted;
 
-   public static String encrypt( String key, String openText){
-      try {
-         EncryptFacade desEncrypter = new EncryptFacade(key);
-         String desEncrypted = desEncrypter.encrypt(openText);
-         return desEncrypted;
+        } catch (final Exception e) {
+            // System.err.println("Failed to decrypt '" + cipherText + "' with key
+            // '" + key + "'");
+        }
+        return null;
+    }
 
-      } catch (Exception e) {
-         // System.err.println("Failed to encrypt '" + openText + "' with key '"
-         // + key + "'");
-      }
-      return null;
-   }
+    /**
+     * Generates secret key by provided password phrase
+     */
+    public static Key getSecretKey(final String passPhrase) throws Exception {
+        if (passPhrase == null) {
+            return null;
+        }
+        // KeyGenerator kg = KeyGenerator.getInstance("DES");
+        // kg.init(56); // 56 is the keysize. Fixed for DES
+        // SecretKey key = kg.generateKey();
 
+        final KeySpec keySpec = new PBEKeySpec(passPhrase.toCharArray(), CryptConstants.SALT, CryptConstants.ITERATION_COUNT);
+        final SecretKey key = SecretKeyFactory.getInstance(CryptConstants.SECRET_KEY_ALGORITHM).generateSecret(keySpec);
 
-   public static String decrypt( String key, String cipherText){
-      try {
-         EncryptFacade desEncrypter = new EncryptFacade(key);
-         String desDecrypted = desEncrypter.decrypt(cipherText);
-         return desDecrypted;
+        return key;
+    }
 
-      } catch (Exception e) {
-         // System.err.println("Failed to decrypt '" + cipherText + "' with key
-         // '" + key + "'");
-      }
-      return null;
-   }
+    /**
+     * Computes the message authentication code from the provided stream and password
+     */
+    public static byte[] computeMAC(final InputStream is, final String pass) throws Exception {
+        if (is == null || pass == null) {
+            return null;
+        }
 
+        final Mac mac = Mac.getInstance(CryptConstants.HMAC_ALGORITHM);
+        mac.init(getSecretKey(pass));
 
-   /**
-    * Generates secret key by provided password phrase
-    */
-   public static Key getSecretKey( String passPhrase) throws Exception{
-      if (passPhrase == null) {
-         return null;
-      }
-      // KeyGenerator kg = KeyGenerator.getInstance("DES");
-      // kg.init(56); // 56 is the keysize. Fixed for DES
-      // SecretKey key = kg.generateKey();
+        final byte[] dataBytes = new byte[1024];
+        int nread = is.read(dataBytes);
+        while (nread > 0) {
+            mac.update(dataBytes, 0, nread);
+            nread = is.read(dataBytes);
+        }
+        final byte[] macbytes = mac.doFinal();
 
-      KeySpec keySpec = new PBEKeySpec(passPhrase.toCharArray(), CryptConstants.SALT, CryptConstants.ITERATION_COUNT);
-      SecretKey key = SecretKeyFactory.getInstance(CryptConstants.SECRET_KEY_ALGORITHM).generateSecret(keySpec);
+        return macbytes;
+    }
 
-      return key;
-   }
+    /**
+     * Computes the message authentication code from the byte array and password
+     */
+    public static byte[] computeMAC(final byte[] dataBytes, final String pass) throws Exception {
+        if (dataBytes == null) {
+            throw new RuntimeException("dataBytes are null.");
+        }
+        if (pass == null) {
+            throw new RuntimeException("pass is null .");
+        }
 
+        final Mac mac = Mac.getInstance(CryptConstants.HMAC_ALGORITHM);
+        mac.init(getSecretKey(pass));
 
-   /**
-    * Computes the message authentication code from the provided stream and
-    * password
-    */
-   public static byte[] computeMAC( InputStream is, String pass) throws Exception{
-      if (is == null || pass == null) {
-         return null;
-      }
+        mac.update(dataBytes);
 
-      Mac mac = Mac.getInstance(CryptConstants.HMAC_ALGORITHM);
-      mac.init(getSecretKey(pass));
+        final byte[] macbytes = mac.doFinal();
 
-      byte[] dataBytes = new byte[1024];
-      int nread = is.read(dataBytes);
-      while (nread > 0) {
-         mac.update(dataBytes, 0, nread);
-         nread = is.read(dataBytes);
-      }
-      byte[] macbytes = mac.doFinal();
+        return macbytes;
+    }
 
-      return macbytes;
-   }
+    public static byte[] computeMD(final InputStream is) throws Exception {
+        if (is == null) {
+            throw new RuntimeException("InputStream is null.");
+        }
 
+        final MessageDigest md = MessageDigest.getInstance(CryptConstants.MESSAGE_DIGEST_ALGORITHM);
 
-   /**
-    * Computes the message authentication code from the byte array and password
-    */
-   public static byte[] computeMAC( byte[] dataBytes, String pass) throws Exception{
-      if (dataBytes == null)
-         throw new RuntimeException("dataBytes are null.");
-      if (pass == null)
-         throw new RuntimeException("pass is null .");
+        final byte[] dataBytes = new byte[1024];
+        int nread = is.read(dataBytes);
+        while (nread > 0) {
+            md.update(dataBytes, 0, nread);
+            nread = is.read(dataBytes);
+        }
+        final byte[] digest = md.digest();
 
-      Mac mac = Mac.getInstance(CryptConstants.HMAC_ALGORITHM);
-      mac.init(getSecretKey(pass));
+        return digest;
+    }
 
-      mac.update(dataBytes);
+    public static byte[] computeMD(final byte[] dataBytes) throws Exception {
+        if (dataBytes == null) {
+            throw new RuntimeException("dataBytes is null.");
+        }
 
-      byte[] macbytes = mac.doFinal();
+        final MessageDigest md = MessageDigest.getInstance(CryptConstants.MESSAGE_DIGEST_ALGORITHM);
 
-      return macbytes;
-   }
+        md.update(dataBytes);
+        final byte[] digest = md.digest();
 
+        return digest;
+    }
 
-   public static byte[] computeMD( InputStream is) throws Exception{
-      if (is == null)
-         throw new RuntimeException("InputStream is null.");
+    public static String encode(final byte[] data) {
+        if (data == null) {
+            throw new RuntimeException("data is null.");
+        }
 
-      MessageDigest md = MessageDigest.getInstance(CryptConstants.MESSAGE_DIGEST_ALGORITHM);
+        String res = null;
+        try {
+            res = new String(Base64.encodeBase64(data), "UTF8"); // new sun.misc.BASE64Encoder().encode(data);
+            res = URLEncoder.encode(res, "UTF8");
+        } catch (final Exception e) {
+            // System.err.println("Failed to encode '" + data + "' using charset '"
+            // + CryptConstants.UTF8 + "'");
+            throw new RuntimeException(e);
+        }
+        return res;
+    }
 
-      byte[] dataBytes = new byte[1024];
-      int nread = is.read(dataBytes);
-      while (nread > 0) {
-         md.update(dataBytes, 0, nread);
-         nread = is.read(dataBytes);
-      }
-      byte[] digest = md.digest();
+    public static byte[] decode(String data) {
+        if (data == null) {
+            throw new RuntimeException("data is null.");
+        }
+        byte[] digestBytes;
+        try {
+            data = URLDecoder.decode(data, "UTF8");
+            digestBytes = Base64.decodeBase64(data.getBytes("UTF8"));// new
+            // sun.misc.BASE64Decoder().decodeBuffer(data);
+        } catch (final Exception e) {
+            // System.err.println("Failed to decode '" + data + "' using charset '"
+            // + CryptConstants.UTF8 + "'");
+            throw new RuntimeException(e);
+        }
+        return digestBytes;
+    }
 
-      return digest;
-   }
+    /**
+     * The method generates the public and private keys.
+     *
+     * @throws NoSuchAlgorithmException
+     */
+    public static Key[] generatePrivatePublicKeys(final String algorithm, final int numBits) throws Exception {
 
+        // Get the public/private key pair
+        final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
+        // SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        // keyGen.initialize(numBits, random);
+        keyGen.initialize(numBits);
+        final KeyPair keyPair = keyGen.genKeyPair();
+        return new Key[] { keyPair.getPrivate(), keyPair.getPublic() };
+    }
 
-   public static byte[] computeMD( byte[] dataBytes) throws Exception{
-      if (dataBytes == null)
-         throw new RuntimeException("dataBytes is null.");
+    /**
+     * Method convertes the bytes arrays back to private and public key objects
+     */
+    public static Key[] bytesToPrivatePublicKeys(final String algorithm, final byte[] privKeyBytes, final byte[] pubKeyBytes) throws Exception {
+        PrivateKey privKey = null;
+        PublicKey pubKey = null;
+        final KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
 
-      MessageDigest md = MessageDigest.getInstance(CryptConstants.MESSAGE_DIGEST_ALGORITHM);
+        if (privKeyBytes != null) {
+            final EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privKeyBytes);
+            privKey = keyFactory.generatePrivate(privateKeySpec);
+        }
 
-      md.update(dataBytes);
-      byte[] digest = md.digest();
+        if (pubKeyBytes != null) {
+            final EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKeyBytes);
+            pubKey = keyFactory.generatePublic(publicKeySpec);
+        }
 
-      return digest;
-   }
+        return new Key[] { privKey, pubKey };
+    }
 
+    /**
+     * Use to dump JDK service types.
+     */
+    private static void viewServiceTypes(final PrintStream out) {
+        out.println("|----------Service Types----------|");
+        for (final Iterator<String> it = getServiceTypes().iterator(); it.hasNext();) {
+            final String servType = it.next();
+            out.println("\t---" + servType + "---");
+            out.println(getCryptoImpls(servType));
+        }
+    }
 
-   public static String encode( byte[] data){
-      if (data == null)
-         throw new RuntimeException("data is null.");
+    /**
+     * returns all available services types
+     */
+    private static Set<String> getServiceTypes() {
+        final Set<String> result = new HashSet<>();
+        // All all providers
+        final Provider[] providers = Security.getProviders();
+        for (final Provider provider : providers) {
+            // Get services provided by each provider
+            final Set keys = provider.keySet();
+            for (final Iterator<String> it = keys.iterator(); it.hasNext();) {
+                String key = it.next();
+                key = key.split(" ")[0];
 
-      String res = null;
-      try {
-         res = new String(Base64.encodeBase64(data), "UTF8");  // new sun.misc.BASE64Encoder().encode(data);
-         res = URLEncoder.encode(res, "UTF8");
-      } catch (Exception e) {
-         // System.err.println("Failed to encode '" + data + "' using charset '"
-         // + CryptConstants.UTF8 + "'");
-         throw new RuntimeException(e);
-      }
-      return res;
-   }
-
-
-   public static byte[] decode( String data){
-      if (data == null)
-         throw new RuntimeException("data is null.");
-      byte[] digestBytes;
-      try {
-         data = URLDecoder.decode(data, "UTF8");
-         digestBytes = Base64.decodeBase64(data.getBytes("UTF8"));// new
-                                                            // sun.misc.BASE64Decoder().decodeBuffer(data);
-      } catch (Exception e) {
-         // System.err.println("Failed to decode '" + data + "' using charset '"
-         // + CryptConstants.UTF8 + "'");
-         throw new RuntimeException(e);
-      }
-      return digestBytes;
-   }
-
-
-   /**
-    * The method generates the public and private keys.
-    * 
-    * @throws NoSuchAlgorithmException
-    */
-   public static Key[] generatePrivatePublicKeys( String algorithm, int numBits) throws Exception{
-
-      // Get the public/private key pair
-      KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
-      // SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-      // keyGen.initialize(numBits, random);
-      keyGen.initialize(numBits);
-      KeyPair keyPair = keyGen.genKeyPair();
-      return new Key[] { keyPair.getPrivate(), keyPair.getPublic() };
-   }
-
-
-   /**
-    * Method convertes the bytes arrays back to private and public key objects
-    */
-   public static Key[] bytesToPrivatePublicKeys( String algorithm, byte[] privKeyBytes, byte[] pubKeyBytes) throws Exception{
-      PrivateKey privKey = null;
-      PublicKey pubKey = null;
-      KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-
-      if (privKeyBytes != null) {
-         EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privKeyBytes);
-         privKey = keyFactory.generatePrivate(privateKeySpec);
-      }
-
-      if (pubKeyBytes != null) {
-         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKeyBytes);
-         pubKey = keyFactory.generatePublic(publicKeySpec);
-      }
-
-      return new Key[] { privKey, pubKey };
-   }
-
-
-   /**
-    * Use to dump JDK service types.
-    */
-   private static void viewServiceTypes( PrintStream out){
-      out.println("|----------Service Types----------|");
-      for (Iterator it = getServiceTypes().iterator(); it.hasNext();) {
-         String servType = (String) it.next();
-         out.println("\t---" + servType + "---");
-         out.println(getCryptoImpls(servType));
-      }
-   }
-
-
-   /**
-    * returns all available services types
-    */
-   private static Set getServiceTypes(){
-      Set result = new HashSet();
-      // All all providers
-      Provider[] providers = Security.getProviders();
-      for (int i = 0; i < providers.length; i++) {
-         // Get services provided by each provider
-         Set keys = providers[i].keySet();
-         for (Iterator it = keys.iterator(); it.hasNext();) {
-            String key = (String) it.next();
-            key = key.split(" ")[0];
-
-            if (key.startsWith("Alg.Alias.")) {
-               // Strip the alias
-               key = key.substring(10);
+                if (key.startsWith("Alg.Alias.")) {
+                    // Strip the alias
+                    key = key.substring(10);
+                }
+                final int ix = key.indexOf('.');
+                result.add(key.substring(0, ix));
             }
-            int ix = key.indexOf('.');
-            result.add(key.substring(0, ix));
-         }
-      }
-      return result;
-   }
+        }
+        return result;
+    }
 
+    /**
+     * returns the available implementations for a service type
+     */
+    private static Set<String> getCryptoImpls(final String serviceType) {
+        final Set<String> result = new HashSet<>();
 
-   /**
-    * returns the available implementations for a service type
-    */
-   private static Set getCryptoImpls( String serviceType){
-      Set result = new HashSet();
+        // All all providers
+        final Provider[] providers = Security.getProviders();
+        for (final Provider provider : providers) {
+            // Get services provided by each provider
+            final Set<Object> keys = provider.keySet();
+            for (final Iterator<Object> it = keys.iterator(); it.hasNext();) {
+                String key = (String) it.next();
+                key = key.split(" ")[0];
 
-      // All all providers
-      Provider[] providers = Security.getProviders();
-      for (int i = 0; i < providers.length; i++) {
-         // Get services provided by each provider
-         Set keys = providers[i].keySet();
-         for (Iterator it = keys.iterator(); it.hasNext();) {
-            String key = (String) it.next();
-            key = key.split(" ")[0];
-
-            if (key.startsWith(serviceType + ".")) {
-               result.add(key.substring(serviceType.length() + 1));
-            } else if (key.startsWith("Alg.Alias." + serviceType + ".")) {
-               // This is an alias
-               result.add(key.substring(serviceType.length() + 11));
+                if (key.startsWith(serviceType + ".")) {
+                    result.add(key.substring(serviceType.length() + 1));
+                } else if (key.startsWith("Alg.Alias." + serviceType + ".")) {
+                    // This is an alias
+                    result.add(key.substring(serviceType.length() + 11));
+                }
             }
-         }
-      }
-      return result;
-   }
+        }
+        return result;
+    }
 
+    public static byte[] mergeBytes(final byte[] bytesA, final byte[] bytesB) {
 
-   public static byte[] mergeBytes( byte[] bytesA, byte[] bytesB){
+        final int aLen = bytesA.length;
+        final int bLen = bytesB.length;
 
-      int aLen = bytesA.length;
-      int bLen = bytesB.length;
+        final byte[] merged = new byte[aLen + bLen];
+        for (int i = 0; i < aLen; i++) {
+            merged[i] = bytesA[i];
+        }
+        for (int i = 0; i < bLen; i++) {
+            merged[aLen + i] = bytesB[i];
+        }
+        return merged;
+    }
 
-      byte[] merged = new byte[aLen + bLen];
-      for (int i = 0; i < aLen; i++) {
-         merged[i] = bytesA[i];
-      }
-      for (int i = 0; i < bLen; i++) {
-         merged[aLen + i] = bytesB[i];
-      }
-      return merged;
-   }
-
-   // public static void main( String[] args){
-   // String data = "MS4xLjJ8MTI0MDUxMTAwMjY2MXx8fA==";
-   // byte[] bytes = decode(data);
-   // System.out.println(new String(bytes));
-   // }
+    // public static void main( String[] args){
+    // String data = "MS4xLjJ8MTI0MDUxMTAwMjY2MXx8fA==";
+    // byte[] bytes = decode(data);
+    // System.out.println(new String(bytes));
+    // }
 
 }

@@ -15,7 +15,6 @@
  */
 package org.roussev.http4e.httpclient.core.client.view.assist;
 
-import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 
 /**
@@ -23,14 +22,9 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
  */
 public class HValueScanner extends RuleBasedScanner {
 
-   public HValueScanner() {
+    public HValueScanner() {
 //      IToken string = new Token(new TextAttribute(ResourceUtils.getColor(Styles.PROC_INSTR)));
 
-      setRules(new IRule[] {
-//            new SingleLineRule("\"", "\"", string, '\\'),
-//            new SingleLineRule("'", "'", string, '\\'),
-//            new SingleLineRule("<", "/>", string, '\\'),
-//            new WhitespaceRule(new WhitespaceDetector())
-      });
-   }
+        setRules();
+    }
 }

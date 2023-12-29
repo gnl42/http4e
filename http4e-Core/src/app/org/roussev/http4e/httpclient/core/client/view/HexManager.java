@@ -16,7 +16,6 @@
 package org.roussev.http4e.httpclient.core.client.view;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -26,59 +25,59 @@ import org.roussev.http4e.crypt.HexUtils;
 import org.roussev.http4e.httpclient.core.CoreConstants;
 import org.roussev.http4e.httpclient.core.misc.CoreException;
 
-
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 class HexManager {
 
-   private String       text;
-   private StyledText   swtText;
-   private ToolItem     swtItem;
-   private boolean      isHex = false;
+    private String text;
+    private final StyledText swtText;
+    private final ToolItem swtItem;
+    private boolean isHex = false;
 
-   HexManager(final StyledText swtText, ToolItem swtItem){
-      this.swtText = swtText;
-      this.swtItem = swtItem;
-      this.swtItem.addSelectionListener(new SelectionAdapter() {
-         public void widgetSelected( SelectionEvent e){
-            if(!isHex){
-               asHex();
-               isHex = true;
-            } else {
-               asString();
-               isHex = false;
+    HexManager(final StyledText swtText, final ToolItem swtItem) {
+        this.swtText = swtText;
+        this.swtItem = swtItem;
+        this.swtItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                if (!isHex) {
+                    asHex();
+                    isHex = true;
+                } else {
+                    asString();
+                    isHex = false;
+                }
             }
-         }
-      });
-   }
+        });
+    }
 
-   public void rebind(){
-      isHex = false;
-      swtItem.setSelection(false);
-      this.text = swtText.getText();
-   }
+    public void rebind() {
+        isHex = false;
+        swtItem.setSelection(false);
+        text = swtText.getText();
+    }
 
-   private void asHex(){
-      this.text = swtText.getText();
-      try {
-         swtText.setText( HexUtils.toHex(text.getBytes(CoreConstants.UTF8)));
-      } catch (IOException e) {
-         throw CoreException.getInstance(CoreException.UNSUPPORTED_ENCODING, e);
-      }
-   }
+    private void asHex() {
+        text = swtText.getText();
+        try {
+            swtText.setText(HexUtils.toHex(text.getBytes(CoreConstants.UTF8)));
+        } catch (final IOException e) {
+            throw CoreException.getInstance(CoreException.UNSUPPORTED_ENCODING, e);
+        }
+    }
 
-   private void asString(){
-      swtText.setText(text);
-   }
+    private void asString() {
+        swtText.setText(text);
+    }
 
-   public void setText(String txt){
-      swtText.setText(txt);
-      rebind();
-   }
+    public void setText(final String txt) {
+        swtText.setText(txt);
+        rebind();
+    }
 
-   public String getText(){
-      return swtText.getText();
-   }
+    public String getText() {
+        return swtText.getText();
+    }
 
 }

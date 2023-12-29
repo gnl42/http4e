@@ -20,35 +20,36 @@ package org.roussev.http4e.httpclient.core.client.view;
  */
 class ItemState {
 
-   public final static int POST_NO_UPDATE = 0;
-   public final static int POST_ENABLED   = 1;
-   public final static int POST_DISABLED  = 2;
+    public final static int POST_NO_UPDATE = 0;
+    public final static int POST_ENABLED = 1;
+    public final static int POST_DISABLED = 2;
 
-   public final static int HTTP_STARTED  = 3;
-   public final static int HTTP_STOPPED  = 4;
-   public final static int HTTP_ABORTED  = 5;
+    public final static int HTTP_STARTED = 3;
+    public final static int HTTP_STOPPED = 4;
+    public final static int HTTP_ABORTED = 5;
 
-   private int             state          = POST_NO_UPDATE;
-   private boolean         xwwwEnabled    = true;
+    private int state = POST_NO_UPDATE;
+    private boolean xwwwEnabled = true;
 
-   public int getState(){
-      return state;
-   }
+    public int getState() {
+        return state;
+    }
 
-   public void setState( int state){
-      this.state = state;
-   }
-   
-   public boolean isXwwwTypeEnabled(){
-      return xwwwEnabled;
-   }
-   
-   public void setXwwwTypeEnabled( boolean xwwwEnabled){
-      this.xwwwEnabled = xwwwEnabled;
-   }
+    public void setState(final int state) {
+        this.state = state;
+    }
 
-   public String toString(){
-      return "ItemState{state=" + getState() + ",xwwwEnabled=" + isXwwwTypeEnabled() + "}";
-   }
+    public boolean isXwwwTypeEnabled() {
+        return xwwwEnabled;
+    }
+
+    public void setXwwwTypeEnabled(final boolean xwwwEnabled) {
+        this.xwwwEnabled = xwwwEnabled;
+    }
+
+    @Override
+    public String toString() {
+        return "ItemState{state=" + getState() + ",xwwwEnabled=" + isXwwwTypeEnabled() + "}";
+    }
 
 }

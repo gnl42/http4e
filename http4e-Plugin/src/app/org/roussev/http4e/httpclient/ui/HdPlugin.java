@@ -35,102 +35,89 @@ import org.roussev.http4e.httpclient.ui.preferences.PreferenceConstants;
  */
 public class HdPlugin extends AbstractUIPlugin implements UIConstants {
 
-   // The shared instance
-   private static HdPlugin plugin;
-   private ResourceBundle  resourceBundle;
+    // The shared instance
+    private static HdPlugin plugin;
+    private ResourceBundle resourceBundle;
 
+    public static String getResourceString(final String key) {
+        final ResourceBundle bundle = HdPlugin.getDefault().getResourceBundle();
+        try {
+            return bundle != null ? bundle.getString(key) : key;
+        } catch (final MissingResourceException e) {
+            return key;
+        }
+    }
 
-   public static String getResourceString( String key){
-      ResourceBundle bundle = HdPlugin.getDefault().getResourceBundle();
-      try {
-         return (bundle != null) ? bundle.getString(key) : key;
-      } catch (MissingResourceException e) {
-         return key;
-      }
-   }
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
+    }
 
+    /**
+     * The constructor
+     */
+    public HdPlugin() {
+        plugin = this;
+        // init images
+        // getImageRegistry();
+    }
 
-   public ResourceBundle getResourceBundle(){
-      return resourceBundle;
-   }
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        super.start(context);
+        try {
+            resourceBundle = ResourceBundle.getBundle(HdPlugin.class.getName());
+        } catch (final MissingResourceException x) {
+            resourceBundle = null;
+        }
+        CoreContext.getContext().putObject("p", HdPlugin.getDefault());
 
+        final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+        int size = store.getInt(PreferenceConstants.P_PAYLOAD_VIEW_SIZE);
+        if (size < 10) {
+            size = 50;
+            store.setValue(PreferenceConstants.P_PAYLOAD_VIEW_SIZE, size);
+        }
+        CoreContext.getContext().putObject(CoreObjects.RESPONSE_VIEW_SIZE, size);
+    }
 
-   /**
-    * The constructor
-    */
-   public HdPlugin() {
-      plugin = this;
-      // init images
-      // getImageRegistry();
-   }
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        cleanupUserDirectoryPackets(".REQ.txt");
+        cleanupUserDirectoryPackets(".RESP.txt");
+        plugin = null;
+        super.stop(context);
+    }
 
+    private static void cleanupUserDirectoryPackets(final String ext) {
 
-   public void start( BundleContext context) throws Exception{
-      super.start(context);
-      try {
-         resourceBundle = ResourceBundle.getBundle(HdPlugin.class.getName());
-      } catch (MissingResourceException x) {
-         resourceBundle = null;
-      }
-      CoreContext.getContext().putObject("p", HdPlugin.getDefault());
+        final FilenameFilter filter = (dir, name) -> name.endsWith(ext);
+        final File dir = new File(CoreContext.PRODUCT_USER_DIR);
+        final String[] files = dir.list(filter);
 
-      IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-      int size = store.getInt(PreferenceConstants.P_PAYLOAD_VIEW_SIZE);
-      if(size < 10){
-         size = 50;
-         store.setValue(PreferenceConstants.P_PAYLOAD_VIEW_SIZE, size);
-      }
-      CoreContext.getContext().putObject(CoreObjects.RESPONSE_VIEW_SIZE, size);
-   }
+        final int len = files.length;
+        for (int i = 0; i < len; i++) {
+            final File f = new File(dir, files[i]);
+            f.delete();
+        }
+    }
 
+    /**
+     * Returns the shared instance
+     * 
+     * @return the shared instance
+     */
+    public static HdPlugin getDefault() {
+        return plugin;
+    }
 
-   public void stop( BundleContext context) throws Exception{
-      cleanupUserDirectoryPackets(".REQ.txt");
-      cleanupUserDirectoryPackets(".RESP.txt");
-      plugin = null;
-      super.stop(context);
-   }
-
-
-   private static void cleanupUserDirectoryPackets( final String ext){
-
-      FilenameFilter filter = new FilenameFilter() {
-
-         public boolean accept( File dir, String name){
-            return name.endsWith(ext);
-         }
-      };
-      File dir = new File(CoreContext.PRODUCT_USER_DIR);
-      String[] files = dir.list(filter);
-
-      int len = files.length;
-      for (int i = 0; i < len; i++) {
-         File f = new File(dir, files[i]);
-         f.delete();
-      }
-   }
-
-
-   /**
-    * Returns the shared instance
-    * 
-    * @return the shared instance
-    */
-   public static HdPlugin getDefault(){
-      return plugin;
-   }
-
-
-   /**
-    * Returns an image descriptor for the image file at the given plug-in
-    * relative path
-    * 
-    * @param path
-    *           the path
-    * @return the image descriptor
-    */
-   public static ImageDescriptor getImageDescriptor( String path){
-      return imageDescriptorFromPlugin(PLUGIN_ID, path);
-   }
+    /**
+     * Returns an image descriptor for the image file at the given plug-in relative path
+     * 
+     * @param path the path
+     * @return the image descriptor
+     */
+    public static ImageDescriptor getImageDescriptor(final String path) {
+        return imageDescriptorFromPlugin(PLUGIN_ID, path);
+    }
 
 }

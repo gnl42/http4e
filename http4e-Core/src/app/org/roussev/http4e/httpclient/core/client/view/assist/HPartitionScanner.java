@@ -26,23 +26,20 @@ import org.eclipse.jface.text.rules.Token;
  */
 public class HPartitionScanner extends RuleBasedPartitionScanner {
 
-   public final static String   PROPERTIES_PARTITIONING = "___pf_partitioning";
-   public final static String   COMMENT                 = "__pf_comment";
-   public final static String   PROPERTY_VALUE          = "__pf_property_value";
-   // public final static String PROPERTY_KEY = "__pf_property_key";
-   
-   public final static String[] PARTITIONS              = new String[] { 
-      COMMENT, PROPERTY_VALUE, /*PROPERTY_KEY*/
-   };
+    public final static String PROPERTIES_PARTITIONING = "___pf_partitioning";
+    public final static String COMMENT = "__pf_comment";
+    public final static String PROPERTY_VALUE = "__pf_property_value";
+    // public final static String PROPERTY_KEY = "__pf_property_key";
 
+    public final static String[] PARTITIONS = { COMMENT, PROPERTY_VALUE, /* PROPERTY_KEY */
+    };
 
-   public HPartitionScanner() {
-      // IToken key= new Token(IDocument.DEFAULT_CONTENT_TYPE);
-      IToken comment = new Token(COMMENT);
-      IToken propertyValue = new Token(PROPERTY_VALUE);
+    public HPartitionScanner() {
+        // IToken key= new Token(IDocument.DEFAULT_CONTENT_TYPE);
+        final IToken comment = new Token(COMMENT);
+        final IToken propertyValue = new Token(PROPERTY_VALUE);
 
-      setPredicateRules(new IPredicateRule[] { 
-            new SingleLineRule(AssistConstants.PARAM_DELIM_EQ, null, propertyValue, '\\', true, true), 
-            new SingleLineRule("#", null, comment, (char) 0, true, true), });
-   }
+        setPredicateRules(new IPredicateRule[] { new SingleLineRule(AssistConstants.PARAM_DELIM_EQ, null, propertyValue, '\\', true, true),
+                new SingleLineRule("#", null, comment, (char) 0, true, true), });
+    }
 }

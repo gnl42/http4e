@@ -19,14 +19,13 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 /**
- *  
+ * 
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public interface ColorManager {
 
     void dispose();
-    
-    Color getColor(RGB rgb);
-    
-}
 
+    Color getColor(RGB rgb);
+
+}

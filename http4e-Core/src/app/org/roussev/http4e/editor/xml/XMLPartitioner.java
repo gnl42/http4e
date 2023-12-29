@@ -22,44 +22,43 @@ import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
 /**
- * Simple extension of DefaultPartitioner with printPartitions() method to
- * assist with printing out partition information
- *  
+ * Simple extension of DefaultPartitioner with printPartitions() method to assist with printing out
+ * partition information
+ * 
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class XMLPartitioner extends FastPartitioner {
 
-   public XMLPartitioner( IPartitionTokenScanner scanner, String[] legalContentTypes) {
-      super(scanner, legalContentTypes);
-   }
+    public XMLPartitioner(final IPartitionTokenScanner scanner, final String[] legalContentTypes) {
+        super(scanner, legalContentTypes);
+    }
 
+    @Override
+    public ITypedRegion[] computePartitioning(final int offset, final int length, final boolean includeZeroLengthPartitions) {
+        return super.computePartitioning(offset, length, includeZeroLengthPartitions);
+    }
 
-   public ITypedRegion[] computePartitioning( int offset, int length, boolean includeZeroLengthPartitions){
-      return super.computePartitioning(offset, length, includeZeroLengthPartitions);
-   }
-
-
-   public void connect( IDocument document, boolean delayInitialization){
-      super.connect(document, delayInitialization);
+    @Override
+    public void connect(final IDocument document, final boolean delayInitialization) {
+        super.connect(document, delayInitialization);
 //      printPartitions(document);
-   }
+    }
 
+    public void printPartitions(final IDocument document) {
+        final StringBuilder buffer = new StringBuilder();
 
-   public void printPartitions( IDocument document){
-      StringBuilder buffer = new StringBuilder();
-
-      ITypedRegion[] partitions = computePartitioning(0, document.getLength());
-      for (int i = 0; i < partitions.length; i++) {
-         try {
-            buffer.append("Partition type: " + partitions[i].getType() + ", offset: " + partitions[i].getOffset() + ", length: " + partitions[i].getLength());
-            buffer.append("\n");
-            buffer.append("Text:\n");
-            buffer.append(document.get(partitions[i].getOffset(), partitions[i].getLength()));
-            buffer.append("\n---------------------------\n\n\n");
-         } catch (BadLocationException e) {
-            e.printStackTrace();
-         }
-      }
-      System.out.print(buffer);
-   }
+        final ITypedRegion[] partitions = computePartitioning(0, document.getLength());
+        for (final ITypedRegion partition : partitions) {
+            try {
+                buffer.append("Partition type: " + partition.getType() + ", offset: " + partition.getOffset() + ", length: " + partition.getLength());
+                buffer.append("\n");
+                buffer.append("Text:\n");
+                buffer.append(document.get(partition.getOffset(), partition.getLength()));
+                buffer.append("\n---------------------------\n\n\n");
+            } catch (final BadLocationException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.print(buffer);
+    }
 }

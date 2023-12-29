@@ -15,8 +15,6 @@
  */
 package org.roussev.http4e.httpclient.core.client.view;
 
-import org.eclipse.jface.text.ITextListener;
-import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
@@ -54,159 +52,146 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 class HeaderView {
 
-   StyledText      headersText;
-   final ItemModel model;
+    StyledText headersText;
+    final ItemModel model;
 
+    HeaderView(final ItemModel iModel, final Composite parent) {
+        model = iModel;
+        final ViewForm vForm = toolbarHeader("Headers", model, parent);
+        headersText = buildEditorText(vForm);
+        vForm.setContent(headersText);
 
-   HeaderView( ItemModel iModel, Composite parent) {
-      this.model = iModel;
-      ViewForm vForm = toolbarHeader("Headers", model, parent);
-      headersText = buildEditorText(vForm);
-      vForm.setContent(headersText);
+        headersText.addMouseListener(new MouseAdapter() {
 
-      headersText.addMouseListener(new MouseAdapter() {
-
-         public void mouseDoubleClick( MouseEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.HEADERS_RESIZED, model));
-         }
-      });
-
-      headersText.addFocusListener(new FocusListener() {
-
-         public void focusGained( FocusEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.HEADERS_FOCUS_GAINED, model));
-         }
-
-
-         public void focusLost( FocusEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.HEADERS_FOCUS_LOST, model));
-         }
-      });
-
-      // /////////////////////////////////
-      Menu popupMenu = new Menu(headersText);
-      new ClipboardMenu(headersText, popupMenu);
-      headersText.setMenu(popupMenu);
-      setText(CoreConstants.CONTENT_TYPE_X_WWW_FORM);
-      
-      headersText.addKeyListener(new ExecuteKeyListener(new ExecuteCommand() {
-         public void execute(){
-            model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model));
-         }
-      }));
-
-      // new MenuItem(popupMenu, SWT.SEPARATOR);
-      //
-      // MenuItem ctItem = new MenuItem(popupMenu, SWT.CASCADE);
-      // ctItem.setText("Content-Type");
-      // Menu contypeMenu = new Menu(ctItem);
-      // ctItem.setMenu(contypeMenu);
-      //
-      // MenuItem hItem = new MenuItem(popupMenu, SWT.CASCADE);
-      // hItem.setText("Add Header");
-      //
-      // Menu headersMenu = new Menu(hItem);
-      // hItem.setMenu(headersMenu);
-      // MenuItem h1 = new MenuItem(headersMenu, SWT.PUSH);
-      // h1.setText("Accept");
-
-      // Listener copyListener = new Listener() {
-      // public void handleEvent( Event event){
-      // if (event.character == '\u0003') {
-      // Clipboard clipboard = new Clipboard(Display.getDefault());
-      // TextTransfer transfer = TextTransfer.getInstance();
-      // String text = (String) clipboard.getContents(transfer);
-      // System.out.println("clipboard contents: " + text);
-      // clipboard.dispose();
-      // }
-      // }
-      // };
-      // headersText.addListener(SWT.KeyDown, copyListener);
-      // /////////////////////////////////
-   }
-
-
-   private StyledText buildEditorText( Composite parent){
-      final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
-
-      final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.HEADER_PROCESSOR);
-      sourceViewer.configure(sourceConf);
-      sourceViewer.setDocument(DocumentUtils.createDocument1());
-
-      sourceViewer.getControl().addKeyListener(new KeyAdapter() {
-
-         public void keyPressed( KeyEvent e){
-            if (Utils.isAutoAssistInvoked(e)) {
-               IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
-               ca.showPossibleCompletions();
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.HEADERS_RESIZED, model));
             }
-         }
-      });
+        });
 
-      sourceViewer.addTextListener(new ITextListener() {
+        headersText.addFocusListener(new FocusListener() {
 
-         public void textChanged( TextEvent e){
-            ModelTrackerListener trackerListener = new ModelTrackerListener() {
+            @Override
+            public void focusGained(final FocusEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.HEADERS_FOCUS_GAINED, model));
+            }
 
-               public void fireExecute( String key, String value){
-                  key = BaseUtils.noNull(key).trim();
-                  if (key.equalsIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE)) {
-                     model.fireExecute(new ModelEvent(ModelEvent.CONTENT_TYPE_CHANGE, model));
-                  }
-               }
+            @Override
+            public void focusLost(final FocusEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.HEADERS_FOCUS_LOST, model));
+            }
+        });
+
+        // /////////////////////////////////
+        final Menu popupMenu = new Menu(headersText);
+        new ClipboardMenu(headersText, popupMenu);
+        headersText.setMenu(popupMenu);
+        setText(CoreConstants.CONTENT_TYPE_X_WWW_FORM);
+
+        headersText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
+
+        // new MenuItem(popupMenu, SWT.SEPARATOR);
+        //
+        // MenuItem ctItem = new MenuItem(popupMenu, SWT.CASCADE);
+        // ctItem.setText("Content-Type");
+        // Menu contypeMenu = new Menu(ctItem);
+        // ctItem.setMenu(contypeMenu);
+        //
+        // MenuItem hItem = new MenuItem(popupMenu, SWT.CASCADE);
+        // hItem.setText("Add Header");
+        //
+        // Menu headersMenu = new Menu(hItem);
+        // hItem.setMenu(headersMenu);
+        // MenuItem h1 = new MenuItem(headersMenu, SWT.PUSH);
+        // h1.setText("Accept");
+
+        // Listener copyListener = new Listener() {
+        // public void handleEvent( Event event){
+        // if (event.character == '\u0003') {
+        // Clipboard clipboard = new Clipboard(Display.getDefault());
+        // TextTransfer transfer = TextTransfer.getInstance();
+        // String text = (String) clipboard.getContents(transfer);
+        // System.out.println("clipboard contents: " + text);
+        // clipboard.dispose();
+        // }
+        // }
+        // };
+        // headersText.addListener(SWT.KeyDown, copyListener);
+        // /////////////////////////////////
+    }
+
+    private StyledText buildEditorText(final Composite parent) {
+        final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+
+        final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.HEADER_PROCESSOR);
+        sourceViewer.configure(sourceConf);
+        sourceViewer.setDocument(DocumentUtils.createDocument1());
+
+        sourceViewer.getControl().addKeyListener(new KeyAdapter() {
+
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                if (Utils.isAutoAssistInvoked(e)) {
+                    final IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
+                    ca.showPossibleCompletions();
+                }
+            }
+        });
+
+        sourceViewer.addTextListener(e -> {
+            final ModelTrackerListener trackerListener = (key, value) -> {
+                key = BaseUtils.noNull(key).trim();
+                if (key.equalsIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE)) {
+                    model.fireExecute(new ModelEvent(ModelEvent.CONTENT_TYPE_CHANGE, model));
+                }
             };
             AssistUtils.addTrackWords(e.getText(), sourceViewer.getDocument(), e.getOffset() - 1, trackerListener);
-         }
-      });
+        });
 
-      return sourceViewer.getTextWidget();
-   }
+        return sourceViewer.getTextWidget();
+    }
 
+    private ViewForm toolbarHeader(final String title, final ItemModel model, final Composite parent) {
+        final ViewForm vForm = ViewUtils.buildViewForm(title, model, parent);
 
-   private ViewForm toolbarHeader( String title, final ItemModel model, final Composite parent){
-      final ViewForm vForm = ViewUtils.buildViewForm(title, model, parent);
+        final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
 
-      final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
+        final ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
+        clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
+        clearBtn.setToolTipText("Clear");
+        clearBtn.addSelectionListener(new SelectionListener() {
 
-      ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
-      clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
-      clearBtn.setToolTipText("Clear");
-      clearBtn.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetDefaultSelected(final SelectionEvent e) {
+            }
 
-         public void widgetDefaultSelected( SelectionEvent e){
-         }
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                HeaderView.this.setText("");
+            }
+        });
+        vForm.setTopCenter(bar);
 
+        return vForm;
+    }
 
-         public void widgetSelected( SelectionEvent e){
-            HeaderView.this.setText("");
-         }
-      });
-      vForm.setTopCenter(bar);
+    String getHeaderText() {
+        if (CoreMessages.HEADER_DEFAULTS.equals(headersText.getText())) {
+            return CoreConstants.EMPTY_TEXT;
+        }
+        return headersText.getText();
+    }
 
-      return vForm;
-   }
+    String getText() {
+        return headersText.getText();
+    }
 
+    void setText(final String txt) {
+        headersText.setText(txt);
+    }
 
-   String getHeaderText(){
-      if (CoreMessages.HEADER_DEFAULTS.equals(headersText.getText())) {
-         return CoreConstants.EMPTY_TEXT;
-      }
-      return headersText.getText();
-   }
-
-
-   String getText(){
-      return headersText.getText();
-   }
-
-
-   void setText( String txt){
-      headersText.setText(txt);
-   }
-
-
-   void setForeground( RGB style){
-      headersText.setForeground(ResourceUtils.getColor(style));
-   }
+    void setForeground(final RGB style) {
+        headersText.setForeground(ResourceUtils.getColor(style));
+    }
 
 }

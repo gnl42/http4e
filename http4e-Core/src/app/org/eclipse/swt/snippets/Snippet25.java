@@ -1,7 +1,5 @@
 package org.eclipse.swt.snippets;
 
-
-
 public class Snippet25 {
 
 //   public static String stateMask (int stateMask) {
@@ -28,13 +26,13 @@ public class Snippet25 {
 //
 //public static String keyCode (int keyCode) {
 //   switch (keyCode) {
-//      
+//
 //      /* Keyboard and Mouse Masks */
 //      case SWT.ALT:     return "ALT";
 //      case SWT.SHIFT:   return "SHIFT";
 //      case SWT.CONTROL: return "CONTROL";
 //      case SWT.COMMAND: return "COMMAND";
-//         
+//
 //      /* Non-Numeric Keypad Keys */
 //      case SWT.ARROW_UP:      return "ARROW_UP";
 //      case SWT.ARROW_DOWN: return "ARROW_DOWN";
@@ -48,13 +46,13 @@ public class Snippet25 {
 //
 //      /* Virtual and Ascii Keys */
 //      case SWT.BS:   return "BS";
-//      case SWT.CR:   return "CR";      
+//      case SWT.CR:   return "CR";
 //      case SWT.DEL:  return "DEL";
 //      case SWT.ESC:  return "ESC";
 //      case SWT.LF:   return "LF";
 //      case SWT.TAB:  return "TAB";
 //      case SWT.SPACE:   return "SPACE";
-//   
+//
 //      /* Functions Keys */
 //      case SWT.F1:   return "F1";
 //      case SWT.F2:   return "F2";
@@ -71,7 +69,7 @@ public class Snippet25 {
 //      case SWT.F13:  return "F13";
 //      case SWT.F14:  return "F14";
 //      case SWT.F15:  return "F15";
-//      
+//
 //      /* Numeric Keypad Keys */
 //      case SWT.KEYPAD_ADD:    return "KEYPAD_ADD";
 //      case SWT.KEYPAD_SUBTRACT:  return "KEYPAD_SUBTRACT";
@@ -113,10 +111,10 @@ public class Snippet25 {
 //         string += " keyCode=0x" + Integer.toHexString (e.keyCode) + " " + keyCode (e.keyCode) + ",";
 //         string += " character=0x" + Integer.toHexString (e.character) + " " + character (e.character);
 //         if (e.keyLocation != 0) {
-//            string +=  " location="; 
-//            if (e.keyLocation == SWT.LEFT) string +=  "LEFT"; 
-//            if (e.keyLocation == SWT.RIGHT) string +=  "RIGHT"; 
-//            if (e.keyLocation == SWT.KEYPAD) string +=  "KEYPAD"; 
+//            string +=  " location=";
+//            if (e.keyLocation == SWT.LEFT) string +=  "LEFT";
+//            if (e.keyLocation == SWT.RIGHT) string +=  "RIGHT";
+//            if (e.keyLocation == SWT.KEYPAD) string +=  "KEYPAD";
 //         }
 //         System.out.println (string);
 //      }

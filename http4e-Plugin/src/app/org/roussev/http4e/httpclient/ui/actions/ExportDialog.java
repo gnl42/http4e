@@ -16,54 +16,54 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class ExportDialog extends TitleAreaDialog {
 
-   private ViewPart view;
-   private String   title;
-   private String   titleMessage;
-   private String   source;
+    private final ViewPart view;
+    private final String title;
+    private final String titleMessage;
+    private final String source;
 
-
-   public ExportDialog( ViewPart view, String title, String titleMessage, String source) {
-      super(view.getViewSite().getShell());
-      setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
-      this.view = view;
-      this.title = title;
-      this.titleMessage = titleMessage;
-      this.source = source;
-   }
+    public ExportDialog(final ViewPart view, final String title, final String titleMessage, final String source) {
+        super(view.getViewSite().getShell());
+        setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
+        this.view = view;
+        this.title = title;
+        this.titleMessage = titleMessage;
+        this.source = source;
+    }
 
 //   public boolean close(){
 //      return super.close();
 //   }
 
-   protected Control createContents( Composite parent){
-      Control contents = super.createContents(parent);
-      setTitle(title);
-      setMessage(titleMessage);
-      return contents;
-   }
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Control contents = super.createContents(parent);
+        setTitle(title);
+        setMessage(titleMessage);
+        return contents;
+    }
 
+    @Override
+    protected Control createDialogArea(final Composite parent) {
+        final Composite composite = (Composite) super.createDialogArea(parent);
 
-   protected Control createDialogArea( Composite parent){
-      Composite composite = (Composite) super.createDialogArea(parent);
+        try {
+            final FolderView folderView = ((HdViewPart) view).getFolderView();
+            final ItemModel itemModel = folderView.getModel().getItemModel(folderView.getSelectionItemHash());
+            itemModel.fireExecute(new ModelEvent(ModelEvent.EXPORT, itemModel));
 
-      try {
-         FolderView folderView = ((HdViewPart) view).getFolderView();
-         ItemModel itemModel = folderView.getModel().getItemModel(new Integer(folderView.getSelectionItemHash()));
-         itemModel.fireExecute(new ModelEvent(ModelEvent.EXPORT, itemModel));
+            final ExportJavaViewer example = new ExportJavaViewer(composite);
+            example.open(source);
 
-         ExportJavaViewer example = new ExportJavaViewer(composite);
-         example.open(source);
+        } catch (final Exception e) {
+            setErrorMessage(e.getLocalizedMessage());
+        }
 
-      } catch (Exception e) {
-         setErrorMessage(e.getLocalizedMessage());
-      }
+        return composite;
+    }
 
-      return composite;
-   }
-
-
-   protected void createButtonsForButtonBar( Composite parent){
-      createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-   }
+    @Override
+    protected void createButtonsForButtonBar(final Composite parent) {
+        createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+    }
 
 }

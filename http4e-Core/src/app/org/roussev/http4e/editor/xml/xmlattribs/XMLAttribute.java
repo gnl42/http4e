@@ -20,29 +20,23 @@ package org.roussev.http4e.editor.xml.xmlattribs;
  */
 public class XMLAttribute {
 
-   private String name;
-   private String value;
+    private final String name;
+    private String value;
 
+    public XMLAttribute(final String name) {
+        this.name = name;
+    }
 
-   public XMLAttribute( String name) {
-      super();
-      this.name = name;
-   }
+    public XMLAttribute(final String name, final String value) {
+        this.name = name;
+        this.value = value;
+    }
 
+    public String getName() {
+        return name;
+    }
 
-   public XMLAttribute( String name, String value) {
-      super();
-      this.name = name;
-      this.value = value;
-   }
-
-
-   public String getName(){
-      return name;
-   }
-
-
-   public String getValue(){
-      return value;
-   }
+    public String getValue() {
+        return value;
+    }
 }

@@ -26,23 +26,22 @@ import org.roussev.http4e.editor.xml.ColorManager;
 import org.roussev.http4e.editor.xml.IXMLColorConstants;
 import org.roussev.http4e.editor.xml.XMLWhitespaceDetector;
 
-
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class XMLScanner extends RuleBasedScanner {
 
-   public XMLScanner( ColorManager manager) {
-      IToken procInstr = new Token(new TextAttribute(manager.getColor(IXMLColorConstants.PROC_INSTR)));
-      IToken docType = new Token(new TextAttribute(manager.getColor(IXMLColorConstants.DOCTYPE)));
+    public XMLScanner(final ColorManager manager) {
+        final IToken procInstr = new Token(new TextAttribute(manager.getColor(IXMLColorConstants.PROC_INSTR)));
+        final IToken docType = new Token(new TextAttribute(manager.getColor(IXMLColorConstants.DOCTYPE)));
 
-      IRule[] rules = new IRule[3];
-      // Add rule for processing instructions and doctype
-      rules[0] = new MultiLineRule("<?", "?>", procInstr);
-      rules[1] = new MultiLineRule("<!DOCTYPE", ">", docType);
-      // Add generic whitespace rule.
-      rules[2] = new WhitespaceRule(new XMLWhitespaceDetector());
+        final IRule[] rules = new IRule[3];
+        // Add rule for processing instructions and doctype
+        rules[0] = new MultiLineRule("<?", "?>", procInstr);
+        rules[1] = new MultiLineRule("<!DOCTYPE", ">", docType);
+        // Add generic whitespace rule.
+        rules[2] = new WhitespaceRule(new XMLWhitespaceDetector());
 
-      setRules(rules);
-   }
+        setRules(rules);
+    }
 }

@@ -36,12 +36,12 @@ import org.apache.commons.httpclient.auth.AuthState;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.roussev.http4e.httpclient.core.client.misc.ApacheHttpListener;
 
-
 /**
  * <p>
- * HttpMethod interface represents a request to be sent via a 
- * {@link HttpConnection HTTP connection} and a corresponding response.
+ * HttpMethod interface represents a request to be sent via a {@link HttpConnection HTTP connection}
+ * and a corresponding response.
  * </p>
+ *
  * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  * @author Rod Waldhoff
  * @author <a href="jsdever@apache.org">Jeff Dever</a>
@@ -54,56 +54,52 @@ import org.roussev.http4e.httpclient.core.client.misc.ApacheHttpListener;
  */
 public interface HttpMethod {
 
-    public ApacheHttpListener getApacheHttpListener();
+    ApacheHttpListener getApacheHttpListener();
 
-    public void setApacheHttpListener( ApacheHttpListener apacheHttpListener);
-    
-    
+    void setApacheHttpListener(ApacheHttpListener apacheHttpListener);
+
     // ------------------------------------------- Property Setters and Getters
 
     /**
-     * Obtains the name of the HTTP method as used in the HTTP request line,
-     * for example <tt>"GET"</tt> or <tt>"POST"</tt>.
+     * Obtains the name of the HTTP method as used in the HTTP request line, for example <tt>"GET"</tt>
+     * or <tt>"POST"</tt>.
      * 
      * @return the name of this method
      */
     String getName();
 
     /**
-     * Gets the host configuration for this method.  The configuration specifies
-     * the server, port, protocol, and proxy server via which this method will
-     * send its HTTP request.
+     * Gets the host configuration for this method. The configuration specifies the server, port,
+     * protocol, and proxy server via which this method will send its HTTP request.
      * 
-     * @deprecated no longer applicable 
+     * @deprecated no longer applicable
      * 
      * @return the HostConfiguration or <code>null</code> if none is set
      */
+    @Deprecated
     HostConfiguration getHostConfiguration();
 
     /**
-     * Sets the path of the HTTP method.
-     * It is responsibility of the caller to ensure that the path is
+     * Sets the path of the HTTP method. It is responsibility of the caller to ensure that the path is
      * properly encoded (URL safe).
      * 
-     * @param path The path of the HTTP method. The path is expected
-     *             to be URL encoded.
+     * @param path The path of the HTTP method. The path is expected to be URL encoded.
      */
     void setPath(String path);
 
     /**
-     * Returns the path of the HTTP method.  
+     * Returns the path of the HTTP method.
      *
-     * Calling this method <em>after</em> the request has been executed will 
-     * return the <em>actual</em> path, following any redirects automatically
-     * handled by this HTTP method.
+     * Calling this method <em>after</em> the request has been executed will return the <em>actual</em>
+     * path, following any redirects automatically handled by this HTTP method.
      * 
      * @return the path of the HTTP method, in URL encoded form
      */
     String getPath();
 
     /**
-     * Returns the URI for this method. The URI will be absolute if the host
-     * configuration has been set and relative otherwise.
+     * Returns the URI for this method. The URI will be absolute if the host configuration has been set
+     * and relative otherwise.
      * 
      * @return the URI for this method
      * 
@@ -112,9 +108,9 @@ public interface HttpMethod {
     URI getURI() throws URIException;
 
     /**
-     * Sets the URI for this method. 
+     * Sets the URI for this method.
      * 
-     * @param uri URI to be set 
+     * @param uri URI to be set
      * 
      * @throws URIException if a URI cannot be set
      * 
@@ -123,19 +119,20 @@ public interface HttpMethod {
     void setURI(URI uri) throws URIException;
 
     /**
-     * Defines how strictly the method follows the HTTP protocol specification.  
-     * (See RFC 2616 and other relevant RFCs.) In the strict mode the method precisely
-     * implements the requirements of the specification, whereas in non-strict mode 
-     * it attempts to mimic the exact behaviour of commonly used HTTP agents, 
-     * which many HTTP servers expect.
+     * Defines how strictly the method follows the HTTP protocol specification. (See RFC 2616 and other
+     * relevant RFCs.) In the strict mode the method precisely implements the requirements of the
+     * specification, whereas in non-strict mode it attempts to mimic the exact behaviour of commonly
+     * used HTTP agents, which many HTTP servers expect.
      * 
      * @param strictMode <tt>true</tt> for strict mode, <tt>false</tt> otherwise
      * 
-     * @deprecated Use {@link org.apache.commons.httpclient.params.HttpParams#setParameter(String, Object)} 
-     * to exercise a more granular control over HTTP protocol strictness.
+     * @deprecated Use
+     *             {@link org.apache.commons.httpclient.params.HttpParams#setParameter(String, Object)}
+     *             to exercise a more granular control over HTTP protocol strictness.
      * 
      * @see #isStrictMode()
      */
+    @Deprecated
     void setStrictMode(boolean strictMode);
 
     /**
@@ -143,18 +140,20 @@ public interface HttpMethod {
      *
      * @return <tt>true</tt> if strict mode is enabled, <tt>false</tt> otherwise
      * 
-     * @deprecated Use {@link org.apache.commons.httpclient.params.HttpParams#setParameter(String, Object)} 
-     * to exercise a more granular control over HTTP protocol strictness.
+     * @deprecated Use
+     *             {@link org.apache.commons.httpclient.params.HttpParams#setParameter(String, Object)}
+     *             to exercise a more granular control over HTTP protocol strictness.
      * 
      * @see #setStrictMode(boolean)
      */
+    @Deprecated
     boolean isStrictMode();
-     
+
     /**
-     * Sets the specified request header, overwriting any
-     * previous value.
-     * Note that header-name matching is case insensitive.
-     * @param headerName the header's name
+     * Sets the specified request header, overwriting any previous value. Note that header-name matching
+     * is case insensitive.
+     *
+     * @param headerName  the header's name
      * @param headerValue the header's value
      *
      * @see #setRequestHeader(Header)
@@ -164,9 +163,9 @@ public interface HttpMethod {
     void setRequestHeader(String headerName, String headerValue);
 
     /**
-     * Sets the specified request header, overwriting any
-     * previous value.
-     * Note that header-name matching is case insensitive.
+     * Sets the specified request header, overwriting any previous value. Note that header-name matching
+     * is case insensitive.
+     *
      * @param header the header to be set
      *
      * @see #setRequestHeader(String,String)
@@ -176,11 +175,11 @@ public interface HttpMethod {
     void setRequestHeader(Header header);
 
     /**
-     * Adds the specified request header, <em>not</em> overwriting any previous value.
-     * If the same header is added multiple times, perhaps with different values,
-     * multiple instances of that header will be sent in the HTTP request.
-     * Note that header-name matching is case insensitive.
-     * @param headerName the header's name
+     * Adds the specified request header, <em>not</em> overwriting any previous value. If the same
+     * header is added multiple times, perhaps with different values, multiple instances of that header
+     * will be sent in the HTTP request. Note that header-name matching is case insensitive.
+     *
+     * @param headerName  the header's name
      * @param headerValue the header's value
      * 
      * @see #addRequestHeader(Header)
@@ -190,10 +189,10 @@ public interface HttpMethod {
     void addRequestHeader(String headerName, String headerValue);
 
     /**
-     * Adds the specified request header, <em>not</em> overwriting any previous value.
-     * If the same header is added multiple times, perhaps with different values,
-     * multiple instances of that header will be sent in the HTTP request.
-     * Note that header-name matching is case insensitive.
+     * Adds the specified request header, <em>not</em> overwriting any previous value. If the same
+     * header is added multiple times, perhaps with different values, multiple instances of that header
+     * will be sent in the HTTP request. Note that header-name matching is case insensitive.
+     *
      * @param header the header
      * 
      * @see #addRequestHeader(String,String)
@@ -203,18 +202,19 @@ public interface HttpMethod {
     void addRequestHeader(Header header);
 
     /**
-     * Gets the request header with the given name.
-     * If there are multiple headers with the same name,
-     * there values will be combined with the ',' separator as specified by RFC2616.
-     * Note that header-name matching is case insensitive.
+     * Gets the request header with the given name. If there are multiple headers with the same name,
+     * there values will be combined with the ',' separator as specified by RFC2616. Note that
+     * header-name matching is case insensitive.
+     *
      * @param headerName the header name
      * @return the header
      */
     Header getRequestHeader(String headerName);
 
     /**
-     * Removes all request headers with the given name.
-     * Note that header-name matching is case insensitive.
+     * Removes all request headers with the given name. Note that header-name matching is case
+     * insensitive.
+     *
      * @param headerName the header name
      */
     void removeRequestHeader(String headerName);
@@ -229,27 +229,26 @@ public interface HttpMethod {
     void removeRequestHeader(Header header);
 
     /**
-     * Returns <tt>true</tt> if the HTTP method should automatically follow HTTP redirects 
-     * (status code 302, etc.), <tt>false</tt> otherwise.
+     * Returns <tt>true</tt> if the HTTP method should automatically follow HTTP redirects (status code
+     * 302, etc.), <tt>false</tt> otherwise.
      * 
-     * @return <tt>true</tt> if the method will automatically follow HTTP redirects, 
-     * <tt>false</tt> otherwise
+     * @return <tt>true</tt> if the method will automatically follow HTTP redirects, <tt>false</tt>
+     *         otherwise
      */
     boolean getFollowRedirects();
 
     /**
-     * Sets whether or not the HTTP method should automatically follow HTTP redirects 
-     * (status code 302, etc.)
+     * Sets whether or not the HTTP method should automatically follow HTTP redirects (status code 302,
+     * etc.)
      * 
      * @param followRedirects <tt>true</tt> if the method will automatically follow redirects,
-     * <tt>false</tt> otherwise.
+     *                        <tt>false</tt> otherwise.
      */
     void setFollowRedirects(boolean followRedirects);
 
     /**
-     * Sets the query string of the HTTP method.
-     * It is responsibility of the caller to ensure that the path is
-     * properly encoded (URL safe).  The string must not include an initial '?' character.
+     * Sets the query string of the HTTP method. It is responsibility of the caller to ensure that the
+     * path is properly encoded (URL safe). The string must not include an initial '?' character.
      * 
      * @param queryString the query to be used in the request, with no leading '?' character
      * 
@@ -259,13 +258,13 @@ public interface HttpMethod {
     void setQueryString(String queryString);
 
     /**
-     * Sets the query string of this HTTP method.  The pairs are encoded as UTF-8 characters.  
-     * To use a different charset the parameters can be encoded manually using EncodingUtil 
-     * and set as a single String.
+     * Sets the query string of this HTTP method. The pairs are encoded as UTF-8 characters. To use a
+     * different charset the parameters can be encoded manually using EncodingUtil and set as a single
+     * String.
      *
-     * @param params An array of <code>NameValuePair</code>s to use as the query string.
-     *               The name/value pairs will be automatically URL encoded and should not
-     *               have been encoded previously.
+     * @param params An array of <code>NameValuePair</code>s to use as the query string. The name/value
+     *               pairs will be automatically URL encoded and should not have been encoded
+     *               previously.
      * 
      * @see #getQueryString()
      * @see #setQueryString(String)
@@ -278,16 +277,16 @@ public interface HttpMethod {
      * 
      * @return the query string in URL encoded form, without a leading '?'.
      * 
-     * @see #setQueryString(NameValuePair[]) 
+     * @see #setQueryString(NameValuePair[])
      * @see #setQueryString(String)
      */
     String getQueryString();
 
     /**
-     * Returns the current request headers for this HTTP method.  The returned headers
-     * will be in the same order that they were added with <code>addRequestHeader</code>.
-     * If there are multiple request headers with the same name (e.g. <code>Cookie</code>),
-     * they will be returned as multiple entries in the array.
+     * Returns the current request headers for this HTTP method. The returned headers will be in the
+     * same order that they were added with <code>addRequestHeader</code>. If there are multiple request
+     * headers with the same name (e.g. <code>Cookie</code>), they will be returned as multiple entries
+     * in the array.
      * 
      * @return an array containing all of the request headers
      * 
@@ -297,8 +296,9 @@ public interface HttpMethod {
     Header[] getRequestHeaders();
 
     /**
-     * Returns the request headers with the given name. Note that header-name matching is
-     * case insensitive.
+     * Returns the request headers with the given name. Note that header-name matching is case
+     * insensitive.
+     *
      * @param headerName the name of the headers to be returned.
      * @return an array of zero or more headers
      * 
@@ -318,43 +318,41 @@ public interface HttpMethod {
     /**
      * Returns the status code associated with the latest response.
      * 
-     * @return The status code from the most recent execution of this method.
-     *         If the method has not yet been executed, the result is undefined.
+     * @return The status code from the most recent execution of this method. If the method has not yet
+     *         been executed, the result is undefined.
      */
     int getStatusCode();
 
     /**
-     * Returns the status text (or "reason phrase") associated with the latest
-     * response.
+     * Returns the status text (or "reason phrase") associated with the latest response.
      * 
-     * @return The status text from the most recent execution of this method.
-     *         If the method has not yet been executed, the result is undefined.
+     * @return The status text from the most recent execution of this method. If the method has not yet
+     *         been executed, the result is undefined.
      */
     String getStatusText();
 
     /**
      * Returns the response headers from the most recent execution of this request.
      * 
-     * @return A newly-created array containing all of the response headers, 
-     *         in the order in which they appeared in the response.
+     * @return A newly-created array containing all of the response headers, in the order in which they
+     *         appeared in the response.
      */
     Header[] getResponseHeaders();
 
     /**
-     * Returns the specified response header. Note that header-name matching is
-     * case insensitive.
+     * Returns the specified response header. Note that header-name matching is case insensitive.
      * 
      * @param headerName The name of the header to be returned.
      * 
-     * @return The specified response header.  If the repsonse contained multiple
-     *         instances of the header, its values will be combined using the ','
-     *         separator as specified by RFC2616.
+     * @return The specified response header. If the repsonse contained multiple instances of the
+     *         header, its values will be combined using the ',' separator as specified by RFC2616.
      */
     Header getResponseHeader(String headerName);
 
     /**
-     * Returns the response headers with the given name. Note that header-name matching is
-     * case insensitive.
+     * Returns the response headers with the given name. Note that header-name matching is case
+     * insensitive.
+     *
      * @param headerName the name of the headers to be returned.
      * @return an array of zero or more headers
      * 
@@ -365,15 +363,13 @@ public interface HttpMethod {
     /**
      * Returns the response footers from the most recent execution of this request.
      * 
-     * @return an array containing the response footers in the order that they
-     *         appeared in the response.  If the response had no footers,
-     *         an empty array will be returned.
+     * @return an array containing the response footers in the order that they appeared in the response.
+     *         If the response had no footers, an empty array will be returned.
      */
     Header[] getResponseFooters();
 
     /**
-     * Return the specified response footer. Note that footer-name matching is
-     * case insensitive.
+     * Return the specified response footer. Note that footer-name matching is case insensitive.
      * 
      * @param footerName The name of the footer.
      * @return The response footer.
@@ -381,51 +377,48 @@ public interface HttpMethod {
     Header getResponseFooter(String footerName);
 
     /**
-     * Returns the response body of the HTTP method, if any, as an array of bytes.
-     * If the method has not yet been executed or the response has no body, <code>null</code>
-     * is returned.  Note that this method does not propagate I/O exceptions.
-     * If an error occurs while reading the body, <code>null</code> will be returned.
+     * Returns the response body of the HTTP method, if any, as an array of bytes. If the method has not
+     * yet been executed or the response has no body, <code>null</code> is returned. Note that this
+     * method does not propagate I/O exceptions. If an error occurs while reading the body,
+     * <code>null</code> will be returned.
      * 
-     * @return The response body, or <code>null</code> if the
-     *         body is not available.
+     * @return The response body, or <code>null</code> if the body is not available.
      * 
      * @throws IOException if an I/O (transport) problem occurs
      */
     byte[] getResponseBody() throws IOException;
 
     /**
-     * Returns the response body of the HTTP method, if any, as a {@link String}. 
-     * If response body is not available or cannot be read, <tt>null</tt> is returned.
-     * The raw bytes in the body are converted to a <code>String</code> using the
-     * character encoding specified in the response's <tt>Content-Type</tt> header, or
-     * ISO-8859-1 if the response did not specify a character set.
+     * Returns the response body of the HTTP method, if any, as a {@link String}. If response body is
+     * not available or cannot be read, <tt>null</tt> is returned. The raw bytes in the body are
+     * converted to a <code>String</code> using the character encoding specified in the response's
+     * <tt>Content-Type</tt> header, or ISO-8859-1 if the response did not specify a character set.
      * <p>
-     * Note that this method does not propagate I/O exceptions.
-     * If an error occurs while reading the body, <code>null</code> will be returned.
+     * Note that this method does not propagate I/O exceptions. If an error occurs while reading the
+     * body, <code>null</code> will be returned.
      *
-     * @return The response body converted to a <code>String</code>, or <code>null</code>
-     *         if the body is not available.
+     * @return The response body converted to a <code>String</code>, or <code>null</code> if the body is
+     *         not available.
      * 
      * @throws IOException if an I/O (transport) problem occurs
      */
     String getResponseBodyAsString() throws IOException;
 
     /**
-     * Returns the response body of the HTTP method, if any, as an InputStream.
-     * If the response had no body or the method has not yet been executed,
-     * <code>null</code> is returned.  Additionally, <code>null</code> may be returned
-     * if {@link #releaseConnection} has been called or
-     * if this method was called previously and the resulting stream was closed. 
+     * Returns the response body of the HTTP method, if any, as an InputStream. If the response had no
+     * body or the method has not yet been executed, <code>null</code> is returned. Additionally,
+     * <code>null</code> may be returned if {@link #releaseConnection} has been called or if this method
+     * was called previously and the resulting stream was closed.
      * 
-     * @return The response body, or <code>null</code> if it is not available 
+     * @return The response body, or <code>null</code> if it is not available
      * 
      * @throws IOException if an I/O (transport) problem occurs
      */
     InputStream getResponseBodyAsStream() throws IOException;
 
     /**
-     * Returns <tt>true</tt> if the HTTP method has been already {@link #execute executed},
-     * but not {@link #recycle recycled}.
+     * Returns <tt>true</tt> if the HTTP method has been already {@link #execute executed}, but not
+     * {@link #recycle recycled}.
      * 
      * @return <tt>true</tt> if the method has been executed, <tt>false</tt> otherwise
      */
@@ -434,22 +427,19 @@ public interface HttpMethod {
     // --------------------------------------------------------- Action Methods
 
     /**
-     * Executes this method using the specified <code>HttpConnection</code> and
-     * <code>HttpState</code>. 
+     * Executes this method using the specified <code>HttpConnection</code> and <code>HttpState</code>.
      *
-     * @param state the {@link HttpState state} information to associate with this method
-     * @param connection the {@link HttpConnection connection} used to execute
-     *        this HTTP method
+     * @param state      the {@link HttpState state} information to associate with this method
+     * @param connection the {@link HttpConnection connection} used to execute this HTTP method
      *
-     * @throws IOException If an I/O (transport) error occurs. Some transport exceptions
-     *                     can be recovered from.
-     * @throws HttpException  If a protocol exception occurs. Usually protocol exceptions 
-     *                    cannot be recovered from.
+     * @throws IOException   If an I/O (transport) error occurs. Some transport exceptions can be
+     *                       recovered from.
+     * @throws HttpException If a protocol exception occurs. Usually protocol exceptions cannot be
+     *                       recovered from.
      *
      * @return the integer status code if one was obtained, or <tt>-1</tt>
      */
-    int execute(HttpState state, HttpConnection connection) 
-        throws HttpException, IOException;
+    int execute(HttpState state, HttpConnection connection) throws HttpException, IOException;
 
     /**
      * Aborts the execution of the HTTP method.
@@ -461,35 +451,32 @@ public interface HttpMethod {
     void abort();
 
     /**
-     * Recycles the HTTP method so that it can be used again.
-     * Note that all of the instance variables will be reset
-     * once this method has been called. This method will also
-     * release the connection being used by this HTTP method.
+     * Recycles the HTTP method so that it can be used again. Note that all of the instance variables
+     * will be reset once this method has been called. This method will also release the connection
+     * being used by this HTTP method.
      * 
      * @see #releaseConnection()
      * 
-     * @deprecated no longer supported and will be removed in the future
-     *             version of HttpClient
+     * @deprecated no longer supported and will be removed in the future version of HttpClient
      */
+    @Deprecated
     void recycle();
 
     /**
-     * Releases the connection being used by this HTTP method. In particular the
-     * connection is used to read the response (if there is one) and will be held
-     * until the response has been read. If the connection can be reused by other 
-     * HTTP methods it is NOT closed at this point.
+     * Releases the connection being used by this HTTP method. In particular the connection is used to
+     * read the response (if there is one) and will be held until the response has been read. If the
+     * connection can be reused by other HTTP methods it is NOT closed at this point.
      * <p>
-     * After this method is called, {@link #getResponseBodyAsStream} will return
-     * <code>null</code>, and {@link #getResponseBody} and {@link #getResponseBodyAsString}
-     * <em>may</em> return <code>null</code>. 
+     * After this method is called, {@link #getResponseBodyAsStream} will return <code>null</code>, and
+     * {@link #getResponseBody} and {@link #getResponseBodyAsString} <em>may</em> return
+     * <code>null</code>.
      */
     void releaseConnection();
 
     /**
      * Add a footer to this method's response.
      * <p>
-     * <b>Note:</b> This method is for
-     * internal use only and should not be called by external clients.
+     * <b>Note:</b> This method is for internal use only and should not be called by external clients.
      * 
      * @param footer the footer to add
      * 
@@ -497,9 +484,9 @@ public interface HttpMethod {
      */
     void addResponseFooter(Header footer);
 
-    /** 
-     * Returns the Status-Line from the most recent response for this method,
-     * or <code>null</code> if the method has not been executed.
+    /**
+     * Returns the Status-Line from the most recent response for this method, or <code>null</code> if
+     * the method has not been executed.
      * 
      * @return the status line, or <code>null</code> if the method has not been executed
      * 
@@ -508,11 +495,11 @@ public interface HttpMethod {
     StatusLine getStatusLine();
 
     /**
-     * Returns <tt>true</tt> if the HTTP method should automatically handle HTTP 
-     * authentication challenges (status code 401, etc.), <tt>false</tt> otherwise
+     * Returns <tt>true</tt> if the HTTP method should automatically handle HTTP authentication
+     * challenges (status code 401, etc.), <tt>false</tt> otherwise
      *
-     * @return <tt>true</tt> if authentication challenges will be processed 
-     * automatically, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if authentication challenges will be processed automatically,
+     *         <tt>false</tt> otherwise.
      * 
      * @since 2.0
      * 
@@ -521,18 +508,17 @@ public interface HttpMethod {
     boolean getDoAuthentication();
 
     /**
-     * Sets whether or not the HTTP method should automatically handle HTTP 
-     * authentication challenges (status code 401, etc.)
+     * Sets whether or not the HTTP method should automatically handle HTTP authentication challenges
+     * (status code 401, etc.)
      *
-     * @param doAuthentication <tt>true</tt> to process authentication challenges
-     * automatically, <tt>false</tt> otherwise.
+     * @param doAuthentication <tt>true</tt> to process authentication challenges automatically,
+     *                         <tt>false</tt> otherwise.
      * 
      * @since 2.0
      * 
      * @see #getDoAuthentication()
      */
     void setDoAuthentication(boolean doAuthentication);
-
 
     /**
      * Returns {@link HttpMethodParams HTTP protocol parameters} associated with this method.
@@ -541,7 +527,7 @@ public interface HttpMethod {
      * 
      * @see HttpMethodParams
      */
-    public HttpMethodParams getParams();
+    HttpMethodParams getParams();
 
     /**
      * Assigns {@link HttpMethodParams HTTP protocol parameters} for this method.
@@ -550,7 +536,7 @@ public interface HttpMethod {
      * 
      * @see HttpMethodParams
      */
-    public void setParams(final HttpMethodParams params);
+    void setParams(final HttpMethodParams params);
 
     /**
      * Returns the target host {@link AuthState authentication state}
@@ -559,7 +545,7 @@ public interface HttpMethod {
      * 
      * @since 3.0
      */
-    public AuthState getHostAuthState();
+    AuthState getHostAuthState();
 
     /**
      * Returns the proxy {@link AuthState authentication state}
@@ -568,13 +554,12 @@ public interface HttpMethod {
      * 
      * @since 3.0
      */
-    public AuthState getProxyAuthState();
+    AuthState getProxyAuthState();
 
     /**
-     * Returns <tt>true</tt> if the HTTP has been transmitted to the target
-     * server in its entirety, <tt>false</tt> otherwise. This flag can be useful 
-     * for recovery logic. If the request has not been transmitted in its entirety,
-     * it is safe to retry the failed method.
+     * Returns <tt>true</tt> if the HTTP has been transmitted to the target server in its entirety,
+     * <tt>false</tt> otherwise. This flag can be useful for recovery logic. If the request has not been
+     * transmitted in its entirety, it is safe to retry the failed method.
      * 
      * @return <tt>true</tt> if the request has been sent, <tt>false</tt> otherwise
      */

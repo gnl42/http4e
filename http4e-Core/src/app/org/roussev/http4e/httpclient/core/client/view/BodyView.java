@@ -41,130 +41,122 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 class BodyView {
 
-   StyledText    bodyText;
-   AttachManager attachManager;
-   CLabel        titleLabel;
+    StyledText bodyText;
+    AttachManager attachManager;
+    CLabel titleLabel;
 
+    BodyView(final ItemModel model, final Composite parent) {
 
-   BodyView( final ItemModel model, Composite parent) {
+        final ViewForm vForm = ViewUtils.buildViewForm(CoreConstants.TITLE_BODY, model, parent);
+        titleLabel = (CLabel) vForm.getChildren()[0];
+        bodyText = new StyledText(vForm, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+        vForm.setContent(bodyText);
 
-      ViewForm vForm = ViewUtils.buildViewForm(CoreConstants.TITLE_BODY, model, parent);
-      titleLabel = (CLabel) vForm.getChildren()[0];
-      bodyText = new StyledText(vForm, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-      vForm.setContent(bodyText);
+        bodyText.setEditable(false);
 
-      bodyText.setEditable(false);
+        // Font font = Display.getCurrent().getSystemFont();
+        // font.getFontData()[0].height = 12;
+        // bodyText.setFont(font);
+        bodyText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
+        bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
 
-      // Font font = Display.getCurrent().getSystemFont();
-      // font.getFontData()[0].height = 12;
-      // bodyText.setFont(font);
-      bodyText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
-      bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
+        // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
+        // bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
+        bodyText.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
 
-      // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-      // bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-      bodyText.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+        bodyText.addMouseListener(new MouseAdapter() {
 
-      bodyText.addMouseListener(new MouseAdapter() {
-
-         public void mouseDoubleClick( MouseEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.BODY_RESIZED, model));
-         }
-      });
-      bodyText.addFocusListener(new FocusListener() {
-
-         private String prevBody = model.getBody();
-
-
-         public void focusGained( FocusEvent e){
-            if (!prevBody.equals(bodyText.getText())) {
-               prevBody = bodyText.getText();
-               model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_GAINED, model));
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.BODY_RESIZED, model));
             }
-         }
+        });
+        bodyText.addFocusListener(new FocusListener() {
 
+            private String prevBody = model.getBody();
 
-         public void focusLost( FocusEvent e){
-            if (!prevBody.equals(bodyText.getText())) {
-               prevBody = bodyText.getText();
-               model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST, model));
+            @Override
+            public void focusGained(final FocusEvent e) {
+                if (!prevBody.equals(bodyText.getText())) {
+                    prevBody = bodyText.getText();
+                    model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_GAINED, model));
+                }
             }
-         }
-      });
-      
-      bodyText.addKeyListener(new ExecuteKeyListener(new ExecuteCommand() {
-         public void execute(){
-            model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model));
-         }
-      }));
 
-      final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
+            @Override
+            public void focusLost(final FocusEvent e) {
+                if (!prevBody.equals(bodyText.getText())) {
+                    prevBody = bodyText.getText();
+                    model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST, model));
+                }
+            }
+        });
 
-      ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
-      clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
-      clearBtn.setToolTipText("Clear");
-      clearBtn.addSelectionListener(new SelectionListener() {
+        bodyText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
 
-         public void widgetDefaultSelected( SelectionEvent e){
-         }
+        final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
 
+        final ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
+        clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
+        clearBtn.setToolTipText("Clear");
+        clearBtn.addSelectionListener(new SelectionListener() {
 
-         public void widgetSelected( SelectionEvent e){
-            BodyView.this.setText("");
-         }
-      });
-      attachManager = new AttachManager(model, bodyText, bar);
+            @Override
+            public void widgetDefaultSelected(final SelectionEvent e) {
+            }
 
-      vForm.setTopCenter(bar);
-   }
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                BodyView.this.setText("");
+            }
+        });
+        attachManager = new AttachManager(model, bodyText, bar);
 
+        vForm.setTopCenter(bar);
+    }
 
-   String getText(){
-      return bodyText.getText();
-   }
+    String getText() {
+        return bodyText.getText();
+    }
 
+    CLabel getTitleLabel() {
+        return titleLabel;
+    }
 
-   CLabel getTitleLabel(){
-      return titleLabel;
-   }
+    void setText(final String txt) {
+        bodyText.setText(txt);
+    }
 
+    void setBackground(final Color color) {
+        final StyledText st = bodyText;
+        st.setBackground(color);
+    }
 
-   void setText( String txt){
-      bodyText.setText(txt);
-   }
+    void setEditable(final boolean editable, final boolean isXwwwForm, final boolean isPost) {
+        if (editable) {
+            // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
+            bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
+            bodyText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
+            bodyText.setEditable(true);
+            // attachManager.setEnabled(true);
+            if (isXwwwForm && isPost) {
+                attachManager.setEnabled(false);
+            } else {
+                attachManager.setEnabled(true);
+            }
+            // if(isXwwForm && isPost){
+            // attachManager.setEnabled(false);
+            // } else {
+            // attachManager.setEnabled(true);
+            // }
 
-
-   void setBackground( Color color){
-      StyledText st = (StyledText) bodyText;
-      st.setBackground(color);
-   }
-
-
-   void setEditable( boolean editable, boolean isXwwwForm, boolean isPost){
-      if (editable) {
-         // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-         bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-         bodyText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
-         bodyText.setEditable(true);
-         // attachManager.setEnabled(true);
-         if (isXwwwForm && isPost) {
+        } else {
+            // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
+            bodyText.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
+            bodyText.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+            bodyText.setEditable(false);
             attachManager.setEnabled(false);
-         } else {
-            attachManager.setEnabled(true);
-         }
-         // if(isXwwForm && isPost){
-         // attachManager.setEnabled(false);
-         // } else {
-         // attachManager.setEnabled(true);
-         // }
-
-      } else {
-         // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-         bodyText.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
-         bodyText.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
-         bodyText.setEditable(false);
-         attachManager.setEnabled(false);
-      }
-   }
+        }
+    }
 
 }

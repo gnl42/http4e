@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 package org.roussev.http4e.httpclient.ui.actions;
- 
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuCreator;
@@ -24,68 +24,71 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.part.ViewPart;
 
-
-/** 
+/**
  * This class is a TODO feature adding a tools menu to toolbar.
  * 
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class ToolsAction extends Action implements IMenuCreator {
 
-   public static final int RESULTS_IN_DROP_DOWN = 10;
+    public static final int RESULTS_IN_DROP_DOWN = 10;
 
-   private ViewPart        view;
-   private Menu            fMenu;
+    private final ViewPart view;
+    private Menu fMenu;
 
-   public ToolsAction( ViewPart view) {
-      this.view = view;
-      fMenu = null;
-      setToolTipText("Http tools: Encoding, Encrypting ..");
-      setMenuCreator(this);
-   }
+    public ToolsAction(final ViewPart view) {
+        this.view = view;
+        fMenu = null;
+        setToolTipText("Http tools: Encoding, Encrypting ..");
+        setMenuCreator(this);
+    }
 
-   public void dispose(){
-      // action is reused, can be called several times.
-      if (fMenu != null) {
-         fMenu.dispose();
-         fMenu = null;
-      }
-   }
+    @Override
+    public void dispose() {
+        // action is reused, can be called several times.
+        if (fMenu != null) {
+            fMenu.dispose();
+            fMenu = null;
+        }
+    }
 
-   public Menu getMenu( Menu parent){
-      return null;
-   }
+    @Override
+    public Menu getMenu(final Menu parent) {
+        return null;
+    }
 
-   public Menu getMenu( Control parent){
-      if (fMenu != null) {
-         fMenu.dispose();
-      }
-      fMenu = new Menu(parent);
-      addEntries(fMenu);
-      new MenuItem(fMenu, SWT.SEPARATOR);
-      addActionToMenu(fMenu, new HelpAboutAction( view, "About"));
+    @Override
+    public Menu getMenu(final Control parent) {
+        if (fMenu != null) {
+            fMenu.dispose();
+        }
+        fMenu = new Menu(parent);
+        addEntries(fMenu);
+        new MenuItem(fMenu, SWT.SEPARATOR);
+        addActionToMenu(fMenu, new HelpAboutAction(view, "About"));
 //      addActionToMenu(fMenu, new SampleAction());
-      return fMenu;
-   }
+        return fMenu;
+    }
 
-   private boolean addEntries( Menu menu){
+    private boolean addEntries(final Menu menu) {
 
-      boolean checked = false;
-      for (int i = 0; i < 5; i++) {
-         HelpAboutAction action = new HelpAboutAction(view, "qwe " + i);
-         // action.setChecked(true);
-         checked = checked || action.isChecked();
-         addActionToMenu(menu, action);
-      }
+        boolean checked = false;
+        for (int i = 0; i < 5; i++) {
+            final HelpAboutAction action = new HelpAboutAction(view, "qwe " + i);
+            // action.setChecked(true);
+            checked = checked || action.isChecked();
+            addActionToMenu(menu, action);
+        }
 
-      return checked;
-   }
+        return checked;
+    }
 
-   protected void addActionToMenu( Menu parent, Action action){
-      ActionContributionItem item = new ActionContributionItem(action);
-      item.fill(parent, -1);
-   }
+    protected void addActionToMenu(final Menu parent, final Action action) {
+        final ActionContributionItem item = new ActionContributionItem(action);
+        item.fill(parent, -1);
+    }
 
-   public void run(){
-   }
+    @Override
+    public void run() {
+    }
 }

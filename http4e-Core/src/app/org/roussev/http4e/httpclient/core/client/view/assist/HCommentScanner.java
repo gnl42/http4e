@@ -15,7 +15,6 @@
  */
 package org.roussev.http4e.httpclient.core.client.view.assist;
 
-import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 
 /**
@@ -24,12 +23,7 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 public class HCommentScanner extends RuleBasedScanner {
 
     public HCommentScanner() {
-//       IToken comment = new Token(HPartitionScanner.COMMENT);         
-       setRules(new IRule[] {
-//             new SingleLineRule("#", null, comment, '\\', true, true),
-//             new WhitespaceRule(new WhitespaceDetector())
-       });
+//       IToken comment = new Token(HPartitionScanner.COMMENT);
+        setRules();
     }
 }
-
-

@@ -26,74 +26,71 @@ import org.eclipse.jface.text.rules.Token;
  */
 public class CDataRule implements IRule {
 
-   IToken                      fToken;
-   StringBuilder               buffer             = new StringBuilder();
-   int                         charsRead          = 0;
+    IToken fToken;
+    StringBuilder buffer = new StringBuilder();
+    int charsRead = 0;
 
-   private String              matchString;
-   private static final String START_MATCH_STRING = "<![CDATA[";
-   private static final String END_MATCH_STRING   = "]]>";
+    private final String matchString;
+    private static final String START_MATCH_STRING = "<![CDATA[";
+    private static final String END_MATCH_STRING = "]]>";
 
+    public CDataRule(final IToken token, final boolean start) {
+        fToken = token;
+        matchString = start ? START_MATCH_STRING : END_MATCH_STRING;
+    }
 
-   public CDataRule( IToken token, boolean start) {
-      super();
-      this.fToken = token;
-      this.matchString = start ? START_MATCH_STRING : END_MATCH_STRING;
-   }
+    /*
+     * @see IRule#evaluate(ICharacterScanner)
+     */
+    @Override
+    public IToken evaluate(final ICharacterScanner scanner) {
 
+        buffer.setLength(0);
 
-   /*
-    * @see IRule#evaluate(ICharacterScanner)
-    */
-   public IToken evaluate( ICharacterScanner scanner){
+        charsRead = 0;
+        int c = read(scanner);
 
-      buffer.setLength(0);
+        if (c == matchString.charAt(0)) {
+            do {
+                c = read(scanner);
+            } while (isOK((char) c));
 
-      charsRead = 0;
-      int c = read(scanner);
+            if (charsRead == matchString.length()) {
+                return fToken;
+            } else {
+                rewind(scanner);
+                return Token.UNDEFINED;
+            }
 
-      if (c == matchString.charAt(0)) {
-         do {
-            c = read(scanner);
-         } while (isOK((char) c));
+        }
 
-         if (charsRead == matchString.length()) {
-            return fToken;
-         } else {
-            rewind(scanner);
-            return Token.UNDEFINED;
-         }
+        scanner.unread();
+        return Token.UNDEFINED;
+    }
 
-      }
+    private void rewind(final ICharacterScanner scanner) {
+        int rewindLength = charsRead;
+        while (rewindLength > 0) {
+            scanner.unread();
+            rewindLength--;
+        }
+    }
 
-      scanner.unread();
-      return Token.UNDEFINED;
-   }
+    private int read(final ICharacterScanner scanner) {
+        final int c = scanner.read();
+        buffer.append((char) c);
+        charsRead++;
+        return c;
+    }
 
-
-   private void rewind( ICharacterScanner scanner){
-      int rewindLength = charsRead;
-      while (rewindLength > 0) {
-         scanner.unread();
-         rewindLength--;
-      }
-   }
-
-
-   private int read( ICharacterScanner scanner){
-      int c = scanner.read();
-      buffer.append((char) c);
-      charsRead++;
-      return c;
-   }
-
-
-   private boolean isOK( char c){
-      if (charsRead >= matchString.length())
-         return false;
-      if (matchString.charAt(charsRead - 1) == c)
-         return true;
-      else
-         return false;
-   }
+    private boolean isOK(final char c) {
+        if (charsRead >= matchString.length()) {
+            return false;
+        }
+        if (matchString.charAt(charsRead - 1) == c) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

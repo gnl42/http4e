@@ -15,11 +15,6 @@
  */
 package org.roussev.http4e.httpclient.core.client.view;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,7 +27,6 @@ import org.roussev.http4e.httpclient.core.CoreImages;
 import org.roussev.http4e.httpclient.core.client.model.ItemModel;
 import org.roussev.http4e.httpclient.core.client.model.Model;
 import org.roussev.http4e.httpclient.core.client.model.ModelEvent;
-import org.roussev.http4e.httpclient.core.misc.CoreException;
 import org.roussev.http4e.httpclient.core.util.ResourceUtils;
 
 /**
@@ -42,27 +36,27 @@ class AttachManager {
 
 //   private final Menu         menu;
 //   private final ToolItem     addBody;
-   private final ToolBar      toolBar;
-   private final ToolItem i_open;
+    private final ToolBar toolBar;
+    private final ToolItem i_open;
 //   private final StyledText   swtText;
 //   private final MenuItem     m_attachPart;
 
-   AttachManager( final ItemModel model, final StyledText swtText, final ToolBar toolbar) {
+    AttachManager(final ItemModel model, final StyledText swtText, final ToolBar toolbar) {
 //      this.swtText = swtText;
-      this.toolBar = toolbar;
+        toolBar = toolbar;
 
-      Open open = new Open(model, swtText);
-      
-      i_open = new ToolItem(toolBar, SWT.PUSH);
-      i_open.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN));
-      i_open.setDisabledImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN_DIS));
-      i_open.setToolTipText("Add File");
-      i_open.addSelectionListener(open);
+        final Open open = new Open(model, swtText);
+
+        i_open = new ToolItem(toolBar, SWT.PUSH);
+        i_open.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN));
+        i_open.setDisabledImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.FILE_OPEN_DIS));
+        i_open.setToolTipText("Add File");
+        i_open.addSelectionListener(open);
 //      i_open.addSelectionListener(new SelectionAdapter() {
 //         public void widgetSelected( SelectionEvent e){
 //         }
 //      });
-      
+
 //      // Menu(bar)
 //      menu = new Menu(toolBar.getShell(), SWT.POP_UP);
 //
@@ -94,11 +88,11 @@ class AttachManager {
 //            }
 //         }
 //      });
-   }
+    }
 
-   public void setEnabled( boolean enabled){
-      i_open.setEnabled(enabled);
-   }
+    public void setEnabled(final boolean enabled) {
+        i_open.setEnabled(enabled);
+    }
 
 //   public void setMultipartEnabled( boolean enabled){
 //      m_attachPart.setEnabled(enabled);
@@ -106,33 +100,33 @@ class AttachManager {
 
 }
 
-
-
-
 class Open implements SelectionListener {
-   private StyledText parent;
-   private Model model;
-   public Open(ItemModel model, StyledText parent){
-      this.parent = parent;
-      this.model = model;
-   }
-   
-   public void widgetSelected( SelectionEvent event){
-      FileDialog fd = new FileDialog(parent.getShell(), SWT.OPEN);
-      fd.setText("Add File Content to Body");
-      // fd.setFilterPath("C:/");
-      fd.setFilterExtensions(CoreConstants.FILE_FILTER_EXT);
-      String file = fd.open();
-      
-      if (file != null) {
-         parent.setText(CoreConstants.FILE_PREFIX + file);
-         model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST, model));
-//       force body to refresh itself
-         model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, model)); 
-      }
-   }
+    private final StyledText parent;
+    private final Model model;
 
-   public void widgetDefaultSelected( SelectionEvent event){
-   }
-   
+    public Open(final ItemModel model, final StyledText parent) {
+        this.parent = parent;
+        this.model = model;
+    }
+
+    @Override
+    public void widgetSelected(final SelectionEvent event) {
+        final FileDialog fd = new FileDialog(parent.getShell(), SWT.OPEN);
+        fd.setText("Add File Content to Body");
+        // fd.setFilterPath("C:/");
+        fd.setFilterExtensions(CoreConstants.FILE_FILTER_EXT);
+        final String file = fd.open();
+
+        if (file != null) {
+            parent.setText(CoreConstants.FILE_PREFIX + file);
+            model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST, model));
+//       force body to refresh itself
+            model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, model));
+        }
+    }
+
+    @Override
+    public void widgetDefaultSelected(final SelectionEvent event) {
+    }
+
 }

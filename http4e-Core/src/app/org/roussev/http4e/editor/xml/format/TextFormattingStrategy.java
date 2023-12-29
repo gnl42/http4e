@@ -21,18 +21,17 @@ package org.roussev.http4e.editor.xml.format;
  */
 public class TextFormattingStrategy extends DefaultFormattingStrategy {
 
-   private static final String lineSeparator = System.getProperty("line.separator");
+    private static final String lineSeparator = System.lineSeparator();
 
+    public TextFormattingStrategy() {
+    }
 
-   public TextFormattingStrategy() {
-      super();
-   }
-
-
-   public String format( String content, boolean isLineStart, String indentation, int[] positions){
-      if (indentation.length() == 0)
-         return content;
-      return lineSeparator + content.trim() + lineSeparator + indentation;
-   }
+    @Override
+    public String format(final String content, final boolean isLineStart, final String indentation, final int[] positions) {
+        if (indentation.length() == 0) {
+            return content;
+        }
+        return lineSeparator + content.trim() + lineSeparator + indentation;
+    }
 
 }

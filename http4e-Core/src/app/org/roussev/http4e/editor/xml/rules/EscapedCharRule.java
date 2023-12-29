@@ -22,49 +22,47 @@ import org.eclipse.jface.text.rules.Token;
 
 public class EscapedCharRule implements IRule {
 
-   IToken       fToken;
-   StringBuilder buffer = new StringBuilder();
+    IToken fToken;
+    StringBuilder buffer = new StringBuilder();
 
+    public EscapedCharRule(final IToken token) {
+        fToken = token;
+    }
 
-   public EscapedCharRule( IToken token) {
-      super();
-      this.fToken = token;
-   }
+    /*
+     * @see IRule#evaluate(ICharacterScanner)
+     */
+    @Override
+    public IToken evaluate(final ICharacterScanner scanner) {
 
+        buffer.setLength(0);
 
-   /*
-    * @see IRule#evaluate(ICharacterScanner)
-    */
-   public IToken evaluate( ICharacterScanner scanner){
+        int c = read(scanner);
+        if (c == '&') {
 
-      buffer.setLength(0);
+            int i = 0;
+            do {
+                c = read(scanner);
+                i++;
 
-      int c = read(scanner);
-      if (c == '&') {
+                if (c == '<' || c == ']') {
+                    for (int j = i - 1; j > 0; j--) {
+                        scanner.unread();
+                    }
+                    return Token.UNDEFINED;
+                }
+            } while (c != ';');
+            return fToken;
+        }
 
-         int i = 0;
-         do {
-            c = read(scanner);
-            i++;
+        scanner.unread();
+        return Token.UNDEFINED;
+    }
 
-            if (c == '<' || c == ']') {
-               for (int j = i - 1; j > 0; j--)
-                  scanner.unread();
-               return Token.UNDEFINED;
-            }
-         } while (c != ';');
-         return fToken;
-      }
-
-      scanner.unread();
-      return Token.UNDEFINED;
-   }
-
-
-   private int read( ICharacterScanner scanner){
-      int c = scanner.read();
-      buffer.append((char) c);
-      return c;
-   }
+    private int read(final ICharacterScanner scanner) {
+        final int c = scanner.read();
+        buffer.append((char) c);
+        return c;
+    }
 
 }

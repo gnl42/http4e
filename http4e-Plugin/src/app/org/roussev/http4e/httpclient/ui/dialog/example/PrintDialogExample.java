@@ -35,56 +35,57 @@ import org.eclipse.swt.widgets.Text;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class PrintDialogExample {
-  Display d;
+    Display d;
 
-  Shell s;
+    Shell s;
 
-  PrintDialogExample() {
-    d = new Display();
-    s = new Shell(d);
-    s.setSize(400, 400);
-    
-    s.setText("A PrintDialog Example");
-    s.setLayout(new FillLayout(SWT.VERTICAL));
-    final Text t = new Text(s, SWT.BORDER | SWT.MULTI);
-    final Button b = new Button(s, SWT.PUSH | SWT.BORDER);
-    b.setText("Print");
-    b.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        PrintDialog printDialog = new PrintDialog(s, SWT.NONE);
-        printDialog.setText("Print");
-        PrinterData printerData = printDialog.open();
-        if (!(printerData == null)) {
-          Printer p = new Printer(printerData);
-          p.startJob("PrintJob");
-          p.startPage();
-          Rectangle trim = p.computeTrim(0, 0, 0, 0);
-          Point dpi = p.getDPI();
-          int leftMargin = dpi.x + trim.x;
-          int topMargin = dpi.y / 2 + trim.y;
-          GC gc = new GC(p);
-          Font font = gc.getFont();
-          String printText = t.getText();
-          Point extent = gc.stringExtent(printText);
-          gc.drawString(printText, leftMargin, topMargin
-              + font.getFontData()[0].getHeight());
-          p.endPage();
-          gc.dispose();
-          p.endJob();
-          p.dispose();
+    PrintDialogExample() {
+        d = new Display();
+        s = new Shell(d);
+        s.setSize(400, 400);
+
+        s.setText("A PrintDialog Example");
+        s.setLayout(new FillLayout(SWT.VERTICAL));
+        final Text t = new Text(s, SWT.BORDER | SWT.MULTI);
+        final Button b = new Button(s, SWT.PUSH | SWT.BORDER);
+        b.setText("Print");
+        b.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                final PrintDialog printDialog = new PrintDialog(s, SWT.NONE);
+                printDialog.setText("Print");
+                final PrinterData printerData = printDialog.open();
+                if (!(printerData == null)) {
+                    final Printer p = new Printer(printerData);
+                    p.startJob("PrintJob");
+                    p.startPage();
+                    final Rectangle trim = p.computeTrim(0, 0, 0, 0);
+                    final Point dpi = p.getDPI();
+                    final int leftMargin = dpi.x + trim.x;
+                    final int topMargin = dpi.y / 2 + trim.y;
+                    final GC gc = new GC(p);
+                    final Font font = gc.getFont();
+                    final String printText = t.getText();
+                    final Point extent = gc.stringExtent(printText);
+                    gc.drawString(printText, leftMargin, topMargin + font.getFontData()[0].getHeight());
+                    p.endPage();
+                    gc.dispose();
+                    p.endJob();
+                    p.dispose();
+                }
+            }
+        });
+        s.open();
+
+        while (!s.isDisposed()) {
+            if (!d.readAndDispatch()) {
+                d.sleep();
+            }
         }
-      }
-    });
-    s.open();
-
-    while (!s.isDisposed()) {
-      if (!d.readAndDispatch())
-        d.sleep();
+        d.dispose();
     }
-    d.dispose();
-  }
 
-  public static void main(String[] argv) {
-    new PrintDialogExample();
-  }
+    public static void main(final String[] argv) {
+        new PrintDialogExample();
+    }
 }

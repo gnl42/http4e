@@ -19,8 +19,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
@@ -29,44 +27,33 @@ import org.eclipse.swt.widgets.MenuItem;
  */
 class ClipboardMenu {
 
-   ClipboardMenu( final StyledText styledText, Menu menu) {
+    ClipboardMenu(final StyledText styledText, final Menu menu) {
 
-      styledText.addKeyListener(new KeyAdapter(){
-         public void keyPressed( KeyEvent e){
-            if (e.stateMask == SWT.CTRL) {
-               if (e.character == 1) { // ^A
-                  styledText.selectAll();               
-               } else if (e.character == 3) { // ^C
-                  styledText.copy();
-               } else if (e.character == 16) { // ^V
-                  styledText.paste();
-               }
+        styledText.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                if (e.stateMask == SWT.CTRL) {
+                    if (e.character == 1) { // ^A
+                        styledText.selectAll();
+                    } else if (e.character == 3) { // ^C
+                        styledText.copy();
+                    } else if (e.character == 16) { // ^V
+                        styledText.paste();
+                    }
+                }
             }
-         }
-      });
-      
-      MenuItem cutItem = new MenuItem(menu, SWT.PUSH);
-      cutItem.setText("Cut \t Ctrl+X");
-      cutItem.addListener(SWT.Selection, new Listener() {
-         public void handleEvent( Event event){
-            styledText.cut();
-         }
-      });
+        });
 
-      MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
-      copyItem.setText("Copy \t Ctrl+C");
-      copyItem.addListener(SWT.Selection, new Listener() {
-         public void handleEvent( Event event){
-            styledText.copy();
-         }
-      });
-      MenuItem pasteItem = new MenuItem(menu, SWT.PUSH);
-      pasteItem.setText("Paste \t Ctrl+P");
-      pasteItem.addListener(SWT.Selection, new Listener() {
-         public void handleEvent( Event event){
-            styledText.paste();
-         }
-      });
-   }
+        final MenuItem cutItem = new MenuItem(menu, SWT.PUSH);
+        cutItem.setText("Cut \t Ctrl+X");
+        cutItem.addListener(SWT.Selection, event -> styledText.cut());
+
+        final MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
+        copyItem.setText("Copy \t Ctrl+C");
+        copyItem.addListener(SWT.Selection, event -> styledText.copy());
+        final MenuItem pasteItem = new MenuItem(menu, SWT.PUSH);
+        pasteItem.setText("Paste \t Ctrl+P");
+        pasteItem.addListener(SWT.Selection, event -> styledText.paste());
+    }
 
 }

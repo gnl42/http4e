@@ -27,71 +27,70 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.roussev.http4e.httpclient.ui.actions.AboutDialog;
 
-
 /**
  * This class demonstrates JFace's TitleAreaDialog class
  * 
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class ShowMyTitleAreaDialog extends ApplicationWindow {
-   /**
-    * ShowCustomDialog constructor
-    */
-   public ShowMyTitleAreaDialog() {
-      super(null);
-   }
+    /**
+     * ShowCustomDialog constructor
+     */
+    public ShowMyTitleAreaDialog() {
+        super(null);
+    }
 
-   /**
-    * Runs the application
-    */
-   public void run(){
-      // Don't return from open() until window closes
-      setBlockOnOpen(true);
+    /**
+     * Runs the application
+     */
+    public void run() {
+        // Don't return from open() until window closes
+        setBlockOnOpen(true);
 
-      // Open the main window
-      open();
+        // Open the main window
+        open();
 
-      // Dispose the display
-      Display.getCurrent().dispose();
-   }
+        // Dispose the display
+        Display.getCurrent().dispose();
+    }
 
-   /**
-    * Creates the main window's contents
-    * 
-    * @param parent
-    *           the main window
-    * @return Control
-    */
-   protected Control createContents( Composite parent){
-      Composite composite = new Composite(parent, SWT.NONE);
-      composite.setLayout(new GridLayout(10, true));
+    /**
+     * Creates the main window's contents
+     * 
+     * @param parent the main window
+     * @return Control
+     */
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout(10, true));
 
-      // Create the button
-      Button show = new Button(composite, SWT.NONE);
-      show.setText("Show");
+        // Create the button
+        final Button show = new Button(composite, SWT.NONE);
+        show.setText("Show");
 
-      final Shell shell = parent.getShell();
+        final Shell shell = parent.getShell();
 
-      // Display the TitleAreaDialog
-      show.addSelectionListener(new SelectionAdapter() {
-         public void widgetSelected( SelectionEvent event){
-            // Create and show the dialog
-            AboutDialog dlg = new AboutDialog(shell);
-            dlg.open();
-         }
-      });
+        // Display the TitleAreaDialog
+        show.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(final SelectionEvent event) {
+                // Create and show the dialog
+                final AboutDialog dlg = new AboutDialog(shell);
+                dlg.open();
+            }
+        });
 
-      parent.pack();
-      return composite;
-   }
+        parent.pack();
+        return composite;
+    }
 
-   /**
-    * The application entry point
-    * 
-    * @param args
-    *           the command line arguments
-    */
-   public static void main( String[] args){
-      new ShowMyTitleAreaDialog().run();
-   }
+    /**
+     * The application entry point
+     * 
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        new ShowMyTitleAreaDialog().run();
+    }
 }

@@ -24,52 +24,50 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class SwtUtils {
 
-   public static void centreWindow( Shell shell){
-      Rectangle displayRect;
-      try {
-         displayRect = shell.getMonitor().getClientArea();
-      } catch (NoSuchMethodError e) {
-         displayRect = shell.getDisplay().getClientArea();
-      }
-      Rectangle shellRect = shell.getBounds();
-      int x = (displayRect.width - shellRect.width) / 2;
-      int y = (displayRect.height - shellRect.height) / 2;
-      shell.setLocation(x, y);
-   }
+    public static void centreWindow(final Shell shell) {
+        Rectangle displayRect;
+        try {
+            displayRect = shell.getMonitor().getClientArea();
+        } catch (final NoSuchMethodError e) {
+            displayRect = shell.getDisplay().getClientArea();
+        }
+        final Rectangle shellRect = shell.getBounds();
+        final int x = (displayRect.width - shellRect.width) / 2;
+        final int y = (displayRect.height - shellRect.height) / 2;
+        shell.setLocation(x, y);
+    }
 
+    public static boolean isMac() {
+        final String platform = SWT.getPlatform();
+        if ("carbon".equals(platform) || "cocoa".equals(platform)) {
+            return true;
+        }
 
-   public static boolean isMac(){
-      String platform = SWT.getPlatform();
-      if ("carbon".equals(platform) || "cocoa".equals(platform)) {
-         return true;
-      }
+        // if ("win32".equals(platform) || "wpf".equals(platform)) {
+        // // className = "org.eclipse.swt.browser.IE";
+        // } else if ("motif".equals(platform)) {
+        // // className = "org.eclipse.swt.browser.Mozilla";
+        // } else if ("gtk".equals(platform)) {
+        // // className = "org.eclipse.swt.browser.Mozilla";
+        // } else if ("carbon".equals(platform) || "cocoa".equals(platform)) {
+        // // className = "org.eclipse.swt.browser.Safari";
+        // return true;
+        // } else if ("photon".equals(platform)) {
+        // // className = "org.eclipse.swt.browser.Voyager";
+        // } else {
+        // // dispose ();
+        // // SWT.error (SWT.ERROR_NO_HANDLES);
+        // }
 
-      // if ("win32".equals(platform) || "wpf".equals(platform)) {
-      // // className = "org.eclipse.swt.browser.IE";
-      // } else if ("motif".equals(platform)) {
-      // // className = "org.eclipse.swt.browser.Mozilla";
-      // } else if ("gtk".equals(platform)) {
-      // // className = "org.eclipse.swt.browser.Mozilla";
-      // } else if ("carbon".equals(platform) || "cocoa".equals(platform)) {
-      // // className = "org.eclipse.swt.browser.Safari";
-      // return true;
-      // } else if ("photon".equals(platform)) {
-      // // className = "org.eclipse.swt.browser.Voyager";
-      // } else {
-      // // dispose ();
-      // // SWT.error (SWT.ERROR_NO_HANDLES);
-      // }
+        return false;
+    }
 
-      return false;
-   }
-
-
-   public static boolean isWindows(){
-      String platform = SWT.getPlatform();
-      if ("win32".equals(platform) || "wpf".equals(platform)) {
-         return true;
-      }
-      return false;
-   }
+    public static boolean isWindows() {
+        final String platform = SWT.getPlatform();
+        if ("win32".equals(platform) || "wpf".equals(platform)) {
+            return true;
+        }
+        return false;
+    }
 
 }

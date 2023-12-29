@@ -44,406 +44,382 @@ import org.roussev.http4e.jmeter.LiveHttpHeadersParser;
 
 public class BaseUtils {
 
-   public static String getJavaVersion(){
-      String ver = null;
-      try {
-         ver = "1.0";
-         Class.forName("java.lang.Void");
-         ver = "1.1";
-         Class.forName("java.lang.ThreadLocal");
-         ver = "1.2";
-         Class.forName("java.lang.StrictMath");
-         ver = "1.3";
-         Class.forName("java.net.URI");
-         ver = "1.4";
-         Class.forName("java.util.Scanner");
-         ver = "5";
-         Class.forName("javax.annotation.processing.Completions");
-         ver = "6";
-      } catch (Throwable t) {
-      }
-      return ver;
-   }
-
-   public static void writeToPrefs( String prefName, byte[] prefData){
-      try {
-         Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
-         Preferences prefs = pl.getPluginPreferences();
-
-         String str64 = new String(Base64.encodeBase64(prefData), "UTF8");
-         prefs.setValue(prefName, str64);
-         pl.savePluginPreferences();
-
-      } catch (UnsupportedEncodingException e) {
-         ExceptionHandler.handle(e);
-      } catch (Exception ignore) {
-         ExceptionHandler.handle(ignore);
-      }
-   }
-
-
-   public static byte[] readFromPrefs( String prefName){
-      try {
-         Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
-         Preferences prefs = pl.getPluginPreferences();
-         String str64 = prefs.getString(prefName);
-         byte[] data = Base64.decodeBase64(str64.getBytes("UTF8"));
-         return data;
-
-      } catch (UnsupportedEncodingException e) {
-         ExceptionHandler.handle(e);
-      } catch (Exception ignore) {
-         ExceptionHandler.handle(ignore);
-      }
-      return null;
-   }
-
-
-   /**
-    * Decodes a String from a given charset
-    */
-   public static String decode( String text, String charsetName){
-      Charset charset = Charset.forName(charsetName);
-      CharsetDecoder decoder = charset.newDecoder();
-      ByteBuffer byteBuff;
-      try {
-         byteBuff = ByteBuffer.wrap(text.getBytes(charsetName));
-         return decoder.decode(byteBuff).toString();
-
-      } catch (CharacterCodingException e) {
-         throw new CoreException(CoreException.UNSUPPORTED_ENCODING, "CharacterCodingException", e);
-      } catch (UnsupportedEncodingException ue) {
-         throw new CoreException(CoreException.UNSUPPORTED_ENCODING, ue);
-      }
-   }
-
-
-   /**
-    * Encodes a String to given charset
-    */
-   public static String encode( String text, String charsetName){
-      try {
-         Charset charset = Charset.forName(charsetName);
-         CharsetEncoder encoder = charset.newEncoder();
-
-         ByteBuffer byteBuff = encoder.encode(CharBuffer.wrap(text));
-         return new String(byteBuff.array(), charsetName);
-
-      } catch (CharacterCodingException e) {
-         throw new CoreException(CoreException.UNSUPPORTED_ENCODING, "CharacterCodingException", e);
-      } catch (UnsupportedEncodingException ue) {
-         throw new CoreException(CoreException.UNSUPPORTED_ENCODING, ue);
-      }
-   }
-
-
-   public static boolean isEmpty( String str){
-      return str == null || str.trim().equals("");
-   }
-
-
-   public static String noNull( String str){
-      return str != null ? str : CoreConstants.EMPTY_TEXT;
-   }
-
-
-   public static String noNull( String str, String val){
-      return str != null ? str : val;
-   }
-
-
-   public static Properties6 loadProperties( String propResource){
-      Properties6 properties = null;
-      if (propResource == null) {
-         throw new IllegalArgumentException("propertiesResource not provided !");
-      }
-
-      InputStream is;
-      try {
-         is = new FileInputStream(propResource);
-
-      } catch (FileNotFoundException e) {
-         is = Thread.currentThread().getContextClassLoader().getResourceAsStream(propResource);
-      }
-
-      try {
-         if (is == null || is.available() < 1) {
-            throw new RuntimeException("Properties '" + propResource + "' not initilized. Skipping..");
-         }
-         properties = new Properties6();
-         InputStreamReader inR = new InputStreamReader(is, "UTF8");
-         BufferedReader bufR = new BufferedReader(inR);
-         properties.load(bufR);
-
-      } catch (IOException ioe) {
-         throw new RuntimeException(ioe);
-      }
-
-      return properties;
-   }
-
-
-   public static List<String> loadList( InputStream is){
-
-      if (is == null) {
-         throw new IllegalArgumentException("InputStream empty.");
-      }
-      byte[] data;
-      try {
-         data = new byte[is.available()];
-         is.read(data);
-      } catch (IOException e) {
-         throw new RuntimeException(e);
-      }
-
-      String str = new String(data);
-      StringTokenizer st = new StringTokenizer(str, "\n\r");
-      List<String> result = new ArrayList<String>();
-      while (st.hasMoreTokens()) {
-         result.add(st.nextToken());
-      }
-      return result;
-   }
-
-
-   public static boolean isHttp4eIdentifier( char c){
-      return Character.isJavaIdentifierPart(c) || c == '-';
-   }
-
-
-   public static void writeJMX( String fileName, FolderModel folderModel) throws FileNotFoundException{
-      Collection<HttpBean> httpBeans = new ArrayList<HttpBean>();
-
-      for (ItemModel iModel : folderModel.getItemModels()) {
-         HttpBean bean = Utils.modelToHttpBean(iModel);
-         bean.filterXml();
-         httpBeans.add(bean);
-      }
-
-      HttpToJmxTransformer t = new HttpToJmxTransformer("/resources/jmx.vm", httpBeans);
-
-      t.doWrite(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName))));
-
-      // write JMX CSV data file
-      try {
-         File f = new File(new File(fileName).getParent() + File.separatorChar + "http4e-jmx.csv");
-         if (!f.exists()) {
-            FileWriter fstream = new FileWriter(f);
-            BufferedWriter out = new BufferedWriter(fstream);
-            out.write("################################################\n");
-            out.write("## Configure varA, varB entries as bellow\n");
-            out.write("## aa=xxx, bb=xxx\n");
-            out.write("################################################\n");
-            out.write("JSESSIONID=xxxxxxxxxx,userId=1\n");
-            out.write("JSESSIONID=yyyyyyyyyy,userId=2\n");
-            out.write("JSESSIONID=zzzzzzzzzz,userId=3\n");
-            out.close();
-         }
-      } catch (Exception ignore) {
-         //
-      }
-   }
-
-
-   public static void writeJavaHttpClient3( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/java3.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeJavaHttpComponent4( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/java.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeJsPrototype( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/js-prototype.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeJsJQuery( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/js-jquery.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeJsXhr( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/js-xhr.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writePython( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/python.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeCsharp( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      bean.filterCSharpSpecialHeaders();
-      new ExportTemplateTransformer("/resources/csharp.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeVisualBasic( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      bean.filterCSharpSpecialHeaders();
-      new ExportTemplateTransformer("/resources/vb.vm", bean).doWrite(writer);
-   }
-
-   public static void writeFlex( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      bean.setMethod(bean.getMethod().toUpperCase());
-      List<String> contentTypeHeader = iModel.getHeaderValuesIgnoreCase("Content-Type");
-      if(contentTypeHeader != null && contentTypeHeader.size() > 0){
-         bean.setContentType(contentTypeHeader.get(0));
-      }
-      new ExportTemplateTransformer("/resources/flex.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeRuby( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJavaSrcipt();
-      bean.setMethod(bean.getMethod().toLowerCase());
-      new ExportTemplateTransformer("/resources/ruby.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writePHP( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      new ExportTemplateTransformer("/resources/php.vm", bean).doWrite(writer);
-   }
-
-
-   public static void writeObjectiveC( ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.filterJava();
-      if ("GET".equalsIgnoreCase(bean.getMethod())) {
-         new ExportTemplateTransformer("/resources/cocoa-get.vm", bean).doWrite(writer);
-
-      } else if ("POST".equalsIgnoreCase(bean.getMethod())) {
-         new ExportTemplateTransformer("/resources/cocoa-post.vm", bean).doWrite(writer);
-
-      } else if ("PUT".equalsIgnoreCase(bean.getMethod())) {
-         new ExportTemplateTransformer("/resources/cocoa-put.vm", bean).doWrite(writer);
-
-      } else if ("DELETE".equalsIgnoreCase(bean.getMethod())) {
-         new ExportTemplateTransformer("/resources/cocoa-delete.vm", bean).doWrite(writer);
-
-      } else {
-         try {
-            writer.write("\n\n       /* Method not allowed. Only GET, POST, PUT and DELETE are supported. */");
-            writer.flush();
-            writer.close();
-         } catch (IOException e) {
-            // ignore
-         }
-      }
-   }
-
-
-   public static void writeHttp4eSessionsModel(Writer writer, FolderModel folderModel) throws FileNotFoundException{
-      Collection<HttpBean> httpBeans = new ArrayList<HttpBean>();
-
-      int inx = 0;
-      for (ItemModel iModel : folderModel.getItemModels()) {
-         HttpBean bean = Utils.modelToHttpBean(iModel);
-         bean.filterXml();
-
-         bean.setId(inx);
-         List<String> contentTypeHeader = iModel.getHeaderValuesIgnoreCase("Content-Type");
-         if(contentTypeHeader != null && contentTypeHeader.size() > 0){
-            bean.setContentType(contentTypeHeader.get(0));
-         } else {
-            bean.setContentType("");
-         }
-
-         httpBeans.add(bean);
-         inx++;
-      }
-
-      ExportSessionsTransformer t = new ExportSessionsTransformer("/resources/http4e-sessions.vm", httpBeans);
-      t.doWrite(writer);
-   }
-
-
-   public static void writeHttp4eItemModel( int inx, ItemModel iModel, Writer writer) throws FileNotFoundException{
-      HttpBean bean = Utils.modelToHttpBean(iModel);
-      bean.setId(inx);
-      List<String> contentTypeHeader = iModel.getHeaderValuesIgnoreCase("Content-Type");
-      if(contentTypeHeader != null && contentTypeHeader.size() > 0){
-         bean.setContentType(contentTypeHeader.get(0));
-      } else {
-         bean.setContentType("");
-      }
-      bean.setRequest(iModel.getRequest());
-      bean.setResponse(iModel.getResponse());
-      bean.filterXml();
-      new ExportTemplateTransformer("/resources/http4e-item.vm", bean).doWrite(writer);
-   }
-
-   public static void writeHttp4eSessions(String file, FolderModel folderModel){
-
-      try {
-         File exportedFile = new File(file);
-         File rawDir = new File(exportedFile.getParent() + File.separator + "raw");
-         if (!rawDir.exists()) {
-            rawDir.mkdir();
-         }
-         // String tmpDir =
-         // "C:/Users/Mitko/Desktop/tmp/";//System.getProperty("java.io.tmpdir");
-
-         FileWriter fileWriter = new FileWriter(new File(exportedFile.getParent() + File.separator + "index-sessions.html"));
-         BaseUtils.writeHttp4eSessionsModel(fileWriter, folderModel);
-         fileWriter.close();
-
-         FileWriter fstream = new FileWriter(exportedFile.getParent() + File.separator + "index-sessions.txt");
-         BufferedWriter outTxt = new BufferedWriter(fstream);
-
-
-         int inx = 0;
-         for (ItemModel im : folderModel.getItemModels()) {
+    public static String getJavaVersion() {
+        String ver = null;
+        try {
+            ver = "1.0";
+            Class.forName("java.lang.Void");
+            ver = "1.1";
+            Class.forName("java.lang.ThreadLocal");
+            ver = "1.2";
+            Class.forName("java.lang.StrictMath");
+            ver = "1.3";
+            Class.forName("java.net.URI");
+            ver = "1.4";
+            Class.forName("java.util.Scanner");
+            ver = "5";
+            Class.forName("javax.annotation.processing.Completions");
+            ver = "6";
+        } catch (final Throwable t) {
+        }
+        return ver;
+    }
+
+    public static void writeToPrefs(final String prefName, final byte[] prefData) {
+        try {
+            final Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
+            final Preferences prefs = pl.getPluginPreferences();
+
+            final String str64 = new String(Base64.encodeBase64(prefData), "UTF8");
+            prefs.setValue(prefName, str64);
+            pl.savePluginPreferences();
+
+        } catch (final Exception ignore) {
+            ExceptionHandler.handle(ignore);
+        }
+    }
+
+    public static byte[] readFromPrefs(final String prefName) {
+        try {
+            final Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
+            final Preferences prefs = pl.getPluginPreferences();
+            final String str64 = prefs.getString(prefName);
+            final byte[] data = Base64.decodeBase64(str64.getBytes("UTF8"));
+            return data;
+
+        } catch (final Exception ignore) {
+            ExceptionHandler.handle(ignore);
+        }
+        return null;
+    }
+
+    /**
+     * Decodes a String from a given charset
+     */
+    public static String decode(final String text, final String charsetName) {
+        final Charset charset = Charset.forName(charsetName);
+        final CharsetDecoder decoder = charset.newDecoder();
+        ByteBuffer byteBuff;
+        try {
+            byteBuff = ByteBuffer.wrap(text.getBytes(charsetName));
+            return decoder.decode(byteBuff).toString();
+
+        } catch (final CharacterCodingException e) {
+            throw new CoreException(CoreException.UNSUPPORTED_ENCODING, "CharacterCodingException", e);
+        } catch (final UnsupportedEncodingException ue) {
+            throw new CoreException(CoreException.UNSUPPORTED_ENCODING, ue);
+        }
+    }
+
+    /**
+     * Encodes a String to given charset
+     */
+    public static String encode(final String text, final String charsetName) {
+        try {
+            final Charset charset = Charset.forName(charsetName);
+            final CharsetEncoder encoder = charset.newEncoder();
+
+            final ByteBuffer byteBuff = encoder.encode(CharBuffer.wrap(text));
+            return new String(byteBuff.array(), charsetName);
+
+        } catch (final CharacterCodingException e) {
+            throw new CoreException(CoreException.UNSUPPORTED_ENCODING, "CharacterCodingException", e);
+        } catch (final UnsupportedEncodingException ue) {
+            throw new CoreException(CoreException.UNSUPPORTED_ENCODING, ue);
+        }
+    }
+
+    public static boolean isEmpty(final String str) {
+        return str == null || str.trim().equals("");
+    }
+
+    public static String noNull(final String str) {
+        return str != null ? str : CoreConstants.EMPTY_TEXT;
+    }
+
+    public static String noNull(final String str, final String val) {
+        return str != null ? str : val;
+    }
+
+    public static Properties6 loadProperties(final String propResource) {
+        Properties6 properties = null;
+        if (propResource == null) {
+            throw new IllegalArgumentException("propertiesResource not provided !");
+        }
+
+        InputStream is = null;
+        try {
             try {
+                is = new FileInputStream(propResource);
 
-               FileWriter fileWriter2 = new FileWriter(new File(exportedFile.getParent() + File.separator + "raw" + File.separator + "00" + inx + "_http4e.html"));
-               BaseUtils.writeHttp4eItemModel(inx, im, fileWriter2);
-               fileWriter2.close();
-
-               outTxt.write("\n----------------------------------------------------------\n");
-               outTxt.write(im.getRequest());
-               outTxt.write("\n");
-               outTxt.write(im.getResponse());
-            } catch (IOException e) {
-               ExceptionHandler.handle(e);
+            } catch (final FileNotFoundException e) {
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream(propResource);
             }
+
+            try {
+                if (is == null || is.available() < 1) {
+                    throw new RuntimeException("Properties '" + propResource + "' not initilized. Skipping..");
+                }
+                properties = new Properties6();
+                final InputStreamReader inR = new InputStreamReader(is, "UTF8");
+                final BufferedReader bufR = new BufferedReader(inR);
+                properties.load(bufR);
+
+            } catch (final IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (final IOException e) {
+                }
+            }
+        }
+        return properties;
+    }
+
+    public static List<String> loadList(final InputStream is) {
+
+        if (is == null) {
+            throw new IllegalArgumentException("InputStream empty.");
+        }
+        byte[] data;
+        try {
+            data = new byte[is.available()];
+            is.read(data);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        final String str = new String(data);
+        final StringTokenizer st = new StringTokenizer(str, "\n\r");
+        final List<String> result = new ArrayList<>();
+        while (st.hasMoreTokens()) {
+            result.add(st.nextToken());
+        }
+        return result;
+    }
+
+    public static boolean isHttp4eIdentifier(final char c) {
+        return Character.isJavaIdentifierPart(c) || c == '-';
+    }
+
+    public static void writeJMX(final String fileName, final FolderModel folderModel) throws FileNotFoundException {
+        final Collection<HttpBean> httpBeans = new ArrayList<>();
+
+        for (final ItemModel iModel : folderModel.getItemModels()) {
+            final HttpBean bean = Utils.modelToHttpBean(iModel);
+            bean.filterXml();
+            httpBeans.add(bean);
+        }
+
+        final HttpToJmxTransformer t = new HttpToJmxTransformer("/resources/jmx.vm", httpBeans);
+
+        t.doWrite(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName))));
+
+        // write JMX CSV data file
+        try {
+            final File f = new File(new File(fileName).getParent() + File.separatorChar + "http4e-jmx.csv");
+            if (!f.exists()) {
+                final FileWriter fstream = new FileWriter(f);
+                final BufferedWriter out = new BufferedWriter(fstream);
+                out.write("################################################\n");
+                out.write("## Configure varA, varB entries as bellow\n");
+                out.write("## aa=xxx, bb=xxx\n");
+                out.write("################################################\n");
+                out.write("JSESSIONID=xxxxxxxxxx,userId=1\n");
+                out.write("JSESSIONID=yyyyyyyyyy,userId=2\n");
+                out.write("JSESSIONID=zzzzzzzzzz,userId=3\n");
+                out.close();
+            }
+        } catch (final Exception ignore) {
+            //
+        }
+    }
+
+    public static void writeJavaHttpClient3(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/java3.vm", bean).doWrite(writer);
+    }
+
+    public static void writeJavaHttpComponent4(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/java.vm", bean).doWrite(writer);
+    }
+
+    public static void writeJsPrototype(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/js-prototype.vm", bean).doWrite(writer);
+    }
+
+    public static void writeJsJQuery(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/js-jquery.vm", bean).doWrite(writer);
+    }
+
+    public static void writeJsXhr(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/js-xhr.vm", bean).doWrite(writer);
+    }
+
+    public static void writePython(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/python.vm", bean).doWrite(writer);
+    }
+
+    public static void writeCsharp(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        bean.filterCSharpSpecialHeaders();
+        new ExportTemplateTransformer("/resources/csharp.vm", bean).doWrite(writer);
+    }
+
+    public static void writeVisualBasic(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        bean.filterCSharpSpecialHeaders();
+        new ExportTemplateTransformer("/resources/vb.vm", bean).doWrite(writer);
+    }
+
+    public static void writeFlex(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        bean.setMethod(bean.getMethod().toUpperCase());
+        final List<String> contentTypeHeader = iModel.getHeaderValuesIgnoreCase("Content-Type");
+        if (contentTypeHeader != null && contentTypeHeader.size() > 0) {
+            bean.setContentType(contentTypeHeader.get(0));
+        }
+        new ExportTemplateTransformer("/resources/flex.vm", bean).doWrite(writer);
+    }
+
+    public static void writeRuby(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJavaSrcipt();
+        bean.setMethod(bean.getMethod().toLowerCase());
+        new ExportTemplateTransformer("/resources/ruby.vm", bean).doWrite(writer);
+    }
+
+    public static void writePHP(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        new ExportTemplateTransformer("/resources/php.vm", bean).doWrite(writer);
+    }
+
+    public static void writeObjectiveC(final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.filterJava();
+        if ("GET".equalsIgnoreCase(bean.getMethod())) {
+            new ExportTemplateTransformer("/resources/cocoa-get.vm", bean).doWrite(writer);
+
+        } else if ("POST".equalsIgnoreCase(bean.getMethod())) {
+            new ExportTemplateTransformer("/resources/cocoa-post.vm", bean).doWrite(writer);
+
+        } else if ("PUT".equalsIgnoreCase(bean.getMethod())) {
+            new ExportTemplateTransformer("/resources/cocoa-put.vm", bean).doWrite(writer);
+
+        } else if ("DELETE".equalsIgnoreCase(bean.getMethod())) {
+            new ExportTemplateTransformer("/resources/cocoa-delete.vm", bean).doWrite(writer);
+
+        } else {
+            try {
+                writer.write("\n\n       /* Method not allowed. Only GET, POST, PUT and DELETE are supported. */");
+                writer.flush();
+                writer.close();
+            } catch (final IOException e) {
+                // ignore
+            }
+        }
+    }
+
+    public static void writeHttp4eSessionsModel(final Writer writer, final FolderModel folderModel) throws FileNotFoundException {
+        final Collection<HttpBean> httpBeans = new ArrayList<>();
+
+        int inx = 0;
+        for (final ItemModel iModel : folderModel.getItemModels()) {
+            final HttpBean bean = Utils.modelToHttpBean(iModel);
+            bean.filterXml();
+
+            bean.setId(inx);
+            final List<String> contentTypeHeader = iModel.getHeaderValuesIgnoreCase("Content-Type");
+            if (contentTypeHeader != null && contentTypeHeader.size() > 0) {
+                bean.setContentType(contentTypeHeader.get(0));
+            } else {
+                bean.setContentType("");
+            }
+
+            httpBeans.add(bean);
             inx++;
-         }
-         //Close the output stream
-         outTxt.close();
+        }
 
-         byte[] data = folderModel.serialize();
-         String str64 = new String(Base64.encodeBase64(data), "UTF8");
-         BufferedWriter out = new BufferedWriter(new FileWriter(exportedFile));
-         out.write(str64);
-         out.flush();
+        final ExportSessionsTransformer t = new ExportSessionsTransformer("/resources/http4e-sessions.vm", httpBeans);
+        t.doWrite(writer);
+    }
 
-      } catch (IOException e) {
-         ExceptionHandler.handle(e);
-      }
+    public static void writeHttp4eItemModel(final int inx, final ItemModel iModel, final Writer writer) throws FileNotFoundException {
+        final HttpBean bean = Utils.modelToHttpBean(iModel);
+        bean.setId(inx);
+        final List<String> contentTypeHeader = iModel.getHeaderValuesIgnoreCase("Content-Type");
+        if (contentTypeHeader != null && contentTypeHeader.size() > 0) {
+            bean.setContentType(contentTypeHeader.get(0));
+        } else {
+            bean.setContentType("");
+        }
+        bean.setRequest(iModel.getRequest());
+        bean.setResponse(iModel.getResponse());
+        bean.filterXml();
+        new ExportTemplateTransformer("/resources/http4e-item.vm", bean).doWrite(writer);
+    }
+
+    public static void writeHttp4eSessions(final String file, final FolderModel folderModel) {
+
+        try {
+            final File exportedFile = new File(file);
+            final File rawDir = new File(exportedFile.getParent() + File.separator + "raw");
+            if (!rawDir.exists()) {
+                rawDir.mkdir();
+            }
+            // String tmpDir =
+            // "C:/Users/Mitko/Desktop/tmp/";//System.getProperty("java.io.tmpdir");
+
+            try (FileWriter fileWriter = new FileWriter(new File(exportedFile.getParent() + File.separator + "index-sessions.html"))) {
+                BaseUtils.writeHttp4eSessionsModel(fileWriter, folderModel);
+            }
+
+            try (FileWriter fstream = new FileWriter(exportedFile.getParent() + File.separator + "index-sessions.txt");
+                    BufferedWriter outTxt = new BufferedWriter(fstream)) {
+                int inx = 0;
+                for (final ItemModel im : folderModel.getItemModels()) {
+                    try (FileWriter fileWriter2 = new FileWriter(
+                            new File(exportedFile.getParent() + File.separator + "raw" + File.separator + "00" + inx + "_http4e.html"))) {
+
+                        BaseUtils.writeHttp4eItemModel(inx, im, fileWriter2);
+
+                        outTxt.write("\n----------------------------------------------------------\n");
+                        outTxt.write(im.getRequest());
+                        outTxt.write("\n");
+                        outTxt.write(im.getResponse());
+                    } catch (final IOException e) {
+                        ExceptionHandler.handle(e);
+                    }
+                    inx++;
+                }
+            }
+            final byte[] data = folderModel.serialize();
+            final String str64 = new String(Base64.encodeBase64(data), "UTF8");
+            try (BufferedWriter out = new BufferedWriter(new FileWriter(exportedFile))) {
+                out.write(str64);
+            }
+
+        } catch (final IOException e) {
+            ExceptionHandler.handle(e);
+        }
 
 //      try {
 //         FileOutputStream fos = new FileOutputStream(file);
@@ -470,88 +446,84 @@ public class BaseUtils {
 //       } catch (IOException e) {
 //         e.printStackTrace();
 //       }
-   }
+    }
 
+    public static List<ItemModel> importHttp4eSessions(final String file, final FolderModel folderModel) {
+        try {
+            final byte[] data = Base64.decodeBase64(getContents(new File(file)).getBytes("UTF8"));
+            final List<ItemModel> items = new FolderModel(null, null).deserialize(data);
 
-   public static List<ItemModel> importHttp4eSessions(String file, FolderModel folderModel){
-      try {
-         byte[] data = Base64.decodeBase64(getContents(new File(file)).getBytes("UTF8"));
-         List<ItemModel> items = new FolderModel(null, null).deserialize(data);
+            return items;
 
-         return items;
+        } catch (final Exception e) {
+            return new ArrayList<>();
+        }
+    }
 
-      } catch (Exception e) {
-         return new ArrayList<ItemModel>();
-      }
-   }
+    public static List<ItemModel> importLiveHttpHeaders(final String file, final FolderModel folderModel) {
+        try {
 
-   public static List<ItemModel> importLiveHttpHeaders(String file, FolderModel folderModel){
-      try {
+            final LiveHttpHeadersParser parser = new LiveHttpHeadersParser();
+            parser.parse(file);
+            final List<ItemModel> items = new ArrayList<>();
+            final Collection<HttpBean> beans = parser.getHttpBeans();
+            for (final HttpBean b : beans) {
+                final ItemModel iModel = toItemModel(folderModel, b);
+                items.add(iModel);
+            }
+            return items;
 
-         LiveHttpHeadersParser parser = new LiveHttpHeadersParser();
-         parser.parse(file);
-         List<ItemModel> items = new ArrayList<ItemModel>();
-         Collection<HttpBean> beans = parser.getHttpBeans();
-         for (HttpBean b : beans) {
-            ItemModel iModel = toItemModel(folderModel, b);
-            items.add(iModel);
-         }
-         return items;
+        } catch (final Exception e) {
+            return new ArrayList<>();
+        }
+    }
 
-      } catch (Exception e) {
-         return new ArrayList<ItemModel>();
-      }
-   }
+    public static ItemModel toItemModel(final FolderModel folderModel, final HttpBean b) {
+        final ItemModel iModel = new ItemModel(folderModel);
+        final Map<String, String> headers = b.getHeaders();
+        for (final String hKey : headers.keySet()) {
+            iModel.addHeader(hKey, headers.get(hKey));
+        }
 
-   public static ItemModel toItemModel(FolderModel folderModel, HttpBean b){
-      ItemModel iModel = new ItemModel(folderModel);
-      Map<String, String> headers = b.getHeaders();
-      for (String hKey : headers.keySet()) {
-         iModel.addHeader(hKey, headers.get(hKey));
-      }
-
-      iModel.setHttpMethod(b.getMethod());
-      iModel.setBody(b.getBody());
-      iModel.setUrl(b.getUrl());
+        iModel.setHttpMethod(b.getMethod());
+        iModel.setBody(b.getBody());
+        iModel.setUrl(b.getUrl());
 
 //      lastBean.setProtocol("https");
 //      doMethod(methodBuff.toString(), lastBean);
 //      doHeaders(headBuff.toString(), lastBean);
 //      doBody(bodyBuff.toString(), lastBean);
 
-      return iModel;
-   }
+        return iModel;
+    }
 
-   static public String getContents( File aFile){
-      // ...checks on aFile are elided
-      StringBuilder contents = new StringBuilder();
+    static public String getContents(final File aFile) {
+        // ...checks on aFile are elided
+        final StringBuilder contents = new StringBuilder();
 
-      try {
-         // use buffering, reading one line at a time
-         // FileReader always assumes default encoding is OK!
-         BufferedReader input = new BufferedReader(new FileReader(aFile));
-         try {
-            String line = null; // not declared within while loop
-            /*
-             * readLine is a bit quirky : it returns the content of a line MINUS
-             * the newline. it returns null only for the END of the stream. it
-             * returns an empty String if two newlines appear in a row.
-             */
-            while ((line = input.readLine()) != null) {
-               contents.append(line);
+        try {
+            // use buffering, reading one line at a time
+            // FileReader always assumes default encoding is OK!
+            final BufferedReader input = new BufferedReader(new FileReader(aFile));
+            try (input) {
+                String line = null; // not declared within while loop
+                /*
+                 * readLine is a bit quirky : it returns the content of a line MINUS the newline. it returns null
+                 * only for the END of the stream. it returns an empty String if two newlines appear in a row.
+                 */
+                while ((line = input.readLine()) != null) {
+                    contents.append(line);
 //               contents.append(System.getProperty("line.separator"));
+                }
             }
-         } finally {
-            input.close();
-         }
-      } catch (IOException ex) {
-         ExceptionHandler.handle(ex);
-      }
+        } catch (final IOException ex) {
+            ExceptionHandler.handle(ex);
+        }
 
-      return contents.toString();
-   }
+        return contents.toString();
+    }
 
-   public static void main( String[] args){
+    public static void main(final String[] args) {
 
 //    FolderModel folderModel = new FolderModel(null, null);
 //    Item item = new Item();
@@ -565,6 +537,6 @@ public class BaseUtils {
 //    iModel.setUrl("http://localhost:8080/helloworld/test/ad/xcbv?aa=1");
 
 //    String file = "C:/Users/Mitko/Desktop/tmp/http4e-sesions.zip";
-   }
+    }
 
 }

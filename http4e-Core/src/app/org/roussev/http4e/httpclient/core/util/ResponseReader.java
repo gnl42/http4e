@@ -17,11 +17,11 @@ package org.roussev.http4e.httpclient.core.util;
 
 import org.apache.commons.httpclient.HttpMethod;
 
-/** 
+/**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public interface ResponseReader {
-   
-   void read(HttpMethod httpMethod);
+
+    void read(HttpMethod httpMethod);
 
 }

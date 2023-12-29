@@ -28,61 +28,56 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XMLValidationErrorHandler extends DefaultHandler {
 
-   private List<XMLValidationError>    errorList = new ArrayList<XMLValidationError>();
-   private Locator locator;
+    private final List<XMLValidationError> errorList = new ArrayList<>();
+    private Locator locator;
 
+    public XMLValidationErrorHandler() {
+    }
 
-   public XMLValidationErrorHandler() {
-   }
+    @Override
+    public void error(final SAXParseException e) throws SAXException {
 
+        handleError(e, false);
 
-   public void error( SAXParseException e) throws SAXException{
+    }
 
-      handleError(e, false);
+    @Override
+    public void setDocumentLocator(final Locator locator) {
+        this.locator = locator;
+    }
 
-   }
+    private void handleError(final SAXParseException e, final boolean isFatal) {
+        final XMLValidationError validationError = nextError(e, isFatal);
+        errorList.add(validationError);
+        // System.err.println(validationError.toString());
 
+    }
 
-   public void setDocumentLocator( Locator locator){
-      this.locator = locator;
-   }
+    protected XMLValidationError nextError(final SAXParseException e, final boolean isFatal) {
+        final String errorMessage = e.getMessage();
 
+        final int lineNumber = locator.getLineNumber();
+        final int columnNumber = locator.getColumnNumber();
 
-   private void handleError( SAXParseException e, boolean isFatal){
-      XMLValidationError validationError = nextError(e, isFatal);
-      errorList.add(validationError);
-      // System.err.println(validationError.toString());
+        log(this, (isFatal ? "FATAL " : "Non-Fatal") + "Error on line " + lineNumber + ", column " + columnNumber + ": " + errorMessage);
 
-   }
+        final XMLValidationError validationError = new XMLValidationError();
+        validationError.setLineNumber(lineNumber);
+        validationError.setColumnNumber(columnNumber);
+        validationError.setErrorMessage(errorMessage);
+        return validationError;
+    }
 
+    private void log(final XMLValidationErrorHandler handler, final String string) {
+    }
 
-   protected XMLValidationError nextError( SAXParseException e, boolean isFatal){
-      String errorMessage = e.getMessage();
+    @Override
+    public void fatalError(final SAXParseException e) throws SAXException {
+        handleError(e, true);
+    }
 
-      int lineNumber = locator.getLineNumber();
-      int columnNumber = locator.getColumnNumber();
-
-      log(this, (isFatal ? "FATAL " : "Non-Fatal") + "Error on line " + lineNumber + ", column " + columnNumber + ": " + errorMessage);
-
-      XMLValidationError validationError = new XMLValidationError();
-      validationError.setLineNumber(lineNumber);
-      validationError.setColumnNumber(columnNumber);
-      validationError.setErrorMessage(errorMessage);
-      return validationError;
-   }
-
-
-   private void log( XMLValidationErrorHandler handler, String string){
-   }
-
-
-   public void fatalError( SAXParseException e) throws SAXException{
-      handleError(e, true);
-   }
-
-
-   public List<XMLValidationError> getErrorList(){
-      return errorList;
-   }
+    public List<XMLValidationError> getErrorList() {
+        return errorList;
+    }
 
 }

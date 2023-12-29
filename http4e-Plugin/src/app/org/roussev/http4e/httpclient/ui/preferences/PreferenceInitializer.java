@@ -25,15 +25,17 @@ import org.roussev.http4e.httpclient.ui.HdPlugin;
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-   /*
-    * (non-Javadoc)
-    * 
-    * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
-    */
-   public void initializeDefaultPreferences(){
-      IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-      store.setDefault(PreferenceConstants.P_PROXY_LIST, "");
-      // store.setDefault(PreferenceConstants.P_KEYSTORE_LIST, "");
-   }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
+     */
+    @Override
+    public void initializeDefaultPreferences() {
+        final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+        store.setDefault(PreferenceConstants.P_PROXY_LIST, "");
+        // store.setDefault(PreferenceConstants.P_KEYSTORE_LIST, "");
+    }
 
 }

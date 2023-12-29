@@ -29,39 +29,38 @@ import org.roussev.http4e.editor.xml.rules.CDataRule;
  */
 public class XMLTextScanner extends RuleBasedScanner {
 
-   public IToken ESCAPED_CHAR;
-   public IToken CDATA_START;
-   public IToken CDATA_END;
-   public IToken CDATA_TEXT;
+    public IToken ESCAPED_CHAR;
+    public IToken CDATA_START;
+    public IToken CDATA_END;
+    public IToken CDATA_TEXT;
 
-   IToken        currentToken;
+    IToken currentToken;
 
+    public XMLTextScanner(final ColorManager colorManager) {
 
-   public XMLTextScanner( ColorManager colorManager) {
+        ESCAPED_CHAR = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.ESCAPED_CHAR)));
+        CDATA_START = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA)));
+        CDATA_END = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA)));
+        CDATA_TEXT = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA_TEXT)));
+        final IRule[] rules = new IRule[2];
 
-      ESCAPED_CHAR = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.ESCAPED_CHAR)));
-      CDATA_START = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA)));
-      CDATA_END = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA)));
-      CDATA_TEXT = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA_TEXT)));
-      IRule[] rules = new IRule[2];
+        // Add rule to pick up escaped chars
+        // Add rule to pick up start of CDATA section
+        rules[0] = new CDataRule(CDATA_START, true);
+        // Add a rule to pick up end of CDATA sections
+        rules[1] = new CDataRule(CDATA_END, false);
+        setRules(rules);
 
-      // Add rule to pick up escaped chars
-      // Add rule to pick up start of CDATA section
-      rules[0] = new CDataRule(CDATA_START, true);
-      // Add a rule to pick up end of CDATA sections
-      rules[1] = new CDataRule(CDATA_END, false);
-      setRules(rules);
+    }
 
-   }
-
-
-   public IToken nextToken(){
-      IToken token = super.nextToken();
-      if (currentToken == CDATA_START || currentToken == CDATA_TEXT && token != CDATA_END) {
-         this.currentToken = CDATA_TEXT;
-         return CDATA_TEXT;
-      }
-      this.currentToken = token;
-      return token;
-   }
+    @Override
+    public IToken nextToken() {
+        final IToken token = super.nextToken();
+        if (currentToken == CDATA_START || currentToken == CDATA_TEXT && token != CDATA_END) {
+            currentToken = CDATA_TEXT;
+            return CDATA_TEXT;
+        }
+        currentToken = token;
+        return token;
+    }
 }

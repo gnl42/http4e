@@ -24,30 +24,28 @@ import java.util.Set;
  */
 class ParseBean {
 
-   public String      key;
-   public Set values = new HashSet();
+    public String key;
+    public Set<String> values = new HashSet<>();
 
-   public ParseBean( String key) {
-      this.key = key;
-   }
+    public ParseBean(final String key) {
+        this.key = key;
+    }
 
-   public String getKey(){
-      return key;
-   }
+    public String getKey() {
+        return key;
+    }
 
-   public void addValue( String val){
-      this.values.add(val);
-   }
+    public void addValue(final String val) {
+        values.add(val);
+    }
 
-   public Collection getValues(){
-      return values;
-   }
+    public Collection<String> getValues() {
+        return values;
+    }
 
-   public String toString(){
-               return "Param{" +
-               "key=" + key +
-               ",values=" + values +
-               "}";
-   }
-   
+    @Override
+    public String toString() {
+        return "Param{" + "key=" + key + ",values=" + values + "}";
+    }
+
 }

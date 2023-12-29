@@ -11,34 +11,37 @@ import java.io.Writer;
  * A simple StringBuffer-based implementation of StringWriter
  */
 public class StringWriter extends Writer {
-    
+
     final private StringBuffer buf;
-    
+
     public StringWriter() {
-        super();
         buf = new StringBuffer();
     }
-    
-    public StringWriter(int initialSize) {
-        super();
+
+    public StringWriter(final int initialSize) {
         buf = new StringBuffer(initialSize);
     }
-    
-    public void write(char[] cbuf, int off, int len) throws IOException {
+
+    @Override
+    public void write(final char[] cbuf, final int off, final int len) throws IOException {
         buf.append(cbuf, off, len);
     }
 
-    public void write(String str) throws IOException {
+    @Override
+    public void write(final String str) throws IOException {
         buf.append(str);
     }
 
-    public void write(String str, int off, int len) throws IOException {
+    @Override
+    public void write(final String str, final int off, final int len) throws IOException {
         buf.append(str.substring(off, len));
     }
 
+    @Override
     public void flush() throws IOException {
     }
 
+    @Override
     public void close() throws IOException {
     }
 }

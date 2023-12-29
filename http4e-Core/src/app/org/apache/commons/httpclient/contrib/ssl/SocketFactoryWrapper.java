@@ -35,7 +35,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+
 import javax.net.ssl.SSLSocketFactory;
+
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
@@ -56,46 +58,46 @@ import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
  */
 public class SocketFactoryWrapper implements SecureProtocolSocketFactory {
 
-    private SSLSocketFactory socketFactory;
+    private final SSLSocketFactory socketFactory;
 
-    public SocketFactoryWrapper(SSLSocketFactory socketFactory) {
+    public SocketFactoryWrapper(final SSLSocketFactory socketFactory) {
         this.socketFactory = socketFactory;
     }
 
-    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+    @Override
+    public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
         return socketFactory.createSocket(host, port);
     }
 
-    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort)
+    @Override
+    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort)
             throws IOException, UnknownHostException {
         return socketFactory.createSocket(host, port, localAddress, localPort);
     }
 
-    public Socket createSocket(
-            String host, 
-            int port, InetAddress localAddress, int localPort,
-            HttpConnectionParams params) throws IOException, UnknownHostException,
-            ConnectTimeoutException {
+    @Override
+    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort, final HttpConnectionParams params)
+            throws IOException, UnknownHostException, ConnectTimeoutException {
         // Based on code from EasySSLProtocolSocketFactory.java
         Socket rval;
         if (params == null) {
             throw new IllegalArgumentException("Parameters may not be null");
         }
-        int timeout = params.getConnectionTimeout();
+        final int timeout = params.getConnectionTimeout();
         if (timeout == 0) {
             rval = socketFactory.createSocket(host, port, localAddress, localPort);
         } else {
             rval = socketFactory.createSocket();
-            SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
-            SocketAddress remoteaddr = new InetSocketAddress(host, port);
+            final SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+            final SocketAddress remoteaddr = new InetSocketAddress(host, port);
             rval.bind(localaddr);
             rval.connect(remoteaddr, timeout);
         }
         return rval;
     }
 
-    public Socket createSocket(Socket socket, String host, int port, boolean autoClose)
-            throws IOException, UnknownHostException {
+    @Override
+    public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose) throws IOException, UnknownHostException {
         return socketFactory.createSocket(socket, host, port, autoClose);
     }
 

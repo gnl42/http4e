@@ -1,15 +1,14 @@
 package org.roussev.http4e.crypt.depricated;
 
-
 public class Qwe {
 
-   public static void main( String[] args) throws Exception{
-      
-      String property = "java.io.tmpdir"; 
-      String tempDir = System.getProperty(property);
-      
-      System.out.println(tempDir);
-      
+    public static void main(final String[] args) throws Exception {
+
+        final String property = "java.io.tmpdir";
+        final String tempDir = System.getProperty(property);
+
+        System.out.println(tempDir);
+
 //      // Display display = new Display ();
 //      // Shell shell = new Shell (display);
 //      // StyledText text = new StyledText (shell, SWT.SINGLE | SWT.BORDER);
@@ -46,6 +45,6 @@ public class Qwe {
 //      }
 //      System.out.println(respBuff);
 
-   }
+    }
 
 }

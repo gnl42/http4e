@@ -29,27 +29,29 @@ import java.io.OutputStream;
 public class ApacheOutputStream extends FilterOutputStream {
 
     /** Original input stream. */
-    private OutputStream out;
-    
-    private ApacheHttpListener apacheHttpListener;
+    private final OutputStream out;
+
+    private final ApacheHttpListener apacheHttpListener;
 
     /**
      * Create an instance that wraps the specified output stream.
-     * @param out The output stream.
+     *
+     * @param out  The output stream.
      * @param wire The Wire log to use.
      */
-    public ApacheOutputStream(ApacheHttpListener apacheHttpListener, OutputStream out/*, Wire wire*/) {
+    public ApacheOutputStream(final ApacheHttpListener apacheHttpListener, final OutputStream out/* , Wire wire */) {
         super(out);
         this.out = out;
         this.apacheHttpListener = apacheHttpListener;
     }
-    
+
     /**
      * 
      * @see java.io.OutputStream#write(byte[], int, int)
      */
-    public void write(byte[] b, int off, int len) throws IOException {
-        this.out.write(b,  off,  len);
+    @Override
+    public void write(final byte[] b, final int off, final int len) throws IOException {
+        out.write(b, off, len);
         apacheHttpListener.write(b);
     }
 
@@ -57,8 +59,9 @@ public class ApacheOutputStream extends FilterOutputStream {
      * 
      * @see java.io.OutputStream#write(byte[])
      */
-    public void write(byte[] b) throws IOException {
-        this.out.write(b);
+    @Override
+    public void write(final byte[] b) throws IOException {
+        out.write(b);
         apacheHttpListener.write(b);
     }
 }

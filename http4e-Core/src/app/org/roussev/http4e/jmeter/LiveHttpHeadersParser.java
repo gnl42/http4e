@@ -15,150 +15,146 @@ import org.roussev.http4e.httpclient.core.util.HttpBean;
 
 public class LiveHttpHeadersParser {
 
-	private final Collection<HttpBean> httpBeans = new ArrayList<HttpBean>();
+    private final Collection<HttpBean> httpBeans = new ArrayList<>();
 
-	public Collection<HttpBean> getHttpBeans() {
-		return httpBeans;
-	}
+    public Collection<HttpBean> getHttpBeans() {
+        return httpBeans;
+    }
 
-	public void parse(String file) throws Exception {
+    public void parse(final String file) throws Exception {
 
-		String line;
+        String line;
 
-		//Open the file for reading
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			boolean isResponse = false;
-			StringBuilder methodBuff = new StringBuilder();
-			StringBuilder headBuff = new StringBuilder();
-			StringBuilder bodyBuff = new StringBuilder();
+        // Open the file for reading
+        try (final BufferedReader br = new BufferedReader(new FileReader(file))) {
+            boolean isResponse = false;
+            final StringBuilder methodBuff = new StringBuilder();
+            final StringBuilder headBuff = new StringBuilder();
+            final StringBuilder bodyBuff = new StringBuilder();
 
-			HttpBean lastBean = new HttpBean();
-			
-			while ((line = br.readLine()) != null) {
+            final HttpBean lastBean = new HttpBean();
 
-				if (line.startsWith("HTTP/1.")) {
-					isResponse = true;
-				}
+            while ((line = br.readLine()) != null) {
 
-				if (!isResponse) {
-					line = filter(line);
-					readLine(line, methodBuff, headBuff, bodyBuff);
-					
-					if(line.startsWith("https://")){
-						lastBean.setProtocol("https");
-					} else if(line.startsWith("http://")){
-						lastBean.setProtocol("http");
-					}
-				}
+                if (line.startsWith("HTTP/1.")) {
+                    isResponse = true;
+                }
 
-				if (line.startsWith("----------------------------------------------------------")) {
-					isResponse = false;
-				}
-			}
+                if (!isResponse) {
+                    line = filter(line);
+                    readLine(line, methodBuff, headBuff, bodyBuff);
+
+                    if (line.startsWith("https://")) {
+                        lastBean.setProtocol("https");
+                    } else if (line.startsWith("http://")) {
+                        lastBean.setProtocol("http");
+                    }
+                }
+
+                if (line.startsWith("----------------------------------------------------------")) {
+                    isResponse = false;
+                }
+            }
 //			System.out.println("---------------------\t\tline=" + line + "\t\t, methodBuff=" + methodBuff + "\t\t, headBuff=" + headBuff + "\t\t, bodyBuff=" + bodyBuff);
-			
-			doMethod(methodBuff.toString(), lastBean);
-			doHeaders(headBuff.toString(), lastBean);
-			doBody(bodyBuff.toString(), lastBean);
-			httpBeans.add(lastBean);
-			
-//			readBuffer(line, methodBuff, headBuff, bodyBuff);
-		} catch (IOException e) {
-         ExceptionHandler.handle(e);
-		}
-	}
-	
-	private String filter(String line){
-		if(line.contains("&")){
-			line = line.replace("&", "&amp;");
-		}
-		return line;
-	}
 
-	private void readLine(String line, StringBuilder methodBuff,
-			StringBuilder headBuff, StringBuilder bodyBuff) throws Exception {
-		if (line.startsWith("http://") || line.startsWith("https://")) {
+            doMethod(methodBuff.toString(), lastBean);
+            doHeaders(headBuff.toString(), lastBean);
+            doBody(bodyBuff.toString(), lastBean);
+            httpBeans.add(lastBean);
+
+//			readBuffer(line, methodBuff, headBuff, bodyBuff);
+        } catch (final IOException e) {
+            ExceptionHandler.handle(e);
+        }
+    }
+
+    private String filter(String line) {
+        if (line.contains("&")) {
+            line = line.replace("&", "&amp;");
+        }
+        return line;
+    }
+
+    private void readLine(final String line, final StringBuilder methodBuff, final StringBuilder headBuff, final StringBuilder bodyBuff) throws Exception {
+        if (line.startsWith("http://") || line.startsWith("https://")) {
 
 //			System.out.println(line + " methodBuff= '" + methodBuff + "'");
-			if (methodBuff.length() > 0) {
-				HttpBean bean = new HttpBean();
-				bean.setProtocol(line.startsWith("http://") ? "http" : "https");
-				httpBeans.add(bean);
-				doMethod(methodBuff.toString(), bean);
-				doHeaders(headBuff.toString(), bean);
-				doBody(bodyBuff.toString(), bean);
+            if (methodBuff.length() > 0) {
+                final HttpBean bean = new HttpBean();
+                bean.setProtocol(line.startsWith("http://") ? "http" : "https");
+                httpBeans.add(bean);
+                doMethod(methodBuff.toString(), bean);
+                doHeaders(headBuff.toString(), bean);
+                doBody(bodyBuff.toString(), bean);
 
-				methodBuff.delete(0, methodBuff.length());
-				headBuff.delete(0, headBuff.length());
-				bodyBuff.delete(0, bodyBuff.length());
-			}
+                methodBuff.delete(0, methodBuff.length());
+                headBuff.delete(0, headBuff.length());
+                bodyBuff.delete(0, bodyBuff.length());
+            }
 
-		} else {
-			boolean isMethod = false;
-			boolean isHeader = false;
-			boolean isBody = false;
-			for (int i = 0; i < Constants.METHODS.length; i++) {
-				if (line.startsWith(Constants.METHODS[i] + " /")) {
-					isMethod = true;
-					isHeader = false;
-				}
-			}
-			for (int i = 0; i < Constants.HEADERS.length; i++) {
-				if (line.startsWith(Constants.HEADERS[i] + ": ")) {
-					isMethod = false;
-					isHeader = true;
-				}
-			}
+        } else {
+            boolean isMethod = false;
+            boolean isHeader = false;
+            for (final String element : Constants.METHODS) {
+                if (line.startsWith(element + " /")) {
+                    isMethod = true;
+                    isHeader = false;
+                }
+            }
+            for (final String element : Constants.HEADERS) {
+                if (line.startsWith(element + ": ")) {
+                    isMethod = false;
+                    isHeader = true;
+                }
+            }
 
-			isBody = !isMethod && !isHeader;
-			if (isHeader) {
-				headBuff.append(line + "\n");
-			} else if (isBody) {
-				bodyBuff.append(line);
-			} else if (isMethod) {
-				methodBuff.append(line);
-			}
-		}
-	}
+            final boolean isBody = !isMethod && !isHeader;
+            if (isHeader) {
+                headBuff.append(line + "\n");
+            } else if (isBody) {
+                bodyBuff.append(line);
+            } else if (isMethod) {
+                methodBuff.append(line);
+            }
+        }
+    }
 
-	private void doHeaders(String hStr, HttpBean bean) throws Exception {
-		Map<String, String> hMap = new HashMap<String, String>();
+    private void doHeaders(final String hStr, final HttpBean bean) throws Exception {
+        final Map<String, String> hMap = new HashMap<>();
 
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new ByteArrayInputStream(hStr.getBytes("utf-8"))));
-		String hLine = null;
-		while ((hLine = br.readLine()) != null) {
-			int delimPos = hLine.indexOf(':');
-			String key = hLine.substring(0, delimPos);
-			String val = hLine.substring(delimPos + 2, hLine.length());
-			hMap.put(key, val);
-		}
-		bean.setHeaders(hMap);
-		bean.setDomain(hMap.get("Host"));
-	}
+        final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(hStr.getBytes("utf-8"))));
+        String hLine = null;
+        while ((hLine = br.readLine()) != null) {
+            final int delimPos = hLine.indexOf(':');
+            final String key = hLine.substring(0, delimPos);
+            final String val = hLine.substring(delimPos + 2);
+            hMap.put(key, val);
+        }
+        bean.setHeaders(hMap);
+        bean.setDomain(hMap.get("Host"));
+    }
 
-	private void doMethod(String mString, HttpBean bean) {
-		String[] arr = mString.split(" ");
-		bean.setMethod(arr[0]);
-		bean.setPath(arr[1]);
-	}
+    private void doMethod(final String mString, final HttpBean bean) {
+        final String[] arr = mString.split(" ");
+        bean.setMethod(arr[0]);
+        bean.setPath(arr[1]);
+    }
 
-	private void doBody(String bString, HttpBean bean) {
-		bean.setBody(bString);
-	}
+    private void doBody(final String bString, final HttpBean bean) {
+        bean.setBody(bString);
+    }
 
-	public static void main(String[] args) {
+    public static void main(final String[] args) {
 
-		LiveHttpHeadersParser t = new LiveHttpHeadersParser();
-		try {
-			t.parse("C:Users/Mitko/Desktop/live-http-headers.txt");
-			for (HttpBean b : t.getHttpBeans()) {
-				System.out.println(b);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        final LiveHttpHeadersParser t = new LiveHttpHeadersParser();
+        try {
+            t.parse("C:Users/Mitko/Desktop/live-http-headers.txt");
+            for (final HttpBean b : t.getHttpBeans()) {
+                System.out.println(b);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

@@ -22,13 +22,13 @@ import java.io.Serializable;
  */
 public interface Model {
 
-   void addListener( ModelListener listener);
+    void addListener(ModelListener listener);
 
-   void removeListener( ModelListener listener);
+    void removeListener(ModelListener listener);
 
-   void fireExecute( ModelEvent e);
+    void fireExecute(ModelEvent e);
 
-   public Serializable getSerializable();
+    Serializable getSerializable();
 
-   public void load( Serializable serializable);
+    void load(Serializable serializable);
 }

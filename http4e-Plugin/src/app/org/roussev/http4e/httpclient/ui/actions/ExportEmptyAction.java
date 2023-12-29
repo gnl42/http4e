@@ -6,19 +6,19 @@ import org.eclipse.ui.part.ViewPart;
 
 public class ExportEmptyAction extends Action {
 
-   private Menu fMenu;
+    private Menu fMenu;
 
-   public ExportEmptyAction( ViewPart view) {
-      fMenu = null;
-      setText("Export As ..");
-      setEnabled(false);
-   }
+    public ExportEmptyAction(final ViewPart view) {
+        fMenu = null;
+        setText("Export As ..");
+        setEnabled(false);
+    }
 
-   public void dispose(){
-      // action is reused, can be called several times.
-      if (fMenu != null) {
-         fMenu.dispose();
-         fMenu = null;
-      }
-   }
+    public void dispose() {
+        // action is reused, can be called several times.
+        if (fMenu != null) {
+            fMenu.dispose();
+            fMenu = null;
+        }
+    }
 }

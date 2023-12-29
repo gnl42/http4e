@@ -21,25 +21,23 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class ProxyAction extends Action {
 
-   private HdViewPart view;
+    private final HdViewPart view;
 
+    public ProxyAction(final HdViewPart view) {
+        this.view = view;
+        setText("Proxy Connection");
+        setDescription("Proxy Connection");
+        setToolTipText("Proxy Connection");
+    }
 
-   public ProxyAction( HdViewPart view) {
-      super();
-      this.view = view;
-      setText("Proxy Connection");
-      setDescription("Proxy Connection");
-      setToolTipText("Proxy Connection");
-   }
-
-
-   public void run(){
-      try {         
-         ProxyDialog dialog = new ProxyDialog(view);
-         dialog.open();
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+    @Override
+    public void run() {
+        try {
+            final ProxyDialog dialog = new ProxyDialog(view);
+            dialog.open();
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+    }
 
 }

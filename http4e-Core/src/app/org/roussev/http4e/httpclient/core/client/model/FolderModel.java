@@ -44,226 +44,209 @@ import org.roussev.http4e.httpclient.core.util.BaseUtils;
  */
 public class FolderModel implements Model {
 
-   private static final long             serialVersionUID  = -6512224765472818414L;
-   public static final String            PREF_VIEW_NAME    = "v";
+    private static final long serialVersionUID = -6512224765472818414L;
+    public static final String PREF_VIEW_NAME = "v";
 
-   private final Map<Integer, ItemModel> itemMap           = new HashMap<Integer, ItemModel>();
-   private final List<ItemModel>         itemList          = new ArrayList<ItemModel>();
-   private final List<ModelListener>     modelListeners    = new ArrayList<ModelListener>();
-   private final Set<String>             urlHistory        = new HashSet<String>();
-   private List<ProxyItem>               availableProxies  = new ArrayList<ProxyItem>();
-   private String                        availableKeystore = null;
+    private final Map<Integer, ItemModel> itemMap = new HashMap<>();
+    private final List<ItemModel> itemList = new ArrayList<>();
+    private final List<ModelListener> modelListeners = new ArrayList<>();
+    private final Set<String> urlHistory = new HashSet<>();
+    private final List<ProxyItem> availableProxies = new ArrayList<>();
+    private String availableKeystore = null;
 
+    public FolderModel(final String availableProxiesString, final String availableKeystoresString) {
+        availableProxies.add(ProxyItem.createDirectConnectionProxy());
+        for (final String proxysettings : new StrTokenizer(availableProxiesString, "#").getTokenArray()) {
+            try {
+                availableProxies.add(ProxyItem.createFromString(proxysettings));
+            } catch (final Exception e) {
+                // TODO handle error
+            }
+        }
+        availableKeystore = availableKeystoresString;
+    }
 
-   public FolderModel( String availableProxiesString, String availableKeystoresString) {
-      this.availableProxies.add(ProxyItem.createDirectConnectionProxy());
-      for (String proxysettings : new StrTokenizer(availableProxiesString, "#").getTokenArray()) {
-         try {
-            this.availableProxies.add(ProxyItem.createFromString(proxysettings));
-         } catch (Exception e) {
-            // TODO handle error
-         }
-      }
-      this.availableKeystore = availableKeystoresString;
-   }
+    @SuppressWarnings("unchecked")
+    public List<ItemModel> deserialize(final byte[] data) {
+        final List<ItemModel> imList = new ArrayList<>();
+        removeAll();
+        List<ItemModel> serList;
+        try {
+            final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            final ObjectInputStream ois = new ObjectInputStream(bais);
+            serList = (List<ItemModel>) ois.readObject();
+            final int size = serList.size();
+            for (int i = size - 1; i > -1; i--) {
+                final Serializable ser = (Serializable) serList.get(i);
+                final ItemModel im = new ItemModel(this);
+                im.load(ser);
+                if (!im.isEmpty()) {
+                    imList.add(im);
+                }
+            }
+            ois.close();
 
+        } catch (final EOFException | FileNotFoundException | ClassNotFoundException ignore) {
+        } catch (final IOException e) {
+            ExceptionHandler.warn("deserialize: " + e);// warning may be ..
+        }
 
-   @SuppressWarnings("unchecked")
-   public List<ItemModel> deserialize( byte[] data){
-      List<ItemModel> imList = new ArrayList<ItemModel>();
-      this.removeAll();
-      List<ItemModel> serList;
-      try {
-         ByteArrayInputStream bais = new ByteArrayInputStream(data);
-         ObjectInputStream ois = new ObjectInputStream(bais);
-         serList = (List<ItemModel>) ois.readObject();
-         int size = serList.size();
-         for (int i = size - 1; i > -1; i--) {
-            Serializable ser = (Serializable) serList.get(i);
-            ItemModel im = new ItemModel(this);
-            im.load(ser);
-            if (!im.isEmpty())
-               imList.add(im);
-         }
-         ois.close();
+        if (imList.size() < 1) {
+            // System.out.println("FolderModel: No items deserialized. Creating one
+            // ..");
+            final ItemModel im = new ItemModel(this);
+            imList.add(im);
+        }
 
-      } catch (EOFException ignore) {
-      } catch (FileNotFoundException ignore) {
-      } catch (ClassNotFoundException ignore) {
-      } catch (IOException e) {
-         ExceptionHandler.warn("deserialize: " + e);// warning may be ..
-      }
+        final int cnt = 0;
+        // Add available Proxies to ItemModels
+        for (final ItemModel itemModel : imList) {
+            itemModel.setAvailableProxies(availableProxies);
+            itemModel.setAvailableKeystore(availableKeystore);
+            if (cnt == 0) { // FIXME. Those values belong to FolderModel, not
+                            // ItemModel
+                final CoreContext ctx = CoreContext.getContext();
+                ctx.putObject(CoreObjects.AUTH_ITEM, itemModel.getAuth());
+                ctx.putObject(CoreObjects.PROXY_ITEM, itemModel.getProxy());
+                ctx.putObject(CoreObjects.PARAMETERIZE_ARGS, itemModel.getParameteredArgs());
+            }
+        }
 
-      if (imList.size() < 1) {
-         // System.out.println("FolderModel: No items deserialized. Creating one
-         // ..");
-         ItemModel im = new ItemModel(this);
-         imList.add(im);
-      }
+        return imList;
+    }
 
-      int cnt = 0;
-      // Add available Proxies to ItemModels
-      for (ItemModel itemModel : imList) {
-         itemModel.setAvailableProxies(availableProxies);
-         itemModel.setAvailableKeystore(availableKeystore);
-         if (cnt == 0) { // FIXME. Those values belong to FolderModel, not
-                         // ItemModel
-            CoreContext ctx = CoreContext.getContext();
-            ctx.putObject(CoreObjects.AUTH_ITEM, itemModel.getAuth());
-            ctx.putObject(CoreObjects.PROXY_ITEM, itemModel.getProxy());
-            ctx.putObject(CoreObjects.PARAMETERIZE_ARGS, itemModel.getParameteredArgs());
-         }
-      }
+    public byte[] serialize() {
+        try {
+            // FileOutputStream fout = new
+            // FileOutputStream(CoreConstants.SERIALIZED_PATH);
+            // ObjectOutputStream oos = new ObjectOutputStream(fout);
+            final List<Serializable> serList = new ArrayList<>();
 
-      return imList;
-   }
+            final CoreContext ctx = CoreContext.getContext();
+            final Map<String, String> mapParmzArgs = (Map<String, String>) ctx.getObject(CoreObjects.PARAMETERIZE_ARGS);
 
+            for (final ItemModel im : itemList) {
+                im.setParameteredArgs(mapParmzArgs);
+                im.fireExecute(new ModelEvent(ModelEvent.FOLDER_INIT, CoreConstants.NULL_MODEL));
+                serList.add(im.getSerializable());
+            }
+            // oos.writeObject(serList);
+            // oos.close();
 
-   public byte[] serialize(){
-      try {
-         // FileOutputStream fout = new
-         // FileOutputStream(CoreConstants.SERIALIZED_PATH);
-         // ObjectOutputStream oos = new ObjectOutputStream(fout);
-         List<Serializable> serList = new ArrayList<Serializable>();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final ObjectOutputStream oos2 = new ObjectOutputStream(baos);
+            oos2.writeObject(serList);
+            oos2.close();
 
-         CoreContext ctx = CoreContext.getContext();
-         Map<String, String> mapParmzArgs = (Map<String, String>) ctx.getObject(CoreObjects.PARAMETERIZE_ARGS);
+            return baos.toByteArray();
 
-         for (ItemModel im : itemList) {
-            im.setParameteredArgs(mapParmzArgs);
-            im.fireExecute(new ModelEvent(ModelEvent.FOLDER_INIT, CoreConstants.NULL_MODEL));
-            serList.add(im.getSerializable());
-         }
-         // oos.writeObject(serList);
-         // oos.close();
+        } catch (final Exception e) {
+            throw new CoreException(CoreException.GENERAL, e);
+        }
+    }
 
-         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-         ObjectOutputStream oos2 = new ObjectOutputStream(baos);
-         oos2.writeObject(serList);
-         oos2.close();
+    @Override
+    public void addListener(final ModelListener listener) {
+        modelListeners.add(listener);
+    }
 
-         return baos.toByteArray();
+    @Override
+    public void removeListener(final ModelListener listener) {
+        modelListeners.remove(listener);
+    }
 
-      } catch (Exception e) {
-         throw new CoreException(CoreException.GENERAL, e);
-      }
-   }
+    @Override
+    public void fireExecute(final ModelEvent e) {
+        for (final ModelListener listener : modelListeners) {
+            listener.executed(e);
+        }
+    }
 
+    public void addUrlToHistory(final String url) {
+        urlHistory.add(url);
+    }
 
-   public void addListener( ModelListener listener){
-      modelListeners.add(listener);
-   }
+    public String[] getUrlHistory() {
+        final String[] urls = new String[urlHistory.size()];
+        int i = 0;
+        for (final Iterator<String> iter = urlHistory.iterator(); iter.hasNext(); i++) {
+            urls[i] = iter.next();
+        }
+        return urls;
+    }
 
+    public synchronized void putItem(final ItemModel itemModel) {
+        itemMap.put(itemModel.hashCode(), itemModel);
+        itemList.add(itemModel);
+    }
 
-   public void removeListener( ModelListener listener){
-      modelListeners.remove(listener);
-   }
+    /**
+     * Using the overloaded remove(int) instead of remove(Object)
+     */
+    public synchronized void removeItem(final Integer hashcode) {
+        itemList.remove(getItemModel(hashcode));
+        itemMap.remove(hashcode);
+    }
 
+    public synchronized void removeAll() {
+        itemMap.clear();
+        itemList.clear();
+    }
 
-   public void fireExecute( ModelEvent e){
-      for (ModelListener listener : modelListeners) {
-         listener.executed(e);
-      }
-   }
+    public List<ProxyItem> getAvailableProxies() {
+        return availableProxies;
+    }
 
+    public String getAvailableKeystore() {
+        return availableKeystore;
+    }
 
-   public void addUrlToHistory( String url){
-      urlHistory.add(url);
-   }
+    public synchronized int getItemCount() {
+        return itemMap.size();
+    }
 
+    public synchronized ItemModel getItemModel(final Integer id) {
+        return itemMap.get(id);
+    }
 
-   public String[] getUrlHistory(){
-      String[] urls = new String[urlHistory.size()];
-      int i = 0;
-      for (Iterator<String> iter = urlHistory.iterator(); iter.hasNext(); i++) {
-         urls[i] = iter.next();
-      }
-      return urls;
-   }
+    public List<ItemModel> getItemModels() {
+        return itemList;
+    }
 
+    @Override
+    public Serializable getSerializable() {
+        throw new RuntimeException("Method not implemented");
+    }
 
-   public synchronized void putItem( ItemModel itemModel){
-      itemMap.put(new Integer(itemModel.hashCode()), itemModel);
-      itemList.add(itemModel);
-   }
+    @Override
+    public void load(final Serializable data) {
+        throw new RuntimeException("Method not implemented");
+    }
 
+    public void doDispose() {
 
-   /**
-    * Using the overloaded remove(int) instead of remove(Object)
-    */
-   public synchronized void removeItem( Integer hashcode){
-      itemList.remove(getItemModel(hashcode));
-      itemMap.remove(hashcode);
-   }
+        BaseUtils.writeToPrefs(PREF_VIEW_NAME, serialize());
+        for (final ItemModel im : itemList) {
+            im.fireExecute(new ModelEvent(ModelEvent.ITEM_DISPOSE, CoreConstants.NULL_MODEL));
+        }
+        removeAll();
+    }
 
+    public void doAuth() {
+        for (final ItemModel im : itemList) {
+            im.fireExecute(new ModelEvent(ModelEvent.AUTH, CoreConstants.NULL_MODEL));
+        }
+    }
 
-   public synchronized void removeAll(){
-      itemMap.clear();
-      itemList.clear();
-   }
+    public void doProxy() {
+        for (final ItemModel im : itemList) {
+            im.fireExecute(new ModelEvent(ModelEvent.PROXY, CoreConstants.NULL_MODEL));
+        }
+    }
 
-
-   public List<ProxyItem> getAvailableProxies(){
-      return availableProxies;
-   }
-
-
-   public String getAvailableKeystore(){
-      return availableKeystore;
-   }
-
-
-   public synchronized int getItemCount(){
-      return itemMap.size();
-   }
-
-
-   public synchronized ItemModel getItemModel( Integer id){
-      return (ItemModel) itemMap.get(id);
-   }
-
-
-   public List<ItemModel> getItemModels(){
-      return itemList;
-   }
-
-
-   public Serializable getSerializable(){
-      throw new RuntimeException("Method not implemented");
-   }
-
-
-   public void load( Serializable data){
-      throw new RuntimeException("Method not implemented");
-   }
-
-
-   public void doDispose(){
-
-      BaseUtils.writeToPrefs(PREF_VIEW_NAME, this.serialize());
-      for (ItemModel im : itemList) {
-         im.fireExecute(new ModelEvent(ModelEvent.ITEM_DISPOSE, CoreConstants.NULL_MODEL));
-      }
-      this.removeAll();
-   }
-
-
-   public void doAuth(){
-      for (ItemModel im : itemList) {
-         im.fireExecute(new ModelEvent(ModelEvent.AUTH, CoreConstants.NULL_MODEL));
-      }
-   }
-
-
-   public void doProxy(){
-      for (ItemModel im : itemList) {
-         im.fireExecute(new ModelEvent(ModelEvent.PROXY, CoreConstants.NULL_MODEL));
-      }
-   }
-
-
-   public String toString(){
-      return "FolderModel{" + "items=" + itemMap + "}";
-   }
+    @Override
+    public String toString() {
+        return "FolderModel{" + "items=" + itemMap + "}";
+    }
 
 }

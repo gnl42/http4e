@@ -33,7 +33,6 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 import org.roussev.http4e.httpclient.core.CoreConstants;
 import org.roussev.http4e.httpclient.core.CoreImages;
 import org.roussev.http4e.httpclient.core.ExceptionHandler;
-import org.roussev.http4e.httpclient.core.client.view.assist.Tracker.BlacklistStrategy;
 import org.roussev.http4e.httpclient.core.misc.LazyObjects;
 import org.roussev.http4e.httpclient.core.util.BaseUtils;
 import org.roussev.http4e.httpclient.core.util.ResourceUtils;
@@ -43,147 +42,144 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 public class AssistUtils {
 
-   // "${header} = [${value}]"
-   private final static String   CONTEXT_ID1   = "header-tmpl";
-   private final static TemplateContextType   CTX_TYPE = new TemplateContextType(CONTEXT_ID1, "Header Template");
-   private final static Template              TEMPLATE_HEADER   = new Template( "header",  "Insert new header", CONTEXT_ID1, "${header}=${value}",  true);
-   private final static Template              TEMPLATE_PARAM    = new Template( "parameter",  "Insert new parameter", CONTEXT_ID1, "${param}=${value}",  true);
+    // "${header} = [${value}]"
+    private final static String CONTEXT_ID1 = "header-tmpl";
+    private final static TemplateContextType CTX_TYPE = new TemplateContextType(CONTEXT_ID1, "Header Template");
+    private final static Template TEMPLATE_HEADER = new Template("header", "Insert new header", CONTEXT_ID1, "${header}=${value}", true);
+    private final static Template TEMPLATE_PARAM = new Template("parameter", "Insert new parameter", CONTEXT_ID1, "${param}=${value}", true);
 //   private final static Template              TEMPLATE_COMMENT  = new Template( "comment", "Insert comment",    CONTEXT_ID1, "# ${comment}", true);
-   
-   
-   public static void doTemplateProposals( IDocument document, int offset, String qualifier, List proposalsList, boolean isHeaderProcessor){
-      if (BaseUtils.isEmpty(qualifier)) {
-         ICompletionProposal proposal;
-         Region region = new Region(offset, 0);
-         TemplateContext ctx1 = new DocumentTemplateContext(CTX_TYPE, document, offset, 0);
-         Template topTmpl = TEMPLATE_PARAM;
-         if(isHeaderProcessor){
-            topTmpl = TEMPLATE_HEADER;
-         }
-         proposal = new TemplateProposal(topTmpl, ctx1, region, ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_TEMPLATE));
-         proposalsList.add(proposal);
-         
+
+    public static void doTemplateProposals(final IDocument document, final int offset, final String qualifier, final List<ICompletionProposal> proposalsList,
+            final boolean isHeaderProcessor) {
+        if (BaseUtils.isEmpty(qualifier)) {
+            ICompletionProposal proposal;
+            final Region region = new Region(offset, 0);
+            final TemplateContext ctx1 = new DocumentTemplateContext(CTX_TYPE, document, offset, 0);
+            Template topTmpl = TEMPLATE_PARAM;
+            if (isHeaderProcessor) {
+                topTmpl = TEMPLATE_HEADER;
+            }
+            proposal = new TemplateProposal(topTmpl, ctx1, region, ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_TEMPLATE));
+            proposalsList.add(proposal);
+
 //         TemplateContext ctx2 = new DocumentTemplateContext(CTX_TYPE, document, offset, 0);
 //         proposal = new TemplateProposal(TEMPLATE_COMMENT, ctx2, region, ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_TEMPLATE));
 //         proposalsList.add(proposal);
-      }
-   }
-   
-   
-   public static String getKeyWordToOffset(IDocument document, int offset){
-      int currOffset = offset - 1;
-      String currWord = "";
-      try {
-         char currChar;
-         while (currOffset > 0 && !Character.isWhitespace(currChar = document.getChar(currOffset))) {
-            currWord = currChar + currWord;
-            currOffset--;
-         }
-      } catch (BadLocationException e) {
-         ExceptionHandler.warn(e);
-      }
-      return currWord;
-   }
-   
-   /**
-    * Adding cached word tracks proposals
-    */
-   public static void doTrackProposals( Tracker wordTracker, String word, int offset, List proposalsList){
-
-      List suggestions = wordTracker.suggest(word);
-      if (suggestions.size() > 0) {
-          buildWordTrackProposals(suggestions, word, offset - word.length(), proposalsList);
-      }
+        }
     }
-   
-   
-   /**
-    * Adding http 1.1 headers proposals
-    */
-   public static void doHttpHeadersProposals( int offset, String qualifier, List proposalsList){
-       List httpHeaders = LazyObjects.getHttpHeaders();
-       int qlen = qualifier.length();
-       
-       for (Iterator iter = httpHeaders.iterator(); iter.hasNext();) {
-         String text = (String) iter.next();
-         if (text.toLowerCase().startsWith(qualifier.toLowerCase())) {
-            int cursor = text.length();
-            CompletionProposal cp = new CompletionProposal(text + AssistConstants.BRACKETS_COMPLETION, offset - qlen, qlen, cursor + 4, ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER), text, null, LazyObjects.getInfoMap("Headers").getInfo(text));
-            proposalsList.add(cp);
-         }
-       }
-   }
-   
-   
-   public static void doHttpH_ValuesProposals( String lineKey, int offset, String qualifier, List propList){
 
-      ICompletionProposal proposal;
-      int qlen = qualifier.length();
-      int replacementOffset = offset - qlen;
-
-      if(AssistConstants.HEADER_DATE.equalsIgnoreCase(lineKey) 
-            || AssistConstants.HEADER_IF_MOD_SINCE.equalsIgnoreCase(lineKey)
-            || AssistConstants.HEADER_RETRY_AFTER.equalsIgnoreCase(lineKey)
-            || AssistConstants.HEADER_LAST_MODIFIED.equalsIgnoreCase(lineKey)
-            || AssistConstants.HEADER_IF_UNMOD_SINCE.equalsIgnoreCase(lineKey)
-            || AssistConstants.HEADER_EXPIRES.equalsIgnoreCase(lineKey)){
-         Date today = new Date();
-         String replaceStr = today.toString();
-         proposal = new CompletionProposal(replaceStr, replacementOffset, qlen, replaceStr.length() + 1, ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER), replaceStr, null, null);
-         propList.add(proposal);
-         
-      } else {
-         Collection valsForHeader = LazyObjects.getValuesForHeader(lineKey);
-         for (Iterator iter = valsForHeader.iterator(); iter.hasNext();) {
-            String val = (String) iter.next();
-            if (val.toLowerCase().startsWith(qualifier.toLowerCase())) {
-               int cursor = val.length();
-               proposal = new CompletionProposal(val, offset - qlen, qlen, cursor + 1, ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER), val, null, LazyObjects.getInfoMap(lineKey).getInfo(val));
-               propList.add(proposal);
+    public static String getKeyWordToOffset(final IDocument document, final int offset) {
+        int currOffset = offset - 1;
+        String currWord = "";
+        try {
+            char currChar;
+            while (currOffset > 0 && !Character.isWhitespace(currChar = document.getChar(currOffset))) {
+                currWord = currChar + currWord;
+                currOffset--;
             }
-         }
-      }
-   }
+        } catch (final BadLocationException e) {
+            ExceptionHandler.warn(e);
+        }
+        return currWord;
+    }
 
-   
-   
-   private static void buildWordTrackProposals( List suggestions, String replacedWord, int offset, List proposalsList){
-      int index = 0;
-      for (Iterator i = suggestions.iterator(); i.hasNext();) {
-         String currSuggestion = (String) i.next();
-         proposalsList.add( new CompletionProposal(currSuggestion, offset, replacedWord.length(), currSuggestion.length(), ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER_CACHED), currSuggestion, null, LazyObjects.getInfoMap("Headers").getInfo(currSuggestion)));
-         index++;
-      }
-   }
-   
-   
-   public static void addTrackWords(String text, IDocument doc, int offset, ModelTrackerListener modelListener){
-      if ( DocumentUtils.isNL(text)) {
-         String newWord = DocumentUtils.findMostRecentWord(offset, doc);
-         newWord = newWord.trim();
-         if(newWord.length() > 0 && !DocumentUtils.isComment(newWord)){
-            final String key = DocumentUtils.getKeyFromLine(newWord);
-            final String val = DocumentUtils.getValueFromLine(newWord);
-            Tracker masterTracker = LazyObjects.getHeaderTracker();
-            if(key.length() > 0) {
-               if(modelListener!= null) modelListener.fireExecute(key, val);
-               masterTracker.add(key);
-               
-               if(val.length() > 0) {
-                  Tracker childTracker = masterTracker.getChildTracker(key);
-                  childTracker.setBlacklistStrategy(new BlacklistStrategy(){
-                     public boolean isBlacklisted( String word){
-                        Collection blackList = LazyObjects.getValuesForHeader(key);
-                        return blackList.contains(word);
-                     }
-                  });
-                  childTracker.add(val);
-               }
+    /**
+     * Adding cached word tracks proposals
+     */
+    public static void doTrackProposals(final Tracker wordTracker, final String word, final int offset, final List<ICompletionProposal> proposalsList) {
+
+        final List<String> suggestions = wordTracker.suggest(word);
+        if (suggestions.size() > 0) {
+            buildWordTrackProposals(suggestions, word, offset - word.length(), proposalsList);
+        }
+    }
+
+    /**
+     * Adding http 1.1 headers proposals
+     */
+    public static void doHttpHeadersProposals(final int offset, final String qualifier, final List<ICompletionProposal> proposalsList) {
+        final List<String> httpHeaders = LazyObjects.getHttpHeaders();
+        final int qlen = qualifier.length();
+
+        for (final Iterator<String> iter = httpHeaders.iterator(); iter.hasNext();) {
+            final String text = iter.next();
+            if (text.toLowerCase().startsWith(qualifier.toLowerCase())) {
+                final int cursor = text.length();
+                final CompletionProposal cp = new CompletionProposal(text + AssistConstants.BRACKETS_COMPLETION, offset - qlen, qlen, cursor + 4,
+                        ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER), text, null,
+                        LazyObjects.getInfoMap("Headers").getInfo(text));
+                proposalsList.add(cp);
             }
-         }
-      }
-   }
-   
+        }
+    }
+
+    public static void doHttpH_ValuesProposals(final String lineKey, final int offset, final String qualifier, final List<ICompletionProposal> propList) {
+
+        ICompletionProposal proposal;
+        final int qlen = qualifier.length();
+        final int replacementOffset = offset - qlen;
+
+        if (AssistConstants.HEADER_DATE.equalsIgnoreCase(lineKey) || AssistConstants.HEADER_IF_MOD_SINCE.equalsIgnoreCase(lineKey)
+                || AssistConstants.HEADER_RETRY_AFTER.equalsIgnoreCase(lineKey) || AssistConstants.HEADER_LAST_MODIFIED.equalsIgnoreCase(lineKey)
+                || AssistConstants.HEADER_IF_UNMOD_SINCE.equalsIgnoreCase(lineKey) || AssistConstants.HEADER_EXPIRES.equalsIgnoreCase(lineKey)) {
+            final Date today = new Date();
+            final String replaceStr = today.toString();
+            proposal = new CompletionProposal(replaceStr, replacementOffset, qlen, replaceStr.length() + 1,
+                    ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER), replaceStr, null, null);
+            propList.add(proposal);
+
+        } else {
+            final Collection<String> valsForHeader = LazyObjects.getValuesForHeader(lineKey);
+            for (final Iterator<String> iter = valsForHeader.iterator(); iter.hasNext();) {
+                final String val = iter.next();
+                if (val.toLowerCase().startsWith(qualifier.toLowerCase())) {
+                    final int cursor = val.length();
+                    proposal = new CompletionProposal(val, offset - qlen, qlen, cursor + 1,
+                            ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER), val, null,
+                            LazyObjects.getInfoMap(lineKey).getInfo(val));
+                    propList.add(proposal);
+                }
+            }
+        }
+    }
+
+    private static void buildWordTrackProposals(final List<String> suggestions, final String replacedWord, final int offset,
+            final List<ICompletionProposal> proposalsList) {
+        int index = 0;
+        for (final Iterator<String> i = suggestions.iterator(); i.hasNext();) {
+            final String currSuggestion = i.next();
+            proposalsList.add(new CompletionProposal(currSuggestion, offset, replacedWord.length(), currSuggestion.length(),
+                    ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.ASSIST_HEADER_CACHED), currSuggestion, null,
+                    LazyObjects.getInfoMap("Headers").getInfo(currSuggestion)));
+            index++;
+        }
+    }
+
+    public static void addTrackWords(final String text, final IDocument doc, final int offset, final ModelTrackerListener modelListener) {
+        if (DocumentUtils.isNL(text)) {
+            String newWord = DocumentUtils.findMostRecentWord(offset, doc);
+            newWord = newWord.trim();
+            if (newWord.length() > 0 && !DocumentUtils.isComment(newWord)) {
+                final String key = DocumentUtils.getKeyFromLine(newWord);
+                final String val = DocumentUtils.getValueFromLine(newWord);
+                final Tracker masterTracker = LazyObjects.getHeaderTracker();
+                if (key.length() > 0) {
+                    if (modelListener != null) {
+                        modelListener.fireExecute(key, val);
+                    }
+                    masterTracker.add(key);
+
+                    if (val.length() > 0) {
+                        final Tracker childTracker = masterTracker.getChildTracker(key);
+                        childTracker.setBlacklistStrategy(word -> {
+                            final Collection<String> blackList = LazyObjects.getValuesForHeader(key);
+                            return blackList.contains(word);
+                        });
+                        childTracker.add(val);
+                    }
+                }
+            }
+        }
+    }
+
 }
-
-

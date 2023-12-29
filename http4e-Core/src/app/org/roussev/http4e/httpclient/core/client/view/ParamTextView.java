@@ -15,8 +15,6 @@
  */
 package org.roussev.http4e.httpclient.core.client.view;
 
-import org.eclipse.jface.text.ITextListener;
-import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
@@ -25,10 +23,8 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.snippets.Snippet25;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
@@ -45,80 +41,69 @@ import org.roussev.http4e.httpclient.core.client.view.assist.ModelTrackerListene
  */
 class ParamTextView implements IControlView {
 
-   private StyledText styledText;
-   final ItemModel    model;
+    private final StyledText styledText;
+    final ItemModel model;
 
+    ParamTextView(final ItemModel iModel, final Composite parent) {
+        model = iModel;
+        styledText = buildEditorText(parent);
 
-   ParamTextView( final ItemModel iModel, Composite parent) {
-      this.model = iModel;
-      styledText = buildEditorText(parent);
+        final Menu popupMenu = new Menu(styledText);
+        new ClipboardMenu(styledText, popupMenu);
+        styledText.setMenu(popupMenu);
 
-      Menu popupMenu = new Menu(styledText);
-      new ClipboardMenu(styledText, popupMenu);
-      styledText.setMenu(popupMenu);
+        styledText.addMouseListener(new MouseAdapter() {
 
-      styledText.addMouseListener(new MouseAdapter() {
-
-         public void mouseDoubleClick( MouseEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.PARAMS_RESIZED, model));
-         }
-      });
-      styledText.addFocusListener(new FocusListener() {
-
-         public void focusGained( FocusEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_GAINED, model));
-         }
-
-
-         public void focusLost( FocusEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, model));
-         }
-      });
-
-      styledText.addKeyListener(new ExecuteKeyListener(new ExecuteCommand() {
-         public void execute(){
-            model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model));
-         }
-      }));
-
-   }
-
-
-   private StyledText buildEditorText( Composite parent){
-      final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
-      final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.PARAM_PROCESSOR);
-      sourceViewer.configure(sourceConf);
-      sourceViewer.setDocument(DocumentUtils.createDocument1());
-
-      sourceViewer.getControl().addKeyListener(new KeyAdapter() {
-
-         public void keyPressed( KeyEvent e){
-            // if ((e.character == ' ') && ((e.stateMask & SWT.CTRL) != 0)) {
-            if (Utils.isAutoAssistInvoked(e)) {
-               IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
-               ca.showPossibleCompletions();
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.PARAMS_RESIZED, model));
             }
-         }
-      });
+        });
+        styledText.addFocusListener(new FocusListener() {
 
-      sourceViewer.addTextListener(new ITextListener() {
+            @Override
+            public void focusGained(final FocusEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_GAINED, model));
+            }
 
-         public void textChanged( TextEvent e){
-            ModelTrackerListener trackerListener = new ModelTrackerListener() {
+            @Override
+            public void focusLost(final FocusEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, model));
+            }
+        });
 
-               public void fireExecute( String key, String value){
-                  model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, model));
-               }
-            };
+        styledText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
+
+    }
+
+    private StyledText buildEditorText(final Composite parent) {
+        final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+        final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.PARAM_PROCESSOR);
+        sourceViewer.configure(sourceConf);
+        sourceViewer.setDocument(DocumentUtils.createDocument1());
+
+        sourceViewer.getControl().addKeyListener(new KeyAdapter() {
+
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                // if ((e.character == ' ') && ((e.stateMask & SWT.CTRL) != 0)) {
+                if (Utils.isAutoAssistInvoked(e)) {
+                    final IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
+                    ca.showPossibleCompletions();
+                }
+            }
+        });
+
+        sourceViewer.addTextListener(e -> {
+            final ModelTrackerListener trackerListener = (key, value) -> model.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, model));
             AssistUtils.addTrackWords(e.getText(), sourceViewer.getDocument(), e.getOffset() - 1, trackerListener);
-         }
-      });
+        });
 
-      return sourceViewer.getTextWidget();
-   }
+        return sourceViewer.getTextWidget();
+    }
 
-
-   public Control getControl(){
-      return styledText;
-   }
+    @Override
+    public Control getControl() {
+        return styledText;
+    }
 }

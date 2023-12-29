@@ -21,116 +21,123 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextViewer;
 import org.roussev.http4e.httpclient.core.util.BaseUtils;
 
-
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class HDoubleClickStrategy implements ITextDoubleClickStrategy {
-   
-   protected ITextViewer fText;
 
-   public void doubleClicked( ITextViewer part){
-      int pos = part.getSelectedRange().x;
+    protected ITextViewer fText;
 
-      if (pos < 0)
-         return;
+    @Override
+    public void doubleClicked(final ITextViewer part) {
+        final int pos = part.getSelectedRange().x;
 
-      fText = part;
+        if (pos < 0) {
+            return;
+        }
 
-      if (!selectComment(pos)) {
-         selectWord(pos);
-      }
-   }
+        fText = part;
 
-   protected boolean selectComment( int caretPos){
-      IDocument doc = fText.getDocument();
-      int startPos, endPos;
+        if (!selectComment(pos)) {
+            selectWord(pos);
+        }
+    }
 
-      try {
-         int pos = caretPos;
-         char c = ' ';
+    protected boolean selectComment(final int caretPos) {
+        final IDocument doc = fText.getDocument();
+        int startPos, endPos;
 
-         while (pos >= 0) {
-            c = doc.getChar(pos);
-            if (c == '\\') {
-               pos -= 2;
-               continue;
+        try {
+            int pos = caretPos;
+            char c = ' ';
+
+            while (pos >= 0) {
+                c = doc.getChar(pos);
+                if (c == '\\') {
+                    pos -= 2;
+                    continue;
+                }
+                if (c == Character.LINE_SEPARATOR || c == '\"') {
+                    break;
+                }
+                --pos;
             }
-            if (c == Character.LINE_SEPARATOR || c == '\"')
-               break;
-            --pos;
-         }
 
-         if (c != '\"')
-            return false;
+            if (c != '\"') {
+                return false;
+            }
 
-         startPos = pos;
+            startPos = pos;
 
-         pos = caretPos;
-         int length = doc.getLength();
-         c = ' ';
+            pos = caretPos;
+            final int length = doc.getLength();
+            c = ' ';
 
-         while (pos < length) {
-            c = doc.getChar(pos);
-            if (c == Character.LINE_SEPARATOR || c == '\"')
-               break;
-            ++pos;
-         }
-         if (c != '\"')
-            return false;
+            while (pos < length) {
+                c = doc.getChar(pos);
+                if (c == Character.LINE_SEPARATOR || c == '\"') {
+                    break;
+                }
+                ++pos;
+            }
+            if (c != '\"') {
+                return false;
+            }
 
-         endPos = pos;
+            endPos = pos;
 
-         int offset = startPos + 1;
-         int len = endPos - offset;
-         fText.setSelectedRange(offset, len);
-         return true;
-      } catch (BadLocationException x) {
-      }
+            final int offset = startPos + 1;
+            final int len = endPos - offset;
+            fText.setSelectedRange(offset, len);
+            return true;
+        } catch (final BadLocationException x) {
+        }
 
-      return false;
-   }
+        return false;
+    }
 
-   protected boolean selectWord( int caretPos){
+    protected boolean selectWord(final int caretPos) {
 
-      IDocument doc = fText.getDocument();
-      int startPos, endPos;
+        final IDocument doc = fText.getDocument();
+        int startPos, endPos;
 
-      try {
-         int pos = caretPos;
-         char c;
-         while (pos >= 0) {
-            c = doc.getChar(pos);
-            if (!BaseUtils.isHttp4eIdentifier(c))
-               break;
-            --pos;
-         }
+        try {
+            int pos = caretPos;
+            char c;
+            while (pos >= 0) {
+                c = doc.getChar(pos);
+                if (!BaseUtils.isHttp4eIdentifier(c)) {
+                    break;
+                }
+                --pos;
+            }
 
-         startPos = pos;
+            startPos = pos;
 
-         pos = caretPos;
-         int length = doc.getLength();
+            pos = caretPos;
+            final int length = doc.getLength();
 
-         while (pos < length) {
-            c = doc.getChar(pos);
-            if (!BaseUtils.isHttp4eIdentifier(c))
-               break;
-            ++pos;
-         }
+            while (pos < length) {
+                c = doc.getChar(pos);
+                if (!BaseUtils.isHttp4eIdentifier(c)) {
+                    break;
+                }
+                ++pos;
+            }
 
-         endPos = pos;
-         selectRange(startPos, endPos);
-         return true;
+            endPos = pos;
+            selectRange(startPos, endPos);
+            return true;
 
-      } catch (BadLocationException x) {
-      }
+        } catch (final BadLocationException x) {
+        }
 
-      return false;
-   }
+        return false;
+    }
 
-   private void selectRange( int startPos, int stopPos){
-      int offset = startPos + 1;
-      int length = stopPos - offset;
-      fText.setSelectedRange(offset, length);
-   }
+    private void selectRange(final int startPos, final int stopPos) {
+        final int offset = startPos + 1;
+        final int length = stopPos - offset;
+        fText.setSelectedRange(offset, length);
+    }
 }

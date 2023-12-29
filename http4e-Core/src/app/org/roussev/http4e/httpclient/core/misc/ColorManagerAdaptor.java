@@ -19,25 +19,24 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.roussev.http4e.editor.xml.ColorManager;
 
-
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class ColorManagerAdaptor implements ColorManager {
-    
-    private ResourceCache cache;
-    
-    public ColorManagerAdaptor(ResourceCache cache){
+
+    private final ResourceCache cache;
+
+    public ColorManagerAdaptor(final ResourceCache cache) {
         this.cache = cache;
     }
 
-    public void dispose(){
+    @Override
+    public void dispose() {
         cache.disposeColors();
     }
 
-    public Color getColor( RGB rgb){
+    @Override
+    public Color getColor(final RGB rgb) {
         return cache.getColor(rgb);
     }
 }
-
-

@@ -27,58 +27,54 @@ import org.roussev.http4e.httpclient.core.CoreConstants;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class Item implements Serializable {
- 
-   private static final long serialVersionUID = -6572164765472818414L;
-   
-   int                              hashcode          = 0;
-   public String                    name              = "";
-   public String                    httpMethod        = CoreConstants.HTTP_GET;
 
-   /* CoreConstants.PROTOCOL_HTTP; */
-   public String                    url               = "";
+    private static final long serialVersionUID = -6572164765472818414L;
 
-   /* default is no proxy */
-   public ProxyItem                 currentProxy      = ProxyItem.createDirectConnectionProxy();
+    int hashcode = 0;
+    public String name = "";
+    public String httpMethod = CoreConstants.HTTP_GET;
 
-   public List<ProxyItem>           availableProxies  = new ArrayList<ProxyItem>();
-   public String                    availableKeystore = null;
+    /* CoreConstants.PROTOCOL_HTTP; */
+    public String url = "";
 
-   public Map<String, List<String>> headers           = new HashMap<String, List<String>>();
-   public Map<String, List<String>> parameters        = new HashMap<String, List<String>>();
+    /* default is no proxy */
+    public ProxyItem currentProxy = ProxyItem.createDirectConnectionProxy();
 
-   public String                    body              = "";
-   public String                           request           = "";
-   public String                           response          = "";
+    public List<ProxyItem> availableProxies = new ArrayList<>();
+    public String availableKeystore = null;
 
-   int[]                            hSashWeights      = new int[] { CoreConstants.H_SASH_EQ, CoreConstants.H_SASH_EQ, CoreConstants.H_SASH_EQ };
-   int[]                            vSashWeights      = new int[] { CoreConstants.V_SASH_EQ, CoreConstants.V_SASH_EQ, CoreConstants.V_SASH_EQ };
+    public Map<String, List<String>> headers = new HashMap<>();
+    public Map<String, List<String>> parameters = new HashMap<>();
 
-   ProxyItem proxyItem = new ProxyItem();
-   AuthItem authItem = new AuthItem();
-   
-   public Map<String, String> parameteredArgs        = new HashMap<String, String>(); //FIXME. This does not belong at Item level, but Folder global level.
+    public String body = "";
+    public String request = "";
+    public String response = "";
 
-   public boolean equals( Object obj){
-      if (obj != null && obj instanceof Item) {
-         Item newItem = (Item) obj;
-         return newItem.hashCode() == this.hashCode();
-      }
-      return false;
-   }
+    int[] hSashWeights = { CoreConstants.H_SASH_EQ, CoreConstants.H_SASH_EQ, CoreConstants.H_SASH_EQ };
+    int[] vSashWeights = { CoreConstants.V_SASH_EQ, CoreConstants.V_SASH_EQ, CoreConstants.V_SASH_EQ };
 
+    ProxyItem proxyItem = new ProxyItem();
+    AuthItem authItem = new AuthItem();
 
-   public int hashCode(){
-      return hashcode;
-   }
+    public Map<String, String> parameteredArgs = new HashMap<>(); // FIXME. This does not belong at Item level, but Folder global level.
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj != null && obj instanceof final Item newItem) {
+            return newItem.hashCode() == hashCode();
+        }
+        return false;
+    }
 
-   public String toString(){
-      return "{" + hashCode() + ",name=" + name +
-      ",httpMethod=" + httpMethod +
-      ",url=" + url +
-      ",headers=" + headers +
-      ",parameters=" + parameters +
-      ",body=" + body + "}";
-   }
+    @Override
+    public int hashCode() {
+        return hashcode;
+    }
+
+    @Override
+    public String toString() {
+        return "{" + hashCode() + ",name=" + name + ",httpMethod=" + httpMethod + ",url=" + url + ",headers=" + headers + ",parameters=" + parameters + ",body="
+                + body + "}";
+    }
 
 }

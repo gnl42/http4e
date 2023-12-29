@@ -17,8 +17,8 @@ package org.roussev.http4e.httpclient.ui.preferences;
 
 public class PreferenceConstants {
 
-   public static final String P_PROXY_LIST = "proxylist";
-   public static final String P_KEYSTORE_LIST = "keystorelist";
-   public static final String P_USER_HOME_DIR = "user.folder";
-   public static final String P_PAYLOAD_VIEW_SIZE = "payload.view.size";
+    public static final String P_PROXY_LIST = "proxylist";
+    public static final String P_KEYSTORE_LIST = "keystorelist";
+    public static final String P_USER_HOME_DIR = "user.folder";
+    public static final String P_PAYLOAD_VIEW_SIZE = "payload.view.size";
 }

@@ -25,32 +25,26 @@ import org.eclipse.jface.text.rules.MultiLineRule;
  */
 public class StartTagRule extends MultiLineRule {
 
-   public StartTagRule( IToken token) {
-      this(token, false);
-   }
+    public StartTagRule(final IToken token) {
+        this(token, false);
+    }
 
+    protected StartTagRule(final IToken token, final boolean endAsWell) {
+        super("<", endAsWell ? "/>" : ">", token);
+    }
 
-   protected StartTagRule( IToken token, boolean endAsWell) {
-      super("<", endAsWell ? "/>" : ">", token);
-   }
-
-
-   protected boolean sequenceDetected( ICharacterScanner scanner, char[] sequence, boolean eofAllowed){
-      int c = scanner.read();
-      if (sequence[0] == '<') {
-         if (c == '?') {
-            // processing instruction - abort
+    @Override
+    protected boolean sequenceDetected(final ICharacterScanner scanner, final char[] sequence, final boolean eofAllowed) {
+        final int c = scanner.read();
+        if (sequence[0] == '<') {
+            if (c == '?' || c == '!') {
+                scanner.unread();
+                // comment - abort
+                return false;
+            }
+        } else if (sequence[0] == '>') {
             scanner.unread();
-            return false;
-         }
-         if (c == '!') {
-            scanner.unread();
-            // comment - abort
-            return false;
-         }
-      } else if (sequence[0] == '>') {
-         scanner.unread();
-      }
-      return super.sequenceDetected(scanner, sequence, eofAllowed);
-   }
+        }
+        return super.sequenceDetected(scanner, sequence, eofAllowed);
+    }
 }

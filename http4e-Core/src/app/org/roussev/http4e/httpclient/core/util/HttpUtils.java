@@ -30,187 +30,185 @@ import org.apache.commons.httpclient.HttpMethod;
  */
 public class HttpUtils {
 
-   public static void execute( HttpClient client, HttpMethod httpmethod, ResponseReader reader) throws Exception{
+    public static void execute(final HttpClient client, final HttpMethod httpmethod, final ResponseReader reader) throws Exception {
 
-      try {
-         client.executeMethod(httpmethod);
+        try {
+            client.executeMethod(httpmethod);
 
-         if (reader != null) {
-            reader.read(httpmethod);
-         }
+            if (reader != null) {
+                reader.read(httpmethod);
+            }
 
-      } catch (Exception e) {
-         throw e;
+        } catch (final Exception e) {
+            throw e;
 
-      } finally {
-         httpmethod.releaseConnection();
-      }
-   }
+        } finally {
+            httpmethod.releaseConnection();
+        }
+    }
 
-   public static void execute( HttpMethod httpmethod, ResponseReader reader) throws Exception{
-      HttpClient client = new HttpClient();
-      execute(client, httpmethod, reader);
-   }
+    public static void execute(final HttpMethod httpmethod, final ResponseReader reader) throws Exception {
+        final HttpClient client = new HttpClient();
+        execute(client, httpmethod, reader);
+    }
 
-   public static void dumpResponse( HttpMethod httpmethod, PrintStream out){
+    public static void dumpResponse(final HttpMethod httpmethod, final PrintStream out) {
 
-      try {
-         out.println("------------");
-         out.println(httpmethod.getStatusLine().toString());
+        try {
+            out.println("------------");
+            out.println(httpmethod.getStatusLine().toString());
 
-         Header[] h = httpmethod.getResponseHeaders();
-         for (int i = 0; i < h.length; i++) {
-            out.println(h[i].getName() + ": " + h[i].getValue());
-         }
+            final Header[] h = httpmethod.getResponseHeaders();
+            for (final Header element : h) {
+                out.println(element.getName() + ": " + element.getValue());
+            }
 
-         InputStreamReader inR = new InputStreamReader(httpmethod.getResponseBodyAsStream());
-         BufferedReader buf = new BufferedReader(inR);
-         String line;
-         while ((line = buf.readLine()) != null) {
-            out.println(line);
-         }
-         out.println("------------");
+            final InputStreamReader inR = new InputStreamReader(httpmethod.getResponseBodyAsStream());
+            final BufferedReader buf = new BufferedReader(inR);
+            String line;
+            while ((line = buf.readLine()) != null) {
+                out.println(line);
+            }
+            out.println("------------");
 
-      } catch (Exception e) {
-         throw new RuntimeException(e);
-      }
-   }
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   public static void dumpResponse( HttpMethod httpmethod, StringBuilder httpResponsePacket, StringBuilder respBody){
-      try {
-         httpResponsePacket.append('\n');
-         httpResponsePacket.append(httpmethod.getStatusLine().toString());
-         httpResponsePacket.append('\n');
-
-         Header[] h = httpmethod.getResponseHeaders();
-         for (int i = 0; i < h.length; i++) {
-            httpResponsePacket.append(h[i].getName() + ": " + h[i].getValue());
+    public static void dumpResponse(final HttpMethod httpmethod, final StringBuilder httpResponsePacket, final StringBuilder respBody) {
+        try {
             httpResponsePacket.append('\n');
-         }
-
-         InputStreamReader inR = new InputStreamReader(httpmethod.getResponseBodyAsStream());
-         BufferedReader buf = new BufferedReader(inR);
-         String line;
-         while ((line = buf.readLine()) != null) {
-            httpResponsePacket.append(line);
+            httpResponsePacket.append(httpmethod.getStatusLine().toString());
             httpResponsePacket.append('\n');
-            respBody.append(line);
-            respBody.append('\n');
-         }
-         httpResponsePacket.append('\n');
 
-      } catch (Exception e) {
-         throw new RuntimeException(e);
-      }
-   }
+            final Header[] h = httpmethod.getResponseHeaders();
+            for (final Header element : h) {
+                httpResponsePacket.append(element.getName() + ": " + element.getValue());
+                httpResponsePacket.append('\n');
+            }
 
+            final InputStreamReader inR = new InputStreamReader(httpmethod.getResponseBodyAsStream());
+            final BufferedReader buf = new BufferedReader(inR);
+            String line;
+            while ((line = buf.readLine()) != null) {
+                httpResponsePacket.append(line);
+                httpResponsePacket.append('\n');
+                respBody.append(line);
+                respBody.append('\n');
+            }
+            httpResponsePacket.append('\n');
 
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   // public static String getRequestPacket( HttpServletRequest req){
-   //
-   // StringBuilder sb = new StringBuilder();
-   //
-   // if(req == null){
-   // return null;
-   // }
-   //
-   // sb.append("\r\n");
-   // sb.append("_______________________________________________Http Request
-   // START________\r\n");
-   // sb.append(req.getMethod());
-   // sb.append(" ");
-   // sb.append(req.getRequestURI());
-   // String qStr = req.getQueryString();
-   // sb.append(qStr!=null? "?" + qStr : "");
-   // sb.append(" ");
-   // sb.append(req.getProtocol());
-   // sb.append("[\\r][\\n]\r\n");
-   // for (Enumeration e = req.getHeaderNames(); e.hasMoreElements();) {
-   // String name = (String) e.nextElement();
-   // Enumeration headers = req.getHeaders(name);
-   // if(headers.hasMoreElements()){
-   // while (headers.hasMoreElements()) {
-   // sb.append(name + ": " + headers.nextElement()).append("[\\r][\\n]\r\n");
-   // }
-   // } else {
-   // sb.append(name + ": " + req.getHeader(name)).append("[\\r][\\n]\r\n");
-   // }
-   // }
-   // sb.append("");
-   // sb.append("[\\r][\\n]\r\n");
-   // sb.append("[\\r][\\n]\r\n");
-   //        
-   // byte[] contentData = null;
-   // String contentType = (req.getContentType() != null)?
-   // req.getContentType().toLowerCase() : "";
-   // if( PlatformConstants.HTTP_METHOD_POST.equals(req.getMethod()) &&
-   // PlatformConstants.HTTP_CONTENT_TYPE_X_WWW_FORM.equals(contentType)){
-   // contentData = getRequestContent_FormUrlEncoded(req);
-   // } else {
-   // contentData = getRequestContent(req);
-   // }
-   // try {
-   // sb.append( new String(contentData, CryptConstants.CHARSET_UTF8));
-   // } catch (UnsupportedEncodingException e) {
-   // throw new RuntimeException(e);
-   // }
-   //        
-   // sb.append("\r\n");
-   // sb.append("_______________________________________________Http Request
-   // END__________");
-   //        
-   // if(contentData != null && contentData.length > 0) {
-   // sb.append("\r\nRequestBody(Hex):");
-   // sb.append( HexUtils.prettyHex(contentData));
-   // }
-   //
-   // return sb.toString();
-   // }
+    // public static String getRequestPacket( HttpServletRequest req){
+    //
+    // StringBuilder sb = new StringBuilder();
+    //
+    // if(req == null){
+    // return null;
+    // }
+    //
+    // sb.append("\r\n");
+    // sb.append("_______________________________________________Http Request
+    // START________\r\n");
+    // sb.append(req.getMethod());
+    // sb.append(" ");
+    // sb.append(req.getRequestURI());
+    // String qStr = req.getQueryString();
+    // sb.append(qStr!=null? "?" + qStr : "");
+    // sb.append(" ");
+    // sb.append(req.getProtocol());
+    // sb.append("[\\r][\\n]\r\n");
+    // for (Enumeration e = req.getHeaderNames(); e.hasMoreElements();) {
+    // String name = (String) e.nextElement();
+    // Enumeration headers = req.getHeaders(name);
+    // if(headers.hasMoreElements()){
+    // while (headers.hasMoreElements()) {
+    // sb.append(name + ": " + headers.nextElement()).append("[\\r][\\n]\r\n");
+    // }
+    // } else {
+    // sb.append(name + ": " + req.getHeader(name)).append("[\\r][\\n]\r\n");
+    // }
+    // }
+    // sb.append("");
+    // sb.append("[\\r][\\n]\r\n");
+    // sb.append("[\\r][\\n]\r\n");
+    //
+    // byte[] contentData = null;
+    // String contentType = (req.getContentType() != null)?
+    // req.getContentType().toLowerCase() : "";
+    // if( PlatformConstants.HTTP_METHOD_POST.equals(req.getMethod()) &&
+    // PlatformConstants.HTTP_CONTENT_TYPE_X_WWW_FORM.equals(contentType)){
+    // contentData = getRequestContent_FormUrlEncoded(req);
+    // } else {
+    // contentData = getRequestContent(req);
+    // }
+    // try {
+    // sb.append( new String(contentData, CryptConstants.CHARSET_UTF8));
+    // } catch (UnsupportedEncodingException e) {
+    // throw new RuntimeException(e);
+    // }
+    //
+    // sb.append("\r\n");
+    // sb.append("_______________________________________________Http Request
+    // END__________");
+    //
+    // if(contentData != null && contentData.length > 0) {
+    // sb.append("\r\nRequestBody(Hex):");
+    // sb.append( HexUtils.prettyHex(contentData));
+    // }
+    //
+    // return sb.toString();
+    // }
 
-   // private static byte[] getRequestContent_FormUrlEncoded(HttpServletRequest
-   // req){
-   //
-   // byte[] contentData = null;
-   // StringBuilder contentBuff = new StringBuilder();
-   // for (Enumeration en = req.getParameterNames(); en.hasMoreElements();) {
-   // String pName = (String)en.nextElement();
-   // String[] values = req.getParameterValues(pName);
-   // if( values!= null && values.length > 0){
-   // for (String val : values) {
-   // contentBuff.append(pName).append("=").append(val).append("&");
-   // }
-   // } else {
-   // contentBuff.append(pName).append("&");
-   // }
-   // }
-   // try {
-   // contentData =
-   // contentBuff.toString().getBytes(CryptConstants.CHARSET_UTF8);
-   // } catch (UnsupportedEncodingException e) {
-   // throw new RuntimeException(e);
-   // }
-   //        
-   // if(contentData == null){
-   // return new byte[]{};
-   // }
-   //        
-   // return contentData;
-   // }
+    // private static byte[] getRequestContent_FormUrlEncoded(HttpServletRequest
+    // req){
+    //
+    // byte[] contentData = null;
+    // StringBuilder contentBuff = new StringBuilder();
+    // for (Enumeration en = req.getParameterNames(); en.hasMoreElements();) {
+    // String pName = (String)en.nextElement();
+    // String[] values = req.getParameterValues(pName);
+    // if( values!= null && values.length > 0){
+    // for (String val : values) {
+    // contentBuff.append(pName).append("=").append(val).append("&");
+    // }
+    // } else {
+    // contentBuff.append(pName).append("&");
+    // }
+    // }
+    // try {
+    // contentData =
+    // contentBuff.toString().getBytes(CryptConstants.CHARSET_UTF8);
+    // } catch (UnsupportedEncodingException e) {
+    // throw new RuntimeException(e);
+    // }
+    //
+    // if(contentData == null){
+    // return new byte[]{};
+    // }
+    //
+    // return contentData;
+    // }
 
-   // public static byte[] getRequestContent(HttpServletRequest req){
-   // if(req.getContentLength() < 1){
-   // return new byte[]{};
-   // }
-   // byte[] contentBytes = new byte[req.getContentLength()];
-   // InputStream in;
-   // try {
-   // in = req.getInputStream();
-   // in.read(contentBytes);
-   // return contentBytes;
-   //
-   // } catch (Exception e) {
-   // throw new RuntimeException(e);
-   // }
-   // }
-   
+    // public static byte[] getRequestContent(HttpServletRequest req){
+    // if(req.getContentLength() < 1){
+    // return new byte[]{};
+    // }
+    // byte[] contentBytes = new byte[req.getContentLength()];
+    // InputStream in;
+    // try {
+    // in = req.getInputStream();
+    // in.read(contentBytes);
+    // return contentBytes;
+    //
+    // } catch (Exception e) {
+    // throw new RuntimeException(e);
+    // }
+    // }
+
 }

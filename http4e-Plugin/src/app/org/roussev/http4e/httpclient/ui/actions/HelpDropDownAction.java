@@ -22,76 +22,72 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.part.ViewPart;
 
-
 public class HelpDropDownAction extends Action implements IMenuCreator {
 
-   public static final int RESULTS_IN_DROP_DOWN = 10;
+    public static final int RESULTS_IN_DROP_DOWN = 10;
 
-   private ViewPart        view;
-   private Menu            fMenu;
-   private HelpAboutAction aboutAction;
-   private ConfigAction  configAction;
+    private final ViewPart view;
+    private Menu fMenu;
+    private HelpAboutAction aboutAction;
+    private ConfigAction configAction;
 
+    public HelpDropDownAction(final ViewPart view) {
+        this.view = view;
+        fMenu = null;
+        setToolTipText("About, License");
+        setMenuCreator(this);
+    }
 
-   public HelpDropDownAction( ViewPart view) {
-      this.view = view;
-      fMenu = null;
-      setToolTipText("About, License");
-      setMenuCreator(this);
-   }
+    @Override
+    public void dispose() {
+        // action is reused, can be called several times.
+        if (fMenu != null) {
+            fMenu.dispose();
+            fMenu = null;
+        }
+    }
 
+    @Override
+    public Menu getMenu(final Menu parent) {
+        return null;
+    }
 
-   public void dispose(){
-      // action is reused, can be called several times.
-      if (fMenu != null) {
-         fMenu.dispose();
-         fMenu = null;
-      }
-   }
+    @Override
+    public Menu getMenu(final Control parent) {
+        if (fMenu != null) {
+            fMenu.dispose();
+        }
+        fMenu = new Menu(parent);
+        // addActionToMenu(fMenu, new HowtoAction(view, "How-to, How-to"));
+        // addActionToMenu(fMenu, new ContributeAction(view, "Contribute to
+        // Plugin"));
+        // new MenuItem(fMenu, SWT.SEPARATOR);
+        addActionToMenu(fMenu, getAboutAction());
+        addActionToMenu(fMenu, getConfigAction());
+        return fMenu;
+    }
 
+    protected void addActionToMenu(final Menu parent, final Action action) {
+        final ActionContributionItem item = new ActionContributionItem(action);
+        item.fill(parent, -1);
+    }
 
-   public Menu getMenu( Menu parent){
-      return null;
-   }
+    private HelpAboutAction getAboutAction() {
+        if (aboutAction == null) {
+            aboutAction = new HelpAboutAction(view, "About");
+        }
+        return aboutAction;
+    }
 
+    private ConfigAction getConfigAction() {
+        if (configAction == null) {
+            configAction = new ConfigAction(view, "Preferences");
+        }
+        return configAction;
+    }
 
-   public Menu getMenu( Control parent){
-      if (fMenu != null) {
-         fMenu.dispose();
-      }
-      fMenu = new Menu(parent);
-      // addActionToMenu(fMenu, new HowtoAction(view, "How-to, How-to"));
-      // addActionToMenu(fMenu, new ContributeAction(view, "Contribute to
-      // Plugin"));
-      // new MenuItem(fMenu, SWT.SEPARATOR);
-      addActionToMenu(fMenu, getAboutAction());
-      addActionToMenu(fMenu, getConfigAction());
-      return fMenu;
-   }
-
-
-   protected void addActionToMenu( Menu parent, Action action){
-      ActionContributionItem item = new ActionContributionItem(action);
-      item.fill(parent, -1);
-   }
-
-
-   private HelpAboutAction getAboutAction(){
-      if (aboutAction == null) {
-         aboutAction = new HelpAboutAction(view, "About");
-      }
-      return aboutAction;
-   }
-
-   private ConfigAction getConfigAction(){
-      if (configAction == null) {
-         configAction = new ConfigAction(view, "Preferences");
-      }
-      return configAction;
-   }
-
-
-   public void run(){
-      getAboutAction().run();
-   }
+    @Override
+    public void run() {
+        getAboutAction().run();
+    }
 }

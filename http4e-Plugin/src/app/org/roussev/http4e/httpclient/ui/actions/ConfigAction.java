@@ -20,22 +20,20 @@ import org.eclipse.ui.part.ViewPart;
 
 public class ConfigAction extends Action {
 
-   private ViewPart view;
+    private final ViewPart view;
 
+    public ConfigAction(final ViewPart view, final String title) {
+        this.view = view;
 
-   public ConfigAction( ViewPart view, String title) {
-      super();
-      this.view = view;
+        setText(title);
+        setDescription(title);
+        setToolTipText(title);
+    }
 
-      setText(title);
-      setDescription(title);
-      setToolTipText(title);
-   }
-
-
-   public void run(){
-      ConfigDialog dialog = new ConfigDialog(view);
-      dialog.open();
-   }
+    @Override
+    public void run() {
+        final ConfigDialog dialog = new ConfigDialog(view);
+        dialog.open();
+    }
 
 }

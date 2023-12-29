@@ -4,8 +4,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -31,148 +29,139 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class ProxyDialog extends TitleAreaDialog {
 
-   private Button    enabledCheck;
-   private Text      hostBox;
-   private Text      portBox;
-   private ProxyItem proxyItem;
-   private ViewPart  viewPart;
+    private Button enabledCheck;
+    private Text hostBox;
+    private Text portBox;
+    private ProxyItem proxyItem;
+    private final ViewPart viewPart;
 
+    public ProxyDialog(final ViewPart view) {
+        super(view.getViewSite().getShell());
+        setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
+        viewPart = view;
+    }
 
-   public ProxyDialog( ViewPart view) {
-      super(view.getViewSite().getShell());
-      setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
-      this.viewPart = view;
-   }
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Control contents = super.createContents(parent);
+        setTitle("Proxy Configuration");
+        setMessage("Proxy Configuration.");
 
+        populate();
 
-   protected Control createContents( Composite parent){
-      Control contents = super.createContents(parent);
-      setTitle("Proxy Configuration");
-      setMessage("Proxy Configuration.");
+        return contents;
+    }
 
-      populate();
+    @Override
+    protected Control createDialogArea(final Composite parent) {
+        final Composite composite = new Composite(parent, SWT.NONE | SWT.BORDER);
+        composite.setLayout(new GridLayout());
+        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-      return contents;
-   }
+        createControlWidgets(composite);
 
+        return composite;
+    }
 
-   protected Control createDialogArea( Composite parent){
-      Composite composite = new Composite(parent, SWT.NONE | SWT.BORDER);
-      composite.setLayout(new GridLayout());
-      composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    private void createControlWidgets(final Composite parent) {
 
-      createControlWidgets(composite);
+        final Composite composite0 = new Composite(parent, SWT.NONE);
+        final GridLayout layout0 = new GridLayout();
+        layout0.numColumns = 1;
+        composite0.setLayout(layout0);
 
-      return composite;
-   }
+        final Composite composite = new Composite(composite0, SWT.NONE);
+        final GridLayout layout = new GridLayout();
+        layout.numColumns = 2;
+        layout.horizontalSpacing = 10;
+        layout.verticalSpacing = 10;
+        composite.setLayout(layout);
 
+        final GridData grData = new GridData(GridData.FILL_HORIZONTAL);
+        grData.widthHint = 260;
 
-   private void createControlWidgets( Composite parent){
+        new Label(composite, SWT.NONE).setText("Host *");
+        hostBox = new Text(composite, SWT.BORDER);
+        hostBox.setLayoutData(grData);
 
-      Composite composite0 = new Composite(parent, SWT.NONE);
-      GridLayout layout0 = new GridLayout();
-      layout0.numColumns = 1;
-      composite0.setLayout(layout0);
+        new Label(composite, SWT.NONE).setText("Port *");
+        portBox = new Text(composite, SWT.BORDER);
+        portBox.setLayoutData(grData);
 
-      Composite composite = new Composite(composite0, SWT.NONE);
-      GridLayout layout = new GridLayout();
-      layout.numColumns = 2;
-      layout.horizontalSpacing = 10;
-      layout.verticalSpacing = 10;
-      composite.setLayout(layout);
+        hostBox.addModifyListener(e -> proxyItem.setHost(hostBox.getText()));
 
-      GridData grData = new GridData(GridData.FILL_HORIZONTAL);
-      grData.widthHint = 260;
-
-      new Label(composite, SWT.NONE).setText("Host *");
-      this.hostBox = new Text(composite, SWT.BORDER);
-      hostBox.setLayoutData(grData);
-
-      new Label(composite, SWT.NONE).setText("Port *");
-      this.portBox = new Text(composite, SWT.BORDER);
-      portBox.setLayoutData(grData);
-
-      hostBox.addModifyListener(new ModifyListener() {
-
-         public void modifyText( ModifyEvent e){
-            ProxyDialog.this.proxyItem.setHost(hostBox.getText());
-         }
-      });
-
-      portBox.addModifyListener(new ModifyListener() {
-
-         public void modifyText( ModifyEvent e){
+        portBox.addModifyListener(e -> {
             try {
-               int port = Integer.parseInt(portBox.getText());
-               ProxyDialog.this.proxyItem.setPort(port);
-            } catch (NumberFormatException nfe) {
-               portBox.setText("");
+                final int port = Integer.parseInt(portBox.getText());
+                proxyItem.setPort(port);
+            } catch (final NumberFormatException nfe) {
+                portBox.setText("");
             }
-         }
-      });
+        });
 
-      Group group = new Group(parent, SWT.NONE);
-      GridLayout layout1 = new GridLayout();
-      layout1.numColumns = 1;
-      layout1.marginHeight = 20;
-      layout1.marginWidth = 20;
-      group.setLayout(layout1);
-      GridData d1 = new GridData(GridData.FILL_HORIZONTAL);
-      group.setLayoutData(d1);
-      this.enabledCheck = new Button(group, SWT.CHECK);
-      enabledCheck.setText("Enable Proxy?");
+        final Group group = new Group(parent, SWT.NONE);
+        final GridLayout layout1 = new GridLayout();
+        layout1.numColumns = 1;
+        layout1.marginHeight = 20;
+        layout1.marginWidth = 20;
+        group.setLayout(layout1);
+        final GridData d1 = new GridData(GridData.FILL_HORIZONTAL);
+        group.setLayoutData(d1);
+        enabledCheck = new Button(group, SWT.CHECK);
+        enabledCheck.setText("Enable Proxy?");
 
-      enabledCheck.addSelectionListener(new SelectionAdapter() {
+        enabledCheck.addSelectionListener(new SelectionAdapter() {
 
-         public void widgetSelected( SelectionEvent e){
-            if (enabledCheck.getSelection()) {
-               ProxyDialog.this.proxyItem.setProxy(true);
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                if (enabledCheck.getSelection()) {
+                    proxyItem.setProxy(true);
+                } else {
+                    proxyItem.setProxy(false);
+                }
+            }
+        });
+
+    }
+
+    public void populate() {
+        final CoreContext ctx = CoreContext.getContext();
+        final ProxyItem item = (ProxyItem) ctx.getObject(CoreObjects.PROXY_ITEM);
+        try {
+            if (item != null) {
+                proxyItem = item;
+                hostBox.setText(BaseUtils.noNull(item.getHost()));
+                portBox.setText("" + item.getPort());
+                enabledCheck.setSelection(item.isProxy());
+
             } else {
-               ProxyDialog.this.proxyItem.setProxy(false);
+                proxyItem = new ProxyItem();
             }
-         }
-      });
+        } catch (final SWTException e) {
+            // dispose exception
+            ExceptionHandler.handle(e);
+        }
+    }
 
-   }
+    @Override
+    protected void createButtonsForButtonBar(final Composite parent) {
+        final Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+        okBtn.addSelectionListener(new SelectionAdapter() {
 
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                CoreContext.getContext().putObject(CoreObjects.PROXY_ITEM, proxyItem);
+                ((HdViewPart) viewPart).fireProxyEnable(proxyItem.isProxy());
+                fireExecuteFolderItems();
+            }
+        });
+    }
 
-   public void populate(){
-      CoreContext ctx = CoreContext.getContext();
-      ProxyItem item = (ProxyItem) ctx.getObject(CoreObjects.PROXY_ITEM);
-      try {
-         if (item != null) {
-            this.proxyItem = item;
-            hostBox.setText(BaseUtils.noNull(item.getHost()));
-            portBox.setText("" + item.getPort());
-            enabledCheck.setSelection(item.isProxy());
+    private void fireExecuteFolderItems() {
+        final IViewSite site = ProxyDialog.this.viewPart.getViewSite();
+        final HdViewPart part = (HdViewPart) site.getPart();
+        final FolderView folderView = part.getFolderView();
+        folderView.enableProxy();
+    }
 
-         } else {
-            this.proxyItem = new ProxyItem();
-         }
-      } catch (SWTException e) {
-         // dispose exception
-         ExceptionHandler.handle(e);
-      }
-   }
-
-
-   protected void createButtonsForButtonBar( Composite parent){
-      Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-      okBtn.addSelectionListener(new SelectionAdapter() {
-
-         public void widgetSelected( SelectionEvent e){
-            CoreContext.getContext().putObject(CoreObjects.PROXY_ITEM, ProxyDialog.this.proxyItem);
-            ((HdViewPart)ProxyDialog.this.viewPart).fireProxyEnable(ProxyDialog.this.proxyItem.isProxy());
-            fireExecuteFolderItems();
-         }
-      });
-   }
-
-   private void fireExecuteFolderItems(){
-      IViewSite site = ProxyDialog.this.viewPart.getViewSite();
-      HdViewPart part = (HdViewPart) site.getPart();
-      FolderView folderView = part.getFolderView();
-      folderView.enableProxy();
-   }
-   
 }

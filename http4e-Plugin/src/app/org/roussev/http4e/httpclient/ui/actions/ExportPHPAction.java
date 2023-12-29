@@ -18,49 +18,46 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
 
 public class ExportPHPAction extends Action {
 
-   private ViewPart view;
-   private Menu     fMenu;
+    private final ViewPart view;
+    private Menu fMenu;
 
+    public ExportPHPAction(final ViewPart view) {
+        this.view = view;
+        fMenu = null;
+        setToolTipText("Export call as PHP script");
+        setImageDescriptor(ImageDescriptor.createFromImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.PHP)));
+        setText("     PHP");
+    }
 
-   public ExportPHPAction( ViewPart view) {
-      this.view = view;
-      fMenu = null;
-      setToolTipText("Export call as PHP script");
-      setImageDescriptor(ImageDescriptor.createFromImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.PHP)));
-      setText("     PHP");
-   }
+    public void dispose() {
+        // action is reused, can be called several times.
+        if (fMenu != null) {
+            fMenu.dispose();
+            fMenu = null;
+        }
+    }
 
+    // protected void addActionToMenu( Menu parent, Action action){
+    // ActionContributionItem item = new ActionContributionItem(action);
+    // item.fill(parent, -1);
+    // }
 
-   public void dispose(){
-      // action is reused, can be called several times.
-      if (fMenu != null) {
-         fMenu.dispose();
-         fMenu = null;
-      }
-   }
+    @Override
+    public void run() {
+        try {
+            final FolderView folderView = ((HdViewPart) view).getFolderView();
+            final ItemModel iModel = folderView.getModel().getItemModel(folderView.getSelectionItemHash());
+            iModel.fireExecute(new ModelEvent(ModelEvent.EXPORT, iModel));
 
+            final StringWriter writer = new StringWriter();
+            BaseUtils.writePHP(iModel, writer);
 
-   // protected void addActionToMenu( Menu parent, Action action){
-   // ActionContributionItem item = new ActionContributionItem(action);
-   // item.fill(parent, -1);
-   // }
-
-   public void run(){
-      try {
-         FolderView folderView = ((HdViewPart) view).getFolderView();
-         ItemModel iModel = folderView.getModel().getItemModel(new Integer(folderView.getSelectionItemHash()));
-         iModel.fireExecute(new ModelEvent(ModelEvent.EXPORT, iModel));
-
-         StringWriter writer = new StringWriter();
-         BaseUtils.writePHP(iModel, writer);
-         
-         ExportDialog dialog = new ExportDialog(view, "PHP Curl HTTP Rest client", 
-               "Your call exported as PHP Curl HTTP Rest client call.",
-               writer.toString());
-         dialog.open();
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+            final ExportDialog dialog = new ExportDialog(view, "PHP Curl HTTP Rest client", "Your call exported as PHP Curl HTTP Rest client call.",
+                    writer.toString());
+            dialog.open();
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+    }
 
 }

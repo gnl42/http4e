@@ -29,130 +29,111 @@ import org.roussev.http4e.httpclient.core.CoreConstants;
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
-public class Tracker {  
-   
-   //-------------------
-   public interface BlacklistStrategy {      
-      boolean isBlacklisted(String word);      
-   }
-   //-------------------
+public class Tracker {
 
-   public final static String  MASTER_ID              = null;
+    // -------------------
+    public interface BlacklistStrategy {
+        boolean isBlacklisted(String word);
+    }
+    // -------------------
 
-   private int  maxQueueSize;
-   private List         keyBuffer;
-   private Collection   knownKeys    = new HashSet();
-   private String id = null;
-   // String(key), Tracker(values-for-key)
-   private Map childTrackers = new HashMap();
-   private BlacklistStrategy blacklistStrategy = new BlacklistStrategy(){
-      public boolean isBlacklisted( String word){
-         return false;
-      }
-   };
+    public final static String MASTER_ID = null;
 
+    private final int maxQueueSize;
+    private final List<String> keyBuffer;
+    private final Collection<String> knownKeys = new HashSet<>();
+    private String id = null;
+    // String(key), Tracker(values-for-key)
+    private final Map<String, Tracker> childTrackers = new HashMap<>();
+    private BlacklistStrategy blacklistStrategy = word -> false;
 
-   public Tracker( String id, int queueSize) {
-      this.id = id;
-      this.maxQueueSize = queueSize;
-      this.keyBuffer = new LinkedList();
-   }
-   
-   
-   public BlacklistStrategy getBlacklistStrategy(){
-      return blacklistStrategy;
-   }
-   
-   
-   public void setBlacklistStrategy( BlacklistStrategy blacklistStrategy){
-      this.blacklistStrategy = blacklistStrategy;
-   }
-   
-   
-   public Tracker getChildTracker(String key){
-      if(key == null || "".equals(key.trim())){
-         throw new IllegalArgumentException("Key is empty");
-      }
-      Tracker vals = (Tracker)childTrackers.get(key);
-      if(vals == null){
-         vals = new Tracker(key, CoreConstants.MAX_TRACKS_VALUES);
-         childTrackers.put(key, vals);
-      }
-      return vals;
-   }
-   
-   
-   public Collection getChildTrackers(){
-      List kids = new ArrayList();
-      for (Iterator iter = childTrackers.keySet().iterator(); iter.hasNext();) {
-         String key = (String) iter.next();
-         kids.add(childTrackers.get(key));
-      }
-      return kids;
-   }
-   
-   /**
-    * 
-    * @return true if this tracker is value tracker, otherwise is key tracker
-    */
-   public boolean isMasterTracker(){
-      return (id == MASTER_ID);
-   }
-   
-      
+    public Tracker(final String id, final int queueSize) {
+        this.id = id;
+        maxQueueSize = queueSize;
+        keyBuffer = new LinkedList<>();
+    }
 
-   public int getWordCount(){
-      return keyBuffer.size();
-   }
-   
+    public BlacklistStrategy getBlacklistStrategy() {
+        return blacklistStrategy;
+    }
 
-   public void add( String word){
-      if (wordIsNotKnown(word) && !getBlacklistStrategy().isBlacklisted(word)) {
-         flushOldestWord();
-         insertNewWord(word);
-      }
-   }
-   
+    public void setBlacklistStrategy(final BlacklistStrategy blacklistStrategy) {
+        this.blacklistStrategy = blacklistStrategy;
+    }
 
-   private void insertNewWord( String word){
-      keyBuffer.add(0, word);
-      knownKeys.add(word);
-   }
-   
+    public Tracker getChildTracker(final String key) {
+        if (key == null || "".equals(key.trim())) {
+            throw new IllegalArgumentException("Key is empty");
+        }
+        Tracker vals = childTrackers.get(key);
+        if (vals == null) {
+            vals = new Tracker(key, CoreConstants.MAX_TRACKS_VALUES);
+            childTrackers.put(key, vals);
+        }
+        return vals;
+    }
 
-   private void flushOldestWord(){
-      if (keyBuffer.size() == maxQueueSize) {
-         String removedWord = (String) keyBuffer.remove(maxQueueSize - 1);
-         knownKeys.remove(removedWord);
-      }
-   }
-   
+    public Collection<Tracker> getChildTrackers() {
+        final List<Tracker> kids = new ArrayList<>();
+        for (final Iterator<String> iter = childTrackers.keySet().iterator(); iter.hasNext();) {
+            final String key = iter.next();
+            kids.add(childTrackers.get(key));
+        }
+        return kids;
+    }
 
-   private boolean wordIsNotKnown( String word){
-      return !knownKeys.contains(word);
-   }
-   
+    /**
+     *
+     * @return true if this tracker is value tracker, otherwise is key tracker
+     */
+    public boolean isMasterTracker() {
+        return id == MASTER_ID;
+    }
 
-   public List suggest( String word){
-      List suggestions = new LinkedList();
-      String currWord;
-      for (Iterator i = keyBuffer.iterator(); i.hasNext();) {
-         currWord = (String) i.next();
-         if (currWord.startsWith(word)) {
-            suggestions.add(currWord);
-         }
-      }
-      return suggestions;
-   }
+    public int getWordCount() {
+        return keyBuffer.size();
+    }
 
+    public void add(final String word) {
+        if (wordIsNotKnown(word) && !getBlacklistStrategy().isBlacklisted(word)) {
+            flushOldestWord();
+            insertNewWord(word);
+        }
+    }
 
-   public String toString(){
-      return "{" + keyBuffer +
-            "," + childTrackers +
-            "}";
-   }
-   
-   
+    private void insertNewWord(final String word) {
+        keyBuffer.add(0, word);
+        knownKeys.add(word);
+    }
+
+    private void flushOldestWord() {
+        if (keyBuffer.size() == maxQueueSize) {
+            final String removedWord = keyBuffer.remove(maxQueueSize - 1);
+            knownKeys.remove(removedWord);
+        }
+    }
+
+    private boolean wordIsNotKnown(final String word) {
+        return !knownKeys.contains(word);
+    }
+
+    public List<String> suggest(final String word) {
+        final List<String> suggestions = new LinkedList<>();
+        String currWord;
+        for (final Iterator<String> i = keyBuffer.iterator(); i.hasNext();) {
+            currWord = i.next();
+            if (currWord.startsWith(word)) {
+                suggestions.add(currWord);
+            }
+        }
+        return suggestions;
+    }
+
+    @Override
+    public String toString() {
+        return "{" + keyBuffer + "," + childTrackers + "}";
+    }
+
 //   public static void main( String[] args){
 //      Collection exclList = new HashSet();
 //      exclList.add("            q we");
@@ -161,5 +142,5 @@ public class Tracker {
 //      System.out.println(exclList.contains("q we"));
 //      System.out.println(exclList.contains("ggggggggg"));
 //   }
-    
+
 }

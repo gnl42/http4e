@@ -21,8 +21,9 @@ package org.roussev.http4e.editor.xml.format;
  */
 public class PIFormattingStrategy extends DefaultFormattingStrategy {
 
-   public String format( String content, boolean isLineStart, String indentation, int[] positions){
-      return content;
-   }
+    @Override
+    public String format(final String content, final boolean isLineStart, final String indentation, final int[] positions) {
+        return content;
+    }
 
 }

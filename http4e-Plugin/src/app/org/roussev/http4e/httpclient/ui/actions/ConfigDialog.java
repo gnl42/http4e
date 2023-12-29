@@ -19,8 +19,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -42,122 +40,116 @@ import org.roussev.http4e.httpclient.ui.preferences.PreferenceConstants;
 
 public class ConfigDialog extends TitleAreaDialog {
 
-   private int      DEFAULT_SIZE = 100;
-   private int      size         = DEFAULT_SIZE;
+    private final int DEFAULT_SIZE = 100;
+    private int size = DEFAULT_SIZE;
 
-   private Text     sizeBox;
+    private Text sizeBox;
 
+    public ConfigDialog(final ViewPart view) {
+        super(view.getViewSite().getShell());
+        setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
+    }
 
-   public ConfigDialog( ViewPart view) {
-      super(view.getViewSite().getShell());
-      setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
-   }
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Control contents = super.createContents(parent);
+        setTitle("HTTP4e Preferences");
+        // setMessage("BASIC and DIGEST Authentication.");
 
+        return contents;
+    }
 
-   protected Control createContents( Composite parent){
-      Control contents = super.createContents(parent);
-      setTitle("HTTP4e Preferences");
-      // setMessage("BASIC and DIGEST Authentication.");
+    @Override
+    protected Control createDialogArea(final Composite parent) {
+        final Composite composite = new Composite(parent, SWT.NONE | SWT.BORDER);
+        composite.setLayout(new GridLayout());
+        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-      return contents;
-   }
+        final Composite gr = createControlGroup(composite);
 
+        return gr;
+    }
 
-   protected Control createDialogArea( Composite parent){
-      Composite composite = new Composite(parent, SWT.NONE | SWT.BORDER);
-      composite.setLayout(new GridLayout());
-      composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    private Composite createControlGroup(final Composite parent) {
 
-      Composite gr = createControlGroup(composite);
+        final Composite composite = new Composite(parent, SWT.NONE);
+        final GridLayout layout1 = new GridLayout();
+        layout1.numColumns = 1;
+        composite.setLayout(layout1);
 
-      return gr;
-   }
+        // ------------
+        createControlWidgets(parent);
 
+        populate();
+        return parent;
+    }
 
-   private Composite createControlGroup( Composite parent){
+    private void createControlWidgets(final Composite controlGroup) {
 
-      Composite composite = new Composite(parent, SWT.NONE);
-      GridLayout layout1 = new GridLayout();
-      layout1.numColumns = 1;
-      composite.setLayout(layout1);
+        final Group group = new Group(controlGroup, SWT.NONE);
+        // group.setText("HTTP Response viewable size");
+        final GridLayout layout = new GridLayout();
+        layout.numColumns = 3;
+        layout.marginHeight = 10;
+        layout.marginWidth = 20;
+        group.setLayout(layout);
+        group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-      // ------------
-      createControlWidgets(parent);
+        final GridData grData = new GridData(GridData.FILL_HORIZONTAL);
+        grData.widthHint = 160;
 
-      populate();
-      return parent;
-   }
+        new Label(group, SWT.NONE).setText("HTTP Response MAX size");
+        sizeBox = new Text(group, SWT.BORDER);
+        sizeBox.setLayoutData(grData);
 
-
-   private void createControlWidgets( Composite controlGroup){
-
-      Group group = new Group(controlGroup, SWT.NONE);
-      // group.setText("HTTP Response viewable size");
-      GridLayout layout = new GridLayout();
-      layout.numColumns = 3;
-      layout.marginHeight = 10;
-      layout.marginWidth = 20;
-      group.setLayout(layout);
-      group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-      GridData grData = new GridData(GridData.FILL_HORIZONTAL);
-      grData.widthHint = 160;
-
-      new Label(group, SWT.NONE).setText("HTTP Response MAX size");
-      sizeBox = new Text(group, SWT.BORDER);
-      sizeBox.setLayoutData(grData);
-
-      sizeBox.addModifyListener(new ModifyListener() {
-
-         public void modifyText( ModifyEvent e){
+        sizeBox.addModifyListener(e -> {
             try {
-               size = Integer.parseInt(sizeBox.getText());
-            } catch (Exception e2) {
-               // ignore
+                size = Integer.parseInt(sizeBox.getText());
+            } catch (final Exception e2) {
+                // ignore
             }
-         }
-      });
-      new Label(group, SWT.NONE).setText("KB");
-   }
+        });
+        new Label(group, SWT.NONE).setText("KB");
+    }
 
+    public void populate() {
+        final CoreContext ctx = CoreContext.getContext();
+        try {
+            final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+            size = store.getInt(PreferenceConstants.P_PAYLOAD_VIEW_SIZE);
+        } catch (final Exception e) {
+            size = DEFAULT_SIZE;
+        }
+        ctx.putObject(CoreObjects.RESPONSE_VIEW_SIZE, size);
+        sizeBox.setText("" + size);
+    }
 
-   public void populate(){
-      CoreContext ctx = CoreContext.getContext();
-      try {
-         IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-         size = store.getInt(PreferenceConstants.P_PAYLOAD_VIEW_SIZE);
-      } catch (Exception e) {
-         size = DEFAULT_SIZE;
-      }
-      ctx.putObject(CoreObjects.RESPONSE_VIEW_SIZE, size);
-      sizeBox.setText("" + size);
-   }
+    @Override
+    protected void createButtonsForButtonBar(final Composite parent) {
+        final Button okBtn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
+        okBtn.addSelectionListener(new SelectionAdapter() {
 
-
-   protected void createButtonsForButtonBar( Composite parent){
-      Button okBtn = createButton(parent, IDialogConstants.OK_ID, "Save", true);
-      okBtn.addSelectionListener(new SelectionAdapter() {
-
-         public void widgetSelected( SelectionEvent e){
-            CoreContext.getContext().putObject(CoreObjects.RESPONSE_VIEW_SIZE, size);
-            IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-            if (size >= 10) {
-               store.setValue(PreferenceConstants.P_PAYLOAD_VIEW_SIZE, size);
-               // System.out.println(store.getInt(PreferenceConstants.P_PAYLOAD_VIEW_SIZE));
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                CoreContext.getContext().putObject(CoreObjects.RESPONSE_VIEW_SIZE, size);
+                final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+                if (size >= 10) {
+                    store.setValue(PreferenceConstants.P_PAYLOAD_VIEW_SIZE, size);
+                    // System.out.println(store.getInt(PreferenceConstants.P_PAYLOAD_VIEW_SIZE));
+                }
+                // fireExecuteFolderItems();
             }
-            // fireExecuteFolderItems();
-         }
-      });
+        });
 
-      Button cancelBtn = createButton(parent, IDialogConstants.OK_ID, "Cancel", true);
-      cancelBtn.addSelectionListener(new SelectionAdapter() {
+        final Button cancelBtn = createButton(parent, IDialogConstants.OK_ID, "Cancel", true);
+        cancelBtn.addSelectionListener(new SelectionAdapter() {
 
-         public void widgetSelected( SelectionEvent e){
-            // fireExecuteFolderItems();
-         }
-      });
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                // fireExecuteFolderItems();
+            }
+        });
 
-   }
+    }
 
 }
-

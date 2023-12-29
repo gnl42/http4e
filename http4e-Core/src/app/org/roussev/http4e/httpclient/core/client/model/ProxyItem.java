@@ -21,126 +21,106 @@ import org.apache.commons.lang3.text.StrTokenizer;
 
 /**
  * <p>
- * Bean for holding proxy information. This version holds no authentication
- * information.
+ * Bean for holding proxy information. This version holds no authentication information.
  * </p>
  * 
  * @author andreaszbschmidt
  */
 public class ProxyItem implements Serializable {
 
-   private static final String DELIMITER        = ",";
-   /**
+    private static final String DELIMITER = ",";
+    /**
     * 
     */
-   private static final long   serialVersionUID = 1L;
-   String                      host;
-   int                         port;
-   String                      name;
-   boolean                     isProxy;
+    private static final long serialVersionUID = 1L;
+    String host;
+    int port;
+    String name;
+    boolean isProxy;
 
+    public ProxyItem() {
+    }
 
-   public ProxyItem() {
-   }
+    /**
+     * @param host    proxy host
+     * @param port    proxy port
+     * @param name    name for ui
+     * @param isProxy <code>false</code> if it is no proxy
+     */
+    private ProxyItem(final String host, final int port, final String name, final boolean isProxy) {
+        this.host = host;
+        this.port = port;
+        this.name = name;
+        this.isProxy = isProxy;
+    }
 
+    /**
+     * @param proxysettings String to convert
+     * @return
+     * @throws Exception
+     */
+    public static ProxyItem createFromString(final String proxysettings) throws Exception {
+        ProxyItem returnvalue = null;
+        try {
+            final StrTokenizer tokenizer = new StrTokenizer(proxysettings, DELIMITER);
+            final String[] tokenArray = tokenizer.getTokenArray();
+            final String name = tokenArray[0];
+            final String host = tokenArray[1];
+            final int port = Integer.parseInt(tokenArray[2]);
+            returnvalue = new ProxyItem(host, port, name, true);
+        } catch (final Exception e) {
+            throw new Exception("Error while parsing proxysettings", e);
+        }
 
-   /**
-    * @param host
-    *           proxy host
-    * @param port
-    *           proxy port
-    * @param name
-    *           name for ui
-    * @param isProxy
-    *           <code>false</code> if it is no proxy
-    */
-   private ProxyItem( String host, int port, String name, boolean isProxy) {
-      super();
-      this.host = host;
-      this.port = port;
-      this.name = name;
-      this.isProxy = isProxy;
-   }
+        return returnvalue;
+    }
 
+    /**
+     * @return ProxyItem with settings for direct Connection
+     */
+    public static ProxyItem createDirectConnectionProxy() {
+        return new ProxyItem("", 0, "direct", false);
+    }
 
-   /**
-    * @param proxysettings
-    *           String to convert
-    * @return
-    * @throws Exception
-    */
-   public static ProxyItem createFromString( String proxysettings) throws Exception{
-      ProxyItem returnvalue = null;
-      try {
-         StrTokenizer tokenizer = new StrTokenizer(proxysettings, DELIMITER);
-         String[] tokenArray = tokenizer.getTokenArray();
-         String name = tokenArray[0];
-         String host = tokenArray[1];
-         int port = Integer.parseInt(tokenArray[2]);
-         returnvalue = new ProxyItem(host, port, name, true);
-      } catch (Exception e) {
-         throw new Exception("Error while parsing proxysettings", e);
-      }
+    public String getHost() {
+        return host;
+    }
 
-      return returnvalue;
-   }
+    public void setHost(final String host) {
+        this.host = host;
+    }
 
+    public int getPort() {
+        return port;
+    }
 
-   /**
-    * @return ProxyItem with settings for direct Connection
-    */
-   public static ProxyItem createDirectConnectionProxy(){
-      return new ProxyItem("", 0, "direct", false);
-   }
+    public void setPort(final int port) {
+        this.port = port;
+    }
 
+    public String getName() {
+        return name;
+    }
 
-   public String getHost(){
-      return host;
-   }
+    public void setName(final String name) {
+        this.name = name;
+    }
 
+    public boolean isProxy() {
+        return isProxy;
+    }
 
-   public void setHost( String host){
-      this.host = host;
-   }
+    public void setProxy(final boolean isProxy) {
+        this.isProxy = isProxy;
+    }
 
+    public String toConfigString() {
 
-   public int getPort(){
-      return port;
-   }
+        return new StringBuilder().append(name).append(DELIMITER).append(host).append(DELIMITER).append(port).toString();
+    }
 
-
-   public void setPort( int port){
-      this.port = port;
-   }
-
-
-   public String getName(){
-      return name;
-   }
-
-
-   public void setName( String name){
-      this.name = name;
-   }
-
-
-   public boolean isProxy(){
-      return isProxy;
-   }
-
-
-   public void setProxy( boolean isProxy){
-      this.isProxy = isProxy;
-   }
-
-
-   public String toConfigString(){
-
-      return new StringBuilder().append(name).append(DELIMITER).append(host).append(DELIMITER).append(port).toString();
-   }
-
-   @Override
-   public String toString(){
-      return "ProxyItem{host=" + host + ",port=" + port + ", isProxy=" + isProxy + "}";
-   }
+    @Override
+    public String toString() {
+        return "ProxyItem{host=" + host + ",port=" + port + ", isProxy=" + isProxy + "}";
+    }
 }

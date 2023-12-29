@@ -29,26 +29,25 @@ import org.roussev.http4e.editor.xml.rules.CDataRule;
  */
 public class CDataScanner extends RuleBasedScanner {
 
-   public IToken ESCAPED_CHAR;
-   public IToken CDATA;
+    public IToken ESCAPED_CHAR;
+    public IToken CDATA;
 
+    public CDataScanner(final ColorManager colorManager) {
 
-   public CDataScanner( ColorManager colorManager) {
+        CDATA = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA)));
 
-      CDATA = new Token(new TextAttribute(colorManager.getColor(IXMLColorConstants.CDATA)));
+        final IRule[] rules = new IRule[2];
 
-      IRule[] rules = new IRule[2];
+        // Add rule to pick up start of c section
+        rules[0] = new CDataRule(CDATA, true);
+        // Add a rule to pick up end of CDATA sections
+        rules[1] = new CDataRule(CDATA, false);
 
-      // Add rule to pick up start of c section
-      rules[0] = new CDataRule(CDATA, true);
-      // Add a rule to pick up end of CDATA sections
-      rules[1] = new CDataRule(CDATA, false);
+        setRules(rules);
+    }
 
-      setRules(rules);
-   }
-
-
-   public IToken nextToken(){
-      return super.nextToken();
-   }
+    @Override
+    public IToken nextToken() {
+        return super.nextToken();
+    }
 }

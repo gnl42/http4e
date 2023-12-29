@@ -44,212 +44,205 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 class ResponseView {
 
-   private final String[]   text        = new String[] { "" };
+    private final String[] text = { "" };
 
-   private final static int ITEM_RAW    = 0;
-   private final static int ITEM_PRETTY = 1;
-   private final static int ITEM_JSON   = 2;
-   private final static int ITEM_HEX    = 3;
-   private final static int ITEM_BRW    = 4;
-   private int              currItem    = ITEM_RAW;
+    private final static int ITEM_RAW = 0;
+    private final static int ITEM_PRETTY = 1;
+    private final static int ITEM_JSON = 2;
+    private final static int ITEM_HEX = 3;
+    private final static int ITEM_BRW = 4;
+    private int currItem = ITEM_RAW;
 
-   private final StyledText responseText;
-   private final StyledText jsonText;
-   private final Browser    browser;
-   private PayloadMenu      payloadMenu;
-   private PayloadMenu      payloadMenuJson;
+    private final StyledText responseText;
+    private final StyledText jsonText;
+    private final Browser browser;
+    private final PayloadMenu payloadMenu;
+    private final PayloadMenu payloadMenuJson;
 
+    ResponseView(final ItemModel model, final Composite parent) {
 
-   ResponseView( final ItemModel model, Composite parent) {
+        final ViewForm vForm = doToolbar(CoreConstants.TITLE_RESPONSE, model, parent);
+        responseText = buildEditorText(vForm);
+        jsonText = buildJsonEditorText(vForm);
+        vForm.setContent(responseText);
 
-      final ViewForm vForm = doToolbar(CoreConstants.TITLE_RESPONSE, model, parent);
-      responseText = buildEditorText(vForm);
-      jsonText = buildJsonEditorText(vForm);
-      vForm.setContent(responseText);
+        browser = new Browser(vForm, SWT.NONE);
 
-      browser = new Browser(vForm, SWT.NONE);
+        responseText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
+        responseText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
+        responseText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
+        responseText.setEditable(false);
+        responseText.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.RESPONSE_RESIZED, model));
+            }
+        });
+        responseText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
 
-      responseText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
-      responseText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-      responseText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
-      responseText.setEditable(false);
-      responseText.addMouseListener(new MouseAdapter() {
-         public void mouseDoubleClick( MouseEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.RESPONSE_RESIZED, model));
-         }
-      });
-      responseText.addKeyListener(new ExecuteKeyListener(new ExecuteCommand() {
-         public void execute(){
-            model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model));
-         }
-      }));
-      
-      jsonText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
-      jsonText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-      jsonText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
-      jsonText.setEditable(false);
-      jsonText.addMouseListener(new MouseAdapter() {
-         public void mouseDoubleClick( MouseEvent e){
-            model.fireExecute(new ModelEvent(ModelEvent.RESPONSE_RESIZED, model));
-         }
-      });
-      jsonText.addKeyListener(new ExecuteKeyListener(new ExecuteCommand() {
-         public void execute(){
-            model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model));
-         }
-      }));
+        jsonText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
+        jsonText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
+        jsonText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
+        jsonText.setEditable(false);
+        jsonText.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                model.fireExecute(new ModelEvent(ModelEvent.RESPONSE_RESIZED, model));
+            }
+        });
+        jsonText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
 
-      Menu popupMenu = new Menu(responseText);
-      payloadMenu = new PayloadMenu(responseText, popupMenu);
-      responseText.setMenu(popupMenu);
+        final Menu popupMenu = new Menu(responseText);
+        payloadMenu = new PayloadMenu(responseText, popupMenu);
+        responseText.setMenu(popupMenu);
 
-      Menu popupMenu2 = new Menu(jsonText);
-      payloadMenuJson = new PayloadMenu(jsonText, popupMenu2);
-      jsonText.setMenu(popupMenu2);
+        final Menu popupMenu2 = new Menu(jsonText);
+        payloadMenuJson = new PayloadMenu(jsonText, popupMenu2);
+        jsonText.setMenu(popupMenu2);
 
-      ToolItem i_raw = Utils.getItem(ITEM_RAW, vForm);
-      ToolItem i_pretty = Utils.getItem(ITEM_PRETTY, vForm);
-      ToolItem i_hex = Utils.getItem(ITEM_HEX, vForm);
-      ToolItem i_brw = Utils.getItem(ITEM_BRW, vForm);
-      ToolItem i_json = Utils.getItem(ITEM_JSON, vForm);
-      i_raw.setSelection(true);
+        final ToolItem i_raw = Utils.getItem(ITEM_RAW, vForm);
+        final ToolItem i_pretty = Utils.getItem(ITEM_PRETTY, vForm);
+        final ToolItem i_hex = Utils.getItem(ITEM_HEX, vForm);
+        final ToolItem i_brw = Utils.getItem(ITEM_BRW, vForm);
+        final ToolItem i_json = Utils.getItem(ITEM_JSON, vForm);
+        i_raw.setSelection(true);
 
-      i_raw.addSelectionListener(new SelectionAdapter() {
+        i_raw.addSelectionListener(new SelectionAdapter() {
 
-         public void widgetSelected( SelectionEvent e){
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                responseText.setText(text[0]);
+                if (currItem == ITEM_BRW || currItem == ITEM_JSON) {
+                    vForm.setContent(responseText);
+                    vForm.redraw();
+                }
+                currItem = ITEM_RAW;
+            }
+        });
+
+        i_pretty.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                responseText.setText(JunkUtils.prettyText(text[0]));
+                if (currItem == ITEM_BRW || currItem == ITEM_JSON) {
+                    vForm.setContent(responseText);
+                    vForm.redraw();
+                }
+                currItem = ITEM_PRETTY;
+            }
+        });
+
+        i_hex.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                JunkUtils.hexText(responseText, text[0]);
+                if (currItem == ITEM_BRW || currItem == ITEM_JSON) {
+                    vForm.setContent(responseText);
+                    vForm.redraw();
+                }
+                currItem = ITEM_HEX;
+            }
+        });
+
+        i_brw.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                browser.setText(JunkUtils.prettyText(text[0]));
+                if (currItem != ITEM_BRW) {
+                    vForm.setContent(browser);
+                    vForm.redraw();
+                }
+                currItem = ITEM_BRW;
+            }
+        });
+
+        i_json.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                jsonText.setText(JunkUtils.jsonText(JunkUtils.prettyText(text[0]), false));
+                if (currItem != ITEM_JSON) {
+                    vForm.setContent(jsonText);
+                    vForm.redraw();
+                }
+                currItem = ITEM_JSON;
+            }
+        });
+    }
+
+    private StyledText buildEditorText(final Composite parent) {
+        final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+
+        final XMLConfiguration sourceConf = new XMLConfiguration(new ColorManagerAdaptor(ResourceUtils.getResourceCache()));
+        sourceViewer.configure(sourceConf);
+        sourceViewer.setDocument(DocumentUtils.createDocument2());
+
+        return sourceViewer.getTextWidget();
+    }
+
+    private StyledText buildJsonEditorText(final Composite parent) {
+        final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+        final StyledText st = sourceViewer.getTextWidget();
+        final JSONLineStyler jsonStyler = new JSONLineStyler();
+        st.addLineStyleListener(jsonStyler);
+        return st;
+    }
+
+    private ViewForm doToolbar(final String title, final ItemModel model, final Composite parent) {
+
+        final ViewForm vForm = ViewUtils.buildViewForm(title, model, parent);
+        final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
+
+        final ToolItem i_raw = new ToolItem(bar, SWT.RADIO);
+        i_raw.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.RAW));
+        i_raw.setToolTipText("Raw View");
+
+        final ToolItem i_pretty = new ToolItem(bar, SWT.RADIO);
+        i_pretty.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.PRETTY));
+        i_pretty.setToolTipText("Pretty View");
+
+        final ToolItem i_json = new ToolItem(bar, SWT.RADIO);
+        i_json.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.JSON));
+        i_json.setToolTipText("JSON View");
+
+        final ToolItem i_hex = new ToolItem(bar, SWT.RADIO);
+        i_hex.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.HEX));
+        i_hex.setToolTipText("Hex View");
+
+        final ToolItem i_br = new ToolItem(bar, SWT.RADIO);
+        i_br.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.BROWSER));
+        i_br.setToolTipText("View in Browser");
+
+        vForm.setTopCenter(bar);
+
+        return vForm;
+    }
+
+    public void setHttpText(final String txt) {
+        text[0] = txt;
+        if (currItem == ITEM_RAW) {
             responseText.setText(text[0]);
-            if (currItem == ITEM_BRW || currItem == ITEM_JSON) {
-               vForm.setContent(responseText);
-               vForm.redraw();
-            }
-            currItem = ITEM_RAW;
-         }
-      });
 
-      i_pretty.addSelectionListener(new SelectionAdapter() {
-
-         public void widgetSelected( SelectionEvent e){
+        } else if (currItem == ITEM_PRETTY) {
             responseText.setText(JunkUtils.prettyText(text[0]));
-            if (currItem == ITEM_BRW || currItem == ITEM_JSON) {
-               vForm.setContent(responseText);
-               vForm.redraw();
-            }
-            currItem = ITEM_PRETTY;
-         }
-      });
 
-      i_hex.addSelectionListener(new SelectionAdapter() {
-
-         public void widgetSelected( SelectionEvent e){
+        } else if (currItem == ITEM_HEX) {
             JunkUtils.hexText(responseText, text[0]);
-            if (currItem == ITEM_BRW || currItem == ITEM_JSON) {
-               vForm.setContent(responseText);
-               vForm.redraw();
-            }
-            currItem = ITEM_HEX;
-         }
-      });
 
-      i_brw.addSelectionListener(new SelectionAdapter() {
-
-         public void widgetSelected( SelectionEvent e){
+        } else if (currItem == ITEM_BRW) {
             browser.setText(JunkUtils.prettyText(text[0]));
-            if (currItem != ITEM_BRW) {
-               vForm.setContent(browser);
-               vForm.redraw();
-            }
-            currItem = ITEM_BRW;
-         }
-      });
 
-      i_json.addSelectionListener(new SelectionAdapter() {
-
-         public void widgetSelected( SelectionEvent e){
+        } else {
             jsonText.setText(JunkUtils.jsonText(JunkUtils.prettyText(text[0]), false));
-            if (currItem != ITEM_JSON) {
-               vForm.setContent(jsonText);
-               vForm.redraw();
-            }
-            currItem = ITEM_JSON;
-         }
-      });
-   }
+        }
+    }
 
-
-   private StyledText buildEditorText( Composite parent){
-      final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
-
-      final XMLConfiguration sourceConf = new XMLConfiguration(new ColorManagerAdaptor(ResourceUtils.getResourceCache()));
-      sourceViewer.configure(sourceConf);
-      sourceViewer.setDocument(DocumentUtils.createDocument2());
-
-      return sourceViewer.getTextWidget();
-   }
-
-
-   private StyledText buildJsonEditorText( Composite parent){
-      final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
-      StyledText st = sourceViewer.getTextWidget();
-      JSONLineStyler jsonStyler = new JSONLineStyler();
-      st.addLineStyleListener(jsonStyler);
-      return st;
-   }
-
-
-   private ViewForm doToolbar( String title, final ItemModel model, final Composite parent){
-
-      final ViewForm vForm = ViewUtils.buildViewForm(title, model, parent);
-      final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
-
-      ToolItem i_raw = new ToolItem(bar, SWT.RADIO);
-      i_raw.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.RAW));
-      i_raw.setToolTipText("Raw View");
-
-      ToolItem i_pretty = new ToolItem(bar, SWT.RADIO);
-      i_pretty.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.PRETTY));
-      i_pretty.setToolTipText("Pretty View");
-
-      ToolItem i_json = new ToolItem(bar, SWT.RADIO);
-      i_json.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.JSON));
-      i_json.setToolTipText("JSON View");
-
-      ToolItem i_hex = new ToolItem(bar, SWT.RADIO);
-      i_hex.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.HEX));
-      i_hex.setToolTipText("Hex View");
-
-      ToolItem i_br = new ToolItem(bar, SWT.RADIO);
-      i_br.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.BROWSER));
-      i_br.setToolTipText("View in Browser");
-
-      vForm.setTopCenter(bar);
-
-      return vForm;
-   }
-
-
-   public void setHttpText( String txt){
-      text[0] = txt;
-      if (currItem == ITEM_RAW) {
-         responseText.setText(text[0]);
-
-      } else if (currItem == ITEM_PRETTY) {
-         responseText.setText(JunkUtils.prettyText(text[0]));
-
-      } else if (currItem == ITEM_HEX) {
-         JunkUtils.hexText(responseText, text[0]);
-
-      } else if (currItem == ITEM_BRW) {
-         browser.setText(JunkUtils.prettyText(text[0]));
-
-      } else {
-         jsonText.setText(JunkUtils.jsonText(JunkUtils.prettyText(text[0]), false));
-      }
-   }
-
-
-   public void setPayloadFilename( String filename){
-      this.payloadMenu.setFilename(filename);
-      this.payloadMenuJson.setFilename(filename);
-   }
+    public void setPayloadFilename(final String filename) {
+        payloadMenu.setFilename(filename);
+        payloadMenuJson.setFilename(filename);
+    }
 
 }

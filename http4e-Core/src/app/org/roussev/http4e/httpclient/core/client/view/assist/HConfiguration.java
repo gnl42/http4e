@@ -16,13 +16,12 @@
 package org.roussev.http4e.httpclient.core.client.view.assist;
 
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
-import org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -34,8 +33,6 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.swt.widgets.Shell;
-import org.roussev.http4e.httpclient.core.ExceptionHandler;
 import org.roussev.http4e.httpclient.core.misc.LazyObjects;
 import org.roussev.http4e.httpclient.core.misc.Styles;
 import org.roussev.http4e.httpclient.core.util.ResourceUtils;
@@ -45,155 +42,149 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 public class HConfiguration extends SourceViewerConfiguration {
 
-   private ITextDoubleClickStrategy doubleClickStrategy;
-   private RuleBasedScanner         defaultScanner;
-   private RuleBasedScanner         valueScanner;
-   private RuleBasedScanner         commentScanner;
-   private ContentAssistant         assistant;
-   private int processorType;
+    private ITextDoubleClickStrategy doubleClickStrategy;
+    private RuleBasedScanner defaultScanner;
+    private RuleBasedScanner valueScanner;
+    private RuleBasedScanner commentScanner;
+    private ContentAssistant assistant;
+    private final int processorType;
 
-   public HConfiguration(int processorType) {
-      super();
-      this.processorType = processorType;
-   }
-   
-   
-   public String[] getConfiguredContentTypes( ISourceViewer sourceViewer){
-      return new String[] { 
-            IDocument.DEFAULT_CONTENT_TYPE,  
-            HPartitionScanner.COMMENT,
-            HPartitionScanner.PROPERTY_VALUE,
-            /*HPartitionScanner.PROPERTY_KEY,*/ };
-   }
+    public HConfiguration(final int processorType) {
+        this.processorType = processorType;
+    }
 
-   /**
-    * @Override
-    */
-   public ITextDoubleClickStrategy getDoubleClickStrategy( ISourceViewer sourceViewer, String contentType){
-      if (doubleClickStrategy == null)
-         doubleClickStrategy = new HDoubleClickStrategy();
-      return doubleClickStrategy;
-   }
-   
+    @Override
+    public String[] getConfiguredContentTypes(final ISourceViewer sourceViewer) {
+        return new String[] { IDocument.DEFAULT_CONTENT_TYPE, HPartitionScanner.COMMENT, HPartitionScanner.PROPERTY_VALUE,
+                /* HPartitionScanner.PROPERTY_KEY, */ };
+    }
 
-   /**
-    * @Override
-    */
-   public IPresentationReconciler getPresentationReconciler( ISourceViewer sourceViewer){
-      PresentationReconciler rr = new PresentationReconciler();
-      DefaultDamagerRepairer dr;
-      
-      dr = new DefaultDamagerRepairer( getCommentScanner());
-      rr.setDamager(dr, HPartitionScanner.COMMENT);
-      rr.setRepairer(dr, HPartitionScanner.COMMENT);
-      
-      dr = new DefaultDamagerRepairer( getValueScanner());
-      rr.setDamager(dr, HPartitionScanner.PROPERTY_VALUE);
-      rr.setRepairer(dr, HPartitionScanner.PROPERTY_VALUE);
-      
-      dr = new DefaultDamagerRepairer( getDefaultScanner());
-      rr.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-      rr.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);      
-      
+    /**
+     * @Override
+     */
+    @Override
+    public ITextDoubleClickStrategy getDoubleClickStrategy(final ISourceViewer sourceViewer, final String contentType) {
+        if (doubleClickStrategy == null) {
+            doubleClickStrategy = new HDoubleClickStrategy();
+        }
+        return doubleClickStrategy;
+    }
+
+    /**
+     * @Override
+     */
+    @Override
+    public IPresentationReconciler getPresentationReconciler(final ISourceViewer sourceViewer) {
+        final PresentationReconciler rr = new PresentationReconciler();
+        DefaultDamagerRepairer dr;
+
+        dr = new DefaultDamagerRepairer(getCommentScanner());
+        rr.setDamager(dr, HPartitionScanner.COMMENT);
+        rr.setRepairer(dr, HPartitionScanner.COMMENT);
+
+        dr = new DefaultDamagerRepairer(getValueScanner());
+        rr.setDamager(dr, HPartitionScanner.PROPERTY_VALUE);
+        rr.setRepairer(dr, HPartitionScanner.PROPERTY_VALUE);
+
+        dr = new DefaultDamagerRepairer(getDefaultScanner());
+        rr.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
+        rr.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+
 //      NonRuleBasedDamagerRepairer ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(ResourceUtils.getColor(Styles.COMMENT)));
 //      rr.setDamager(ndr, HPartitionScanner.COMMENT);
 //      rr.setRepairer(ndr, HPartitionScanner.COMMENT);
-      
-      return rr;
-   }
-   
 
-   /**
-    * @Override
-    */
-   public IContentAssistant getContentAssistant( ISourceViewer sourceViewer){
-      if (assistant != null) {
-         return assistant;
-      }
-      assistant = new ContentAssistant();
-      IContentAssistProcessor processor = new HContentAssistProcessor(processorType, LazyObjects.getHeaderTracker());
-      // Set this processor for each supported content type
-      assistant.setContentAssistProcessor(processor, HPartitionScanner.PROPERTY_VALUE);
-      assistant.setContentAssistProcessor(processor, HPartitionScanner.PROPERTIES_PARTITIONING);
-      assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-      // Set factory for information controller
-      assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));      
-      assistant.enableAutoActivation(true);
-      assistant.setAutoActivationDelay(200);
-      assistant.setProposalSelectorBackground(ResourceUtils.getColor(Styles.CONTENT_ASSIST));
-      
-      return assistant;
-   }
-   
-   /**
-    * @Override
-    */
-   public IInformationControlCreator getInformationControlCreator( ISourceViewer sourceViewer){
-      return new IInformationControlCreator() {
-         public IInformationControl createInformationControl( Shell parent){
-            return new DefaultInformationControl(parent, getInformationPresenter());
-         }
-      };
-   }
+        return rr;
+    }
 
-   /**
-    * @Override
-    */
-   public IAnnotationHover getAnnotationHover( ISourceViewer sourceViewer){
-      return new MyAnnotationHover();
-   }
+    /**
+     * @Override
+     */
+    @Override
+    public IContentAssistant getContentAssistant(final ISourceViewer sourceViewer) {
+        if (assistant != null) {
+            return assistant;
+        }
+        assistant = new ContentAssistant();
+        final IContentAssistProcessor processor = new HContentAssistProcessor(processorType, LazyObjects.getHeaderTracker());
+        // Set this processor for each supported content type
+        assistant.setContentAssistProcessor(processor, HPartitionScanner.PROPERTY_VALUE);
+        assistant.setContentAssistProcessor(processor, HPartitionScanner.PROPERTIES_PARTITIONING);
+        assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+        // Set factory for information controller
+        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+        assistant.enableAutoActivation(true);
+        assistant.setAutoActivationDelay(200);
+        assistant.setProposalSelectorBackground(ResourceUtils.getColor(Styles.CONTENT_ASSIST));
 
-   /**
-    * @Override
-    */
-   public ITextHover getTextHover( ISourceViewer sourceViewer, String contentType){
-      return new MyTextHover();
-   }
+        return assistant;
+    }
 
+    /**
+     * @Override
+     */
+    @Override
+    public IInformationControlCreator getInformationControlCreator(final ISourceViewer sourceViewer) {
+        return parent -> new DefaultInformationControl(parent, getInformationPresenter());
+    }
 
-   //===============================================
-   private RuleBasedScanner getCommentScanner(){
-      if (commentScanner == null) {
-          commentScanner = new HCommentScanner();
-          commentScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.COMMENT))));
-      }
-      return commentScanner;
-   }
-   
+    /**
+     * @Override
+     */
+    @Override
+    public IAnnotationHover getAnnotationHover(final ISourceViewer sourceViewer) {
+        return new MyAnnotationHover();
+    }
 
-   private RuleBasedScanner getValueScanner(){
-      if (valueScanner == null) {
-          valueScanner = new HValueScanner();
-          valueScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.STRING))));
-      }
-      return valueScanner;
-   }
-   
+    /**
+     * @Override
+     */
+    @Override
+    public ITextHover getTextHover(final ISourceViewer sourceViewer, final String contentType) {
+        return new MyTextHover();
+    }
 
-   private RuleBasedScanner getDefaultScanner(){
-      if (defaultScanner == null) {
-          defaultScanner = new HDefaultScanner();
-          defaultScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.KEY))));
-      }
-      return defaultScanner;
-   }
+    // ===============================================
+    private RuleBasedScanner getCommentScanner() {
+        if (commentScanner == null) {
+            commentScanner = new HCommentScanner();
+            commentScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.COMMENT))));
+        }
+        return commentScanner;
+    }
 
-   private static IInformationPresenter getInformationPresenter(){
-      String _3_2_PRESENTER = "org.eclipse.jface.internal.text.link.contentassist.HTMLTextPresenter";
-      String _3_3_PRESENTER = "org.eclipse.jface.internal.text.html.HTMLTextPresenter";
-      try {
-         try {
-            return (IInformationPresenter) Class.forName(_3_2_PRESENTER).newInstance();
+    private RuleBasedScanner getValueScanner() {
+        if (valueScanner == null) {
+            valueScanner = new HValueScanner();
+            valueScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.STRING))));
+        }
+        return valueScanner;
+    }
 
-         } catch (java.lang.NoClassDefFoundError e) {
-            return (IInformationPresenter) Class.forName(_3_3_PRESENTER).newInstance();
-         }
-      } catch (Exception e) {
+    private RuleBasedScanner getDefaultScanner() {
+        if (defaultScanner == null) {
+            defaultScanner = new HDefaultScanner();
+            defaultScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.KEY))));
+        }
+        return defaultScanner;
+    }
+
+    private static IInformationPresenter getInformationPresenter() {
+        final String _3_2_PRESENTER = "org.eclipse.jface.internal.text.link.contentassist.HTMLTextPresenter";
+        final String _3_3_PRESENTER = "org.eclipse.jface.internal.text.html.HTMLTextPresenter";
+        try {
+            try {
+                return (IInformationPresenter) Class.forName(_3_2_PRESENTER).newInstance();
+
+            } catch (final java.lang.NoClassDefFoundError e) {
+                return (IInformationPresenter) Class.forName(_3_3_PRESENTER).newInstance();
+            }
+        } catch (final Exception e) {
 //         ExceptionHandler.handle(e);
-      }
-      return null;
-   }
-   
+        }
+        return null;
+    }
+
 // // The presenter instance for the information window
 //   private static final DefaultInformationControl.IInformationPresenter presenter =
 //      new DefaultInformationControl.IInformationPresenter() {

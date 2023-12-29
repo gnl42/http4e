@@ -21,85 +21,81 @@ import org.roussev.http4e.httpclient.ui.preferences.PreferenceConstants;
 
 public class ImportHTTP4eAction extends Action {
 
-   private ViewPart view;
-   private Menu     fMenu;
+    private final ViewPart view;
+    private Menu fMenu;
 
+    public ImportHTTP4eAction(final ViewPart view) {
+        this.view = view;
+        fMenu = null;
+        setToolTipText("Import HTTP4e script");
+        setImageDescriptor(ImageDescriptor.createFromImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO)));
+        setText("Import HTTP4e script");
+    }
 
-   public ImportHTTP4eAction( ViewPart view) {
-      this.view = view;
-      fMenu = null;
-      setToolTipText("Import HTTP4e script");
-      setImageDescriptor(ImageDescriptor.createFromImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO)));
-      setText("Import HTTP4e script");
-   }
+    public void dispose() {
+        // action is reused, can be called several times.
+        if (fMenu != null) {
+            fMenu.dispose();
+            fMenu = null;
+        }
+    }
 
+    // protected void addActionToMenu( Menu parent, Action action){
+    // ActionContributionItem item = new ActionContributionItem(action);
+    // item.fill(parent, -1);
+    // }
 
-   public void dispose(){
-      // action is reused, can be called several times.
-      if (fMenu != null) {
-         fMenu.dispose();
-         fMenu = null;
-      }
-   }
+    @Override
+    public void run() {
 
+        try {
 
-   // protected void addActionToMenu( Menu parent, Action action){
-   // ActionContributionItem item = new ActionContributionItem(action);
-   // item.fill(parent, -1);
-   // }
+            final FileDialog fileDialog = new FileDialog(view.getSite().getShell(), SWT.OPEN);
 
-   public void run(){
+            fileDialog.setFileName("sessions.http4e");
+            fileDialog.setFilterNames(new String[] { "HTTP4e File *.http4e" });
+            fileDialog.setFilterExtensions(new String[] { "*.http4e" });
+            fileDialog.setText("Open HTTP4e script");
+            fileDialog.setFilterPath(getUserHomeDir());
 
-      try {
+            final String path = fileDialog.open();
+            if (path != null) {
+                final HdViewPart hdView = (HdViewPart) view;
+                final List<ItemModel> iteModels = BaseUtils.importHttp4eSessions(path, hdView.getFolderView().getModel());
+                final HdViewPart hdViewPart = (HdViewPart) view;
+                for (final ItemModel im : iteModels) {
+                    hdViewPart.getFolderView().buildTab(im);
+                }
 
-         FileDialog fileDialog = new FileDialog(view.getSite().getShell(), SWT.OPEN);
-
-         fileDialog.setFileName("sessions.http4e");
-         fileDialog.setFilterNames(new String[] { "HTTP4e File *.http4e" });
-         fileDialog.setFilterExtensions(new String[] { "*.http4e" });
-         fileDialog.setText("Open HTTP4e script");
-         fileDialog.setFilterPath(getUserHomeDir());
-
-         String path = fileDialog.open();
-         if (path != null) {
-            HdViewPart hdView = (HdViewPart) view;
-            List<ItemModel> iteModels = BaseUtils.importHttp4eSessions(path, hdView.getFolderView().getModel());
-            HdViewPart hdViewPart = (HdViewPart)view;
-            for (ItemModel im : iteModels) {
-               hdViewPart.getFolderView().buildTab(im);
+                updateUserHomeDir(path);
             }
-            
-            updateUserHomeDir(path);
-         }
 
-      } catch (Exception e) {
-         ExceptionHandler.handle(e);
-      }
-   }
+        } catch (final Exception e) {
+            ExceptionHandler.handle(e);
+        }
+    }
 
+    private String getUserHomeDir() {
+        final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+        final String userDir = store.getString(PreferenceConstants.P_USER_HOME_DIR);
+        if (BaseUtils.isEmpty(userDir)) {
+            return System.getProperty("user.home");
+        }
+        return userDir;
+    }
 
-   private String getUserHomeDir(){
-      IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-      String userDir = store.getString(PreferenceConstants.P_USER_HOME_DIR);
-      if (BaseUtils.isEmpty(userDir)) {
-         return System.getProperty("user.home");
-      }
-      return userDir;
-   }
+    private void updateUserHomeDir(final String userDir) {
 
+        if (!BaseUtils.isEmpty(userDir)) {
+            // Updating using Plugin directly persist the entry on each invokation
+            // Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
+            // Preferences prefs = pl.getPluginPreferences();
+            // prefs.setValue(PreferenceConstants.P_USER_HOME_DIR, userDir);
+            // pl.savePluginPreferences();
 
-   private void updateUserHomeDir( String userDir){
-
-      if (!BaseUtils.isEmpty(userDir)) {
-         // Updating using Plugin directly persist the entry on each invokation
-         // Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
-         // Preferences prefs = pl.getPluginPreferences();
-         // prefs.setValue(PreferenceConstants.P_USER_HOME_DIR, userDir);
-         // pl.savePluginPreferences();
-
-         // Updating the preference "in memory" and persists "on Eclipse exit"
-         IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
-         store.setValue(PreferenceConstants.P_USER_HOME_DIR, userDir);
-      }
-   }
+            // Updating the preference "in memory" and persists "on Eclipse exit"
+            final IPreferenceStore store = HdPlugin.getDefault().getPreferenceStore();
+            store.setValue(PreferenceConstants.P_USER_HOME_DIR, userDir);
+        }
+    }
 }

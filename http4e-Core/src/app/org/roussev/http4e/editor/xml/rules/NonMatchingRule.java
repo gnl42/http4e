@@ -26,23 +26,22 @@ import org.eclipse.jface.text.rules.Token;
  */
 public class NonMatchingRule implements IPredicateRule {
 
-   public NonMatchingRule() {
-      super();
-   }
+    public NonMatchingRule() {
+    }
 
+    @Override
+    public IToken getSuccessToken() {
+        return Token.UNDEFINED;
+    }
 
-   public IToken getSuccessToken(){
-      return Token.UNDEFINED;
-   }
+    @Override
+    public IToken evaluate(final ICharacterScanner scanner, final boolean resume) {
+        return Token.UNDEFINED;
+    }
 
-
-   public IToken evaluate( ICharacterScanner scanner, boolean resume){
-      return Token.UNDEFINED;
-   }
-
-
-   public IToken evaluate( ICharacterScanner scanner){
-      return Token.UNDEFINED;
-   }
+    @Override
+    public IToken evaluate(final ICharacterScanner scanner) {
+        return Token.UNDEFINED;
+    }
 
 }

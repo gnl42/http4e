@@ -20,22 +20,22 @@ package org.roussev.http4e.httpclient.core;
  */
 public interface CoreMessages {
 
-   String VERSION             = "5.0.13";
-   String PLUGIN_NAME         = "HTTP4e Client";
-   String PLUGIN_NAME_SHORT   = "http4e";
-   String PLUGIN_ABOUT        = "Version: " + VERSION;
+    String VERSION = "5.0.13";
+    String PLUGIN_NAME = "HTTP4e Client";
+    String PLUGIN_NAME_SHORT = "http4e";
+    String PLUGIN_ABOUT = "Version: " + VERSION;
 
-   String HEADER_DEFAULTS     = "";                                                                  // "header=value";
-   String PARAM_DEFAULTS      = "";                                                                  // "parameter=value";
-   String EMPTY_TITLE         = "New Tab";
-   String EMPTY_TITLE_NAME    = "New Tab";
+    String HEADER_DEFAULTS = ""; // "header=value";
+    String PARAM_DEFAULTS = ""; // "parameter=value";
+    String EMPTY_TITLE = "New Tab";
+    String EMPTY_TITLE_NAME = "New Tab";
 
-   String CONNECTION_REFUSED  = "\n\tUnable to connect: Can't establish a connection to server \n\n\t";
-   String CONNECTION_DROPPED  = "\n\tIO error: The server dropped connection on us \n\n\t";
-   String CONNECTION_IO_ERR   = "\n\tIO error: Can't establish a connection to server \n\n\t";
-   String CONNECTION_ILLEAGAL = "\n\tWrong argumens: HTTP4e can't establish a connection to server \n\n\t";
-   String CONNECTION_UNKNOWN  = "\n\tHTTP4e can't establish a connection to server \n\n\t";
-   String ABORTED             = "";
+    String CONNECTION_REFUSED = "\n\tUnable to connect: Can't establish a connection to server \n\n\t";
+    String CONNECTION_DROPPED = "\n\tIO error: The server dropped connection on us \n\n\t";
+    String CONNECTION_IO_ERR = "\n\tIO error: Can't establish a connection to server \n\n\t";
+    String CONNECTION_ILLEAGAL = "\n\tWrong argumens: HTTP4e can't establish a connection to server \n\n\t";
+    String CONNECTION_UNKNOWN = "\n\tHTTP4e can't establish a connection to server \n\n\t";
+    String ABORTED = "";
 
-   String LICENSE_TITLE       = "HTTP4e License";
+    String LICENSE_TITLE = "HTTP4e License";
 }

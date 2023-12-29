@@ -26,10 +26,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.roussev.http4e.httpclient.core.CoreConstants;
-import org.roussev.http4e.httpclient.core.CoreContext;
 import org.roussev.http4e.httpclient.core.CoreImages;
 import org.roussev.http4e.httpclient.core.CoreMessages;
-import org.roussev.http4e.httpclient.core.util.BaseUtils;
 import org.roussev.http4e.httpclient.core.util.ResourceUtils;
 
 /**
@@ -37,51 +35,51 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 public class AboutDialog extends TitleAreaDialog {
 
-   public AboutDialog( Shell shell) {
-      super(shell);
-      setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
-      setHelpAvailable(false);
-   }
+    public AboutDialog(final Shell shell) {
+        super(shell);
+        setTitleImage(ResourceUtils.getImage(CoreConstants.PLUGIN_UI, CoreImages.LOGO_DIALOG));
+        setHelpAvailable(false);
+    }
 
+    @Override
+    public boolean close() {
+        return super.close();
+    }
 
-   public boolean close(){
-      return super.close();
-   }
+    @Override
+    protected Control createContents(final Composite parent) {
+        final Control contents = super.createContents(parent);
+        setTitle(CoreMessages.PLUGIN_NAME);
+        setMessage(CoreMessages.PLUGIN_ABOUT);
+        return contents;
+    }
 
+    @Override
+    protected Control createDialogArea(final Composite parent) {
+        final Composite composite = (Composite) super.createDialogArea(parent);
 
-   protected Control createContents( Composite parent){
-      Control contents = super.createContents(parent);
-      setTitle(CoreMessages.PLUGIN_NAME);
-      setMessage(CoreMessages.PLUGIN_ABOUT);
-      return contents;
-   }
+        final Browser browser = new Browser(composite, SWT.NONE);
+        browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+        try {
+            String html = new String(ResourceUtils.getBundleResourceBytes(CoreConstants.PLUGIN_UI, "resources/about.html"));
+            html = html.replaceAll("currentYear", "" + Calendar.getInstance().get(Calendar.YEAR));
+            browser.setText(html);
 
-   protected Control createDialogArea( Composite parent){
-      Composite composite = (Composite) super.createDialogArea(parent);
+        } catch (final Exception e) {
+            setErrorMessage(e.getLocalizedMessage());
+        }
+        return composite;
+    }
 
-      Browser browser = new Browser(composite, SWT.NONE);
-      browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-      try {
-         String html = new String(ResourceUtils.getBundleResourceBytes(CoreConstants.PLUGIN_UI, "resources/about.html"));
-         html = html.replaceAll("currentYear", ""+Calendar.getInstance().get(Calendar.YEAR));
-         browser.setText(html);
-
-      } catch (Exception e) {
-         setErrorMessage(e.getLocalizedMessage());
-      }
-      return composite;
-   }
-
-   /**
-    * Creates the buttons for the button bar
-    * 
-    * @param parent
-    *           the parent composite
-    */
-   protected void createButtonsForButtonBar( Composite parent){
-      createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-   }
+    /**
+     * Creates the buttons for the button bar
+     * 
+     * @param parent the parent composite
+     */
+    @Override
+    protected void createButtonsForButtonBar(final Composite parent) {
+        createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+    }
 
 }

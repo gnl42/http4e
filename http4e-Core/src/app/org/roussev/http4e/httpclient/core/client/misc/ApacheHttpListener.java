@@ -19,9 +19,9 @@ package org.roussev.http4e.httpclient.core.client.misc;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public interface ApacheHttpListener {
-   
-   void write( byte[] data);
-   
-   void close();
+
+    void write(byte[] data);
+
+    void close();
 
 }

@@ -15,8 +15,6 @@
  */
 package org.roussev.http4e.httpclient.core.client.view.assist;
 
-import org.eclipse.jface.text.ITextListener;
-import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
@@ -37,74 +35,70 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 public class AstandaloneHEditor {
 
-   private SourceViewer sourceViewer;
+    private SourceViewer sourceViewer;
 
-   public AstandaloneHEditor( Composite parent) {
-      buildControls(parent);
-   }
+    public AstandaloneHEditor(final Composite parent) {
+        buildControls(parent);
+    }
 
-   public void dispose(){
-      ResourceUtils.disposeResources();
-   }
+    public void dispose() {
+        ResourceUtils.disposeResources();
+    }
 
-   private void buildControls( Composite parent){
-      parent.setLayout(new FillLayout());
-      
-      sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL);
-      
-      final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.HEADER_PROCESSOR);
-      sourceViewer.configure(sourceConf);
-      sourceViewer.setDocument( DocumentUtils.createDocument1());
+    private void buildControls(final Composite parent) {
+        parent.setLayout(new FillLayout());
 
-      // final IContentAssistant assistant = getContentAssistant(null);
-      // assistant.install(textViewer);
+        sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL);
 
-      final StyledText st = sourceViewer.getTextWidget();
-      
-      sourceViewer.getControl().addKeyListener(new KeyAdapter() {
-         public void keyPressed( KeyEvent e){
-            if ((e.character == ' ') && ((e.stateMask & SWT.CTRL) != 0)) {
-               IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
-               ca.showPossibleCompletions();
+        final HConfiguration sourceConf = new HConfiguration(HContentAssistProcessor.HEADER_PROCESSOR);
+        sourceViewer.configure(sourceConf);
+        sourceViewer.setDocument(DocumentUtils.createDocument1());
 
-               st.setBackground(ResourceUtils.getColor(Styles.SSL));
+        // final IContentAssistant assistant = getContentAssistant(null);
+        // assistant.install(textViewer);
+
+        final StyledText st = sourceViewer.getTextWidget();
+
+        sourceViewer.getControl().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                if (e.character == ' ' && (e.stateMask & SWT.CTRL) != 0) {
+                    final IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
+                    ca.showPossibleCompletions();
+
+                    st.setBackground(ResourceUtils.getColor(Styles.SSL));
+                }
+                st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
             }
-            st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
-         }
-      });
-      
-      
-      sourceViewer.addTextListener(new ITextListener() {
-         public void textChanged( TextEvent e){
-            AssistUtils.addTrackWords(e.getText(), sourceViewer.getDocument(), e.getOffset()-1, null);            
-         }
-      });
-      
-   }
+        });
 
-   public static void main( String[] args){
-      
-      String ROOT_CORE  = "C:/.work/http4e/org.roussev.http4e/Core";     
-      String ROOT_UI    = "C:/.work/http4e/org.roussev.http4e/Plugin";        
-       
-      CoreContext.getContext().putObject(CoreObjects.ROOT_PATH_CORE, ROOT_CORE);       
-      CoreContext.getContext().putObject(CoreObjects.ROOT_PATH_UI, ROOT_UI);
-      CoreContext.getContext().putObject(CoreObjects.IS_STANDALONE, "nonull");
-       
-      Display display = new Display();
-      Shell shell = new Shell(display);
-      shell.setBounds(700, 350, 500, 350);
-      // shell.setLayout(new FillLayout());
-      AstandaloneHEditor view = new AstandaloneHEditor(shell);
+        sourceViewer.addTextListener(e -> AssistUtils.addTrackWords(e.getText(), sourceViewer.getDocument(), e.getOffset() - 1, null));
 
-      shell.open();
+    }
 
-      while (!shell.isDisposed()) {
-         if (!display.readAndDispatch()) {
-            display.sleep();
-         }
-      }
-      view.dispose();
-      display.dispose();
-   }
+    public static void main(final String[] args) {
+
+        final String ROOT_CORE = "C:/.work/http4e/org.roussev.http4e/Core";
+        final String ROOT_UI = "C:/.work/http4e/org.roussev.http4e/Plugin";
+
+        CoreContext.getContext().putObject(CoreObjects.ROOT_PATH_CORE, ROOT_CORE);
+        CoreContext.getContext().putObject(CoreObjects.ROOT_PATH_UI, ROOT_UI);
+        CoreContext.getContext().putObject(CoreObjects.IS_STANDALONE, "nonull");
+
+        final Display display = new Display();
+        final Shell shell = new Shell(display);
+        shell.setBounds(700, 350, 500, 350);
+        // shell.setLayout(new FillLayout());
+        final AstandaloneHEditor view = new AstandaloneHEditor(shell);
+
+        shell.open();
+
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        view.dispose();
+        display.dispose();
+    }
 }

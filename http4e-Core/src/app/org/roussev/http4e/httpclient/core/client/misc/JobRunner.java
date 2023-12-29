@@ -23,51 +23,56 @@ import org.eclipse.swt.widgets.Display;
  */
 public class JobRunner implements Runnable {
 
-   private boolean     done = false;
-   private JobListener listener;
-   private Composite   composite;
+    private boolean done = false;
+    private final JobListener listener;
+    private final Composite composite;
 
-   public JobRunner( Composite composite, JobListener listener) {
-      this.listener = listener;
-      this.composite = composite;
-   }
+    public JobRunner(final Composite composite, final JobListener listener) {
+        this.listener = listener;
+        this.composite = composite;
+    }
 
-   public void run(){
-      // main swt thread
-      final Display display = Display.getDefault();
+    @Override
+    public void run() {
+        // main swt thread
+        final Display display = Display.getDefault();
 
-      // start separate thread
-      Thread separateThread = new Thread(new Runnable() {
-         public void run(){
+        // start separate thread
+        final Thread separateThread = new Thread(() -> {
 
-            if (display.isDisposed()) return;
+            if (display.isDisposed()) {
+                return;
+            }
             final Object execObj = listener.execute();
 
-            if (display.isDisposed()) return;
-            display.syncExec(new Runnable() {
-               public void run(){
-                  // sync back to main swt thread
-                  if (listener.isDisposed())
-                     return;
-                  listener.update(execObj);
-               }
+            if (display.isDisposed()) {
+                return;
+            }
+            display.syncExec(() -> {
+                // sync back to main swt thread
+                if (listener.isDisposed()) {
+                    return;
+                }
+                listener.update(execObj);
             });
             done = true;
 
-            if (display.isDisposed()) return;
+            if (display.isDisposed()) {
+                return;
+            }
             display.wake();
-         }
-      });
-      separateThread.start();
+        });
+        separateThread.start();
 
-      while (!done && !composite.isDisposed()) {
-         if (!display.readAndDispatch())
-            display.sleep();
-      }
-   }
+        while (!done && !composite.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+    }
 
-   public boolean isFinished(){
-      return done;
-   }
+    public boolean isFinished() {
+        return done;
+    }
 
 }

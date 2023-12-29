@@ -39,7 +39,7 @@ import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
  */
 public class InsecureSSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 
-    private SSLContext context_;
+    private final SSLContext context_;
 
     /**
      * Creates a new insecure SSL protocol socket factory.
@@ -48,20 +48,21 @@ public class InsecureSSLProtocolSocketFactory implements SecureProtocolSocketFac
      */
     public InsecureSSLProtocolSocketFactory() throws GeneralSecurityException {
         context_ = SSLContext.getInstance("SSL");
-        context_.init(null, new TrustManager[] {new InsecureTrustManager()}, null);
+        context_.init(null, new TrustManager[] { new InsecureTrustManager() }, null);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose)
-        throws IOException {
+    @Override
+    public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose) throws IOException {
         return context_.getSocketFactory().createSocket(socket, host, port, autoClose);
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
         return context_.getSocketFactory().createSocket(host, port);
     }
@@ -69,16 +70,17 @@ public class InsecureSSLProtocolSocketFactory implements SecureProtocolSocketFac
     /**
      * {@inheritDoc}
      */
-    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort)
-        throws IOException {
+    @Override
+    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException {
         return context_.getSocketFactory().createSocket(host, port, localAddress, localPort);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort,
-        final HttpConnectionParams params) throws IOException {
+    @Override
+    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort, final HttpConnectionParams params)
+            throws IOException {
         return context_.getSocketFactory().createSocket(host, port, localAddress, localPort);
     }
 

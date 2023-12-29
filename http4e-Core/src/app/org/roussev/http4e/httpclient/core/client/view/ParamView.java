@@ -37,112 +37,104 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 class ParamView {
 
-   private IControlView textView;
-   private CLabel       titleLabel;
-   private ParamsAttachManager attachManager;
-   private boolean        isMultipart = false;
+    private final IControlView textView;
+    private final CLabel titleLabel;
+    private final ParamsAttachManager attachManager;
+    private final boolean isMultipart = false;
 
+    ParamView(final ItemModel model, final Composite parent) {
+        final ViewForm vForm = ViewUtils.buildViewForm(CoreConstants.TITLE_PARAMETERS, model, parent);
+        textView = new ParamTextView(model, vForm);
+        titleLabel = (CLabel) vForm.getChildren()[0];
+        final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
+        vForm.setContent(textView.getControl());
+        final ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
+        clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
+        clearBtn.setToolTipText("Clear");
+        clearBtn.addSelectionListener(new SelectionListener() {
 
-   ParamView( final ItemModel model, Composite parent) {
-      ViewForm vForm = ViewUtils.buildViewForm(CoreConstants.TITLE_PARAMETERS, model, parent);
-      textView = new ParamTextView(model, vForm);
-      titleLabel = (CLabel) vForm.getChildren()[0];
-      final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
-      vForm.setContent(textView.getControl());
-      ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
-      clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
-      clearBtn.setToolTipText("Clear");
-      clearBtn.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetDefaultSelected(final SelectionEvent e) {
+            }
 
-         public void widgetDefaultSelected( SelectionEvent e){
-         }
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                ParamView.this.setParamText("");
+            }
+        });
+        attachManager = new ParamsAttachManager(model, (StyledText) textView.getControl(), bar);
+        vForm.setContent(textView.getControl());
+        vForm.setTopCenter(bar);
+    }
 
+    String getParamText() {
+        final StyledText st = (StyledText) textView.getControl();
+        if (CoreMessages.PARAM_DEFAULTS.equals(st.getText())) {
+            return CoreConstants.EMPTY_TEXT;
+        }
+        final String txt = st.getText();
 
-         public void widgetSelected( SelectionEvent e){
-            ParamView.this.setParamText("");
-         }
-      });
-      attachManager = new ParamsAttachManager(model, (StyledText) textView.getControl(), bar);
-      vForm.setContent(textView.getControl());
-      vForm.setTopCenter(bar);
-   }
+        return txt;
+    }
 
+    void setParamText(final String txt) {
+        final StyledText st = (StyledText) textView.getControl();
+        if (CoreConstants.EMPTY_TEXT.equals(txt)) {
+            st.setText(CoreMessages.PARAM_DEFAULTS);
+        } else {
+            st.setText(txt);
+        }
+        if (CoreConstants.EMPTY_TEXT.equals(getParamText())) {
+            st.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
+        } else {
+            st.setForeground(ResourceUtils.getColor(Styles.DARK_RGB_TEXT));
+        }
+    }
 
-   String getParamText(){
-      StyledText st = (StyledText) textView.getControl();
-      if (CoreMessages.PARAM_DEFAULTS.equals(st.getText())) {
-         return CoreConstants.EMPTY_TEXT;
-      }
-      String txt = st.getText();
-      
-      return txt;
-   }
+    void setFocus(final boolean focusGained) {
+        final StyledText st = (StyledText) textView.getControl();
+        if (focusGained) {
+            if (CoreConstants.EMPTY_TEXT.equals(getParamText())) {
+                st.setText(CoreConstants.EMPTY_TEXT);
+            }
+            st.setForeground(ResourceUtils.getColor(Styles.DARK_RGB_TEXT));
+        }
+    }
 
+    void setEditable(final boolean editable) {
+        final StyledText st = (StyledText) textView.getControl();
+        if (editable) {
+            // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
+            st.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
+            st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
+            st.setEditable(true);
+            attachManager.setEnabled(true);
 
-   void setParamText( String txt){
-      StyledText st = (StyledText) textView.getControl();
-      if (CoreConstants.EMPTY_TEXT.equals(txt)) {
-         st.setText(CoreMessages.PARAM_DEFAULTS);
-      } else {
-         st.setText(txt);
-      }
-      if (CoreConstants.EMPTY_TEXT.equals(getParamText())) {
-         st.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
-      } else {
-         st.setForeground(ResourceUtils.getColor(Styles.DARK_RGB_TEXT));
-      }
-   }
+        } else {
+            // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
+            st.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
+            st.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+            st.setEditable(false);
+            attachManager.setEnabled(false);
+        }
+    }
 
+    CLabel getTitleLabel() {
+        return titleLabel;
+    }
 
-   void setFocus( boolean focusGained){
-      StyledText st = (StyledText) textView.getControl();
-      if (focusGained) {
-         if (CoreConstants.EMPTY_TEXT.equals(getParamText())) {
-            st.setText(CoreConstants.EMPTY_TEXT);
-         }
-         st.setForeground(ResourceUtils.getColor(Styles.DARK_RGB_TEXT));
-      }
-   }
+    boolean isEditable() {
+        final StyledText st = (StyledText) textView.getControl();
+        return st.getEditable();
+    }
 
+    public void setMultipart(final boolean isMultipart) {
+        attachManager.setMultipart(isMultipart);
+    }
 
-   void setEditable( boolean editable){
-      StyledText st = (StyledText) textView.getControl();
-      if (editable) {
-         // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-         st.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-         st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
-         st.setEditable(true);
-         attachManager.setEnabled(true);
-
-      } else {
-         // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-         st.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
-         st.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
-         st.setEditable(false);
-         attachManager.setEnabled(false);
-      }
-   }
-
-
-   CLabel getTitleLabel(){
-      return titleLabel;
-   }
-
-
-   boolean isEditable(){
-      StyledText st = (StyledText) textView.getControl();
-      return st.getEditable();
-   }
-
-   
-   public void setMultipart( boolean isMultipart){
-      this.attachManager.setMultipart(isMultipart);
-   }
-
-
-   void setBackground( Color color){
-      StyledText st = (StyledText) textView.getControl();
-      st.setBackground(color);
-   }
+    void setBackground(final Color color) {
+        final StyledText st = (StyledText) textView.getControl();
+        st.setBackground(color);
+    }
 
 }

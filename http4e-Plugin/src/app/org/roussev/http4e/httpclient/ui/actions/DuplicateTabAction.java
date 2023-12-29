@@ -24,21 +24,19 @@ import org.roussev.http4e.httpclient.ui.HdViewPart;
  */
 public class DuplicateTabAction extends Action {
 
-   private HdViewPart view;
+    private final HdViewPart view;
 
+    public DuplicateTabAction(final HdViewPart view) {
+        this.view = view;
+        setText("Duplicate tab");
+        setDescription("Duplicate tab");
+        setToolTipText("Duplicate tab");
+    }
 
-   public DuplicateTabAction( HdViewPart view) {
-      super();
-      this.view = view;
-      setText("Duplicate tab");
-      setDescription("Duplicate tab");
-      setToolTipText("Duplicate tab");
-   }
-
-
-   public void run(){
-      FolderView folderView = view.getFolderView();
-      folderView.duplicateTab();
-   }
+    @Override
+    public void run() {
+        final FolderView folderView = view.getFolderView();
+        folderView.duplicateTab();
+    }
 
 }

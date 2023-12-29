@@ -23,12 +23,12 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.internal.ide.AboutInfo;
 import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
 
-/** 
+/**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class HdJavaEditorInput implements IEditorInput {
-   
-    private AboutInfo aboutInfo;
+
+    private final AboutInfo aboutInfo;
 
     private final static String FACTORY_ID = "org.eclipse.ui.internal.dialogs.WelcomeEditorInputFactory";
 
@@ -37,39 +37,44 @@ public class HdJavaEditorInput implements IEditorInput {
     /**
      * WelcomeEditorInput constructor comment.
      */
-    public HdJavaEditorInput(AboutInfo info) {
-        super();
+    public HdJavaEditorInput(final AboutInfo info) {
         if (info == null) {
             throw new IllegalArgumentException();
         }
         aboutInfo = info;
     }
 
+    @Override
     public boolean exists() {
         return false;
     }
 
-    public Object getAdapter(Class adapter) {
+    @Override
+    public Object getAdapter(final Class adapter) {
         return null;
     }
 
+    @Override
     public ImageDescriptor getImageDescriptor() {
         return null;
     }
 
+    @Override
     public String getName() {
         return IDEWorkbenchMessages.WelcomeEditor_title;
     }
 
+    @Override
     public IPersistableElement getPersistable() {
         return new IPersistableElement() {
+            @Override
             public String getFactoryId() {
                 return FACTORY_ID;
             }
 
-            public void saveState(IMemento memento) {
-                memento.putString(FEATURE_ID, aboutInfo.getFeatureId() + ':'
-                        + aboutInfo.getVersionId());
+            @Override
+            public void saveState(final IMemento memento) {
+                memento.putString(FEATURE_ID, aboutInfo.getFeatureId() + ':' + aboutInfo.getVersionId());
             }
         };
     }
@@ -78,16 +83,17 @@ public class HdJavaEditorInput implements IEditorInput {
         return aboutInfo;
     }
 
-    public boolean equals(Object o) {
-        if ((o != null) && (o instanceof HdJavaEditorInput)) {
-            if (((HdJavaEditorInput) o).aboutInfo.getFeatureId().equals(
-                    aboutInfo.getFeatureId())) {
+    @Override
+    public boolean equals(final Object o) {
+        if (o != null && o instanceof HdJavaEditorInput) {
+            if (((HdJavaEditorInput) o).aboutInfo.getFeatureId().equals(aboutInfo.getFeatureId())) {
                 return true;
             }
         }
         return false;
     }
 
+    @Override
     public String getToolTipText() {
         return NLS.bind(IDEWorkbenchMessages.WelcomeEditor_toolTip, aboutInfo.getFeatureLabel());
     }

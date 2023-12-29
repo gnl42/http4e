@@ -54,10 +54,9 @@ import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
  * Handles the process of executing a method including authentication, redirection and retries.
- * 
+ *
  * @since 3.0
  */
 class HttpMethodDirector {
@@ -77,43 +76,37 @@ class HttpMethodDirector {
     private static final Log LOG = LogFactory.getLog(HttpMethodDirector.class);
 
     private ConnectMethod connectMethod;
-    
-    private HttpState state;
-    
-    private HostConfiguration hostConfiguration;
-    
-    private HttpConnectionManager connectionManager;
-    
-    private HttpClientParams params;
-    
+
+    private final HttpState state;
+
+    private final HostConfiguration hostConfiguration;
+
+    private final HttpConnectionManager connectionManager;
+
+    private final HttpClientParams params;
+
     private HttpConnection conn;
-    
+
     /** A flag to indicate if the connection should be released after the method is executed. */
     private boolean releaseConnection = false;
 
     /** Authentication processor */
     private AuthChallengeProcessor authProcessor = null;
 
-    private Set redirectLocations = null; 
-    
-    public HttpMethodDirector(
-        final HttpConnectionManager connectionManager,
-        final HostConfiguration hostConfiguration,
-        final HttpClientParams params,
-        final HttpState state
-    ) {
-        super();
+    private Set<URI> redirectLocations = null;
+
+    public HttpMethodDirector(final HttpConnectionManager connectionManager, final HostConfiguration hostConfiguration, final HttpClientParams params,
+            final HttpState state) {
         this.connectionManager = connectionManager;
         this.hostConfiguration = hostConfiguration;
         this.params = params;
         this.state = state;
-        this.authProcessor = new AuthChallengeProcessor(this.params);
+        authProcessor = new AuthChallengeProcessor(this.params);
     }
-    
-    
+
     /**
      * Executes the method associated with this method director.
-     * 
+     *
      * @throws IOException
      * @throws HttpException
      */
@@ -123,45 +116,39 @@ class HttpMethodDirector {
         }
         // Link all parameter collections to form the hierarchy:
         // Global -> HttpClient -> HostConfiguration -> HttpMethod
-        this.hostConfiguration.getParams().setDefaults(this.params);
-        method.getParams().setDefaults(this.hostConfiguration.getParams());
-        
+        hostConfiguration.getParams().setDefaults(params);
+        method.getParams().setDefaults(hostConfiguration.getParams());
+
         // Generate default request headers
-        Collection defaults = (Collection)this.hostConfiguration.getParams().
-            getParameter(HostParams.DEFAULT_HEADERS);
+        final Collection<Header> defaults = (Collection<Header>) hostConfiguration.getParams().getParameter(HostParams.DEFAULT_HEADERS);
         if (defaults != null) {
-            Iterator i = defaults.iterator();
+            final Iterator<Header> i = defaults.iterator();
             while (i.hasNext()) {
-                method.addRequestHeader((Header)i.next());
+                method.addRequestHeader(i.next());
             }
         }
-        
+
         try {
-            int maxRedirects = this.params.getIntParameter(HttpClientParams.MAX_REDIRECTS, 100);
+            final int maxRedirects = params.getIntParameter(HttpClientParams.MAX_REDIRECTS, 100);
 
             for (int redirectCount = 0;;) {
 
                 // make sure the connection we have is appropriate
-                if (this.conn != null && !hostConfiguration.hostEquals(this.conn)) {
-                    this.conn.setLocked(false);
-                    this.conn.releaseConnection();
-                    this.conn = null;
+                if (conn != null && !hostConfiguration.hostEquals(conn)) {
+                    conn.setLocked(false);
+                    conn.releaseConnection();
+                    conn = null;
                 }
-        
+
                 // get a connection, if we need one
-                if (this.conn == null) {
-                    this.conn = connectionManager.getConnectionWithTimeout(
-                        hostConfiguration,
-                        this.params.getConnectionManagerTimeout() 
-                    );
-                    this.conn.setLocked(true);
-                    if (this.params.isAuthenticationPreemptive()
-                     || this.state.isAuthenticationPreemptive()) 
-                    {
+                if (conn == null) {
+                    conn = connectionManager.getConnectionWithTimeout(hostConfiguration, params.getConnectionManagerTimeout());
+                    conn.setLocked(true);
+                    if (params.isAuthenticationPreemptive() || state.isAuthenticationPreemptive()) {
                         LOG.debug("Preemptively sending default basic credentials");
                         method.getHostAuthState().setPreemptive();
                         method.getHostAuthState().setAuthAttempted(true);
-                        if (this.conn.isProxied() && !this.conn.isSecure()) {
+                        if (conn.isProxied() && !conn.isSecure()) {
                             method.getProxyAuthState().setPreemptive();
                             method.getProxyAuthState().setAuthAttempted(true);
                         }
@@ -169,11 +156,11 @@ class HttpMethodDirector {
                 }
                 authenticate(method);
                 executeWithRetry(method);
-                if (this.connectMethod != null) {
+                if (connectMethod != null) {
                     fakeResponse(method);
                     break;
                 }
-                
+
                 boolean retry = false;
                 if (isRedirectNeeded(method)) {
                     if (processRedirectResponse(method)) {
@@ -181,8 +168,7 @@ class HttpMethodDirector {
                         ++redirectCount;
                         if (redirectCount >= maxRedirects) {
                             LOG.error("Narrowly avoided an infinite loop in execute");
-                            throw new RedirectException("Maximum redirects ("
-                                + maxRedirects + ") exceeded");
+                            throw new RedirectException("Maximum redirects (" + maxRedirects + ") exceeded");
                         }
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Execute redirect " + redirectCount + " of " + maxRedirects);
@@ -198,51 +184,45 @@ class HttpMethodDirector {
                 if (!retry) {
                     break;
                 }
-                // retry - close previous stream.  Caution - this causes
+                // retry - close previous stream. Caution - this causes
                 // responseBodyConsumed to be called, which may also close the
                 // connection.
                 if (method.getResponseBodyAsStream() != null) {
                     method.getResponseBodyAsStream().close();
                 }
 
-            } //end of retry loop
+            } // end of retry loop
         } finally {
-            if (this.conn != null) {
-                this.conn.setLocked(false);
+            if (conn != null) {
+                conn.setLocked(false);
             }
             // If the response has been fully processed, return the connection
-            // to the pool.  Use this flag, rather than other tests (like
+            // to the pool. Use this flag, rather than other tests (like
             // responseStream == null), as subclasses, might reset the stream,
             // for example, reading the entire response into a file and then
             // setting the file as the stream.
-            if (
-                (releaseConnection || method.getResponseBodyAsStream() == null) 
-                && this.conn != null
-            ) {
-                this.conn.releaseConnection();
+            if ((releaseConnection || method.getResponseBodyAsStream() == null) && conn != null) {
+                conn.releaseConnection();
             }
         }
 
     }
 
-    
     private void authenticate(final HttpMethod method) {
         try {
-            if (this.conn.isProxied() && !this.conn.isSecure()) {
+            if (conn.isProxied() && !conn.isSecure()) {
                 authenticateProxy(method);
             }
             authenticateHost(method);
-        } catch (AuthenticationException e) {
+        } catch (final AuthenticationException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-
     private boolean cleanAuthHeaders(final HttpMethod method, final String name) {
-        Header[] authheaders = method.getRequestHeaders(name);
+        final Header[] authheaders = method.getRequestHeaders(name);
         boolean clean = true;
-        for (int i = 0; i < authheaders.length; i++) {
-            Header authheader = authheaders[i];
+        for (final Header authheader : authheaders) {
             if (authheader.isAutogenerated()) {
                 method.removeRequestHeader(authheader);
             } else {
@@ -251,7 +231,6 @@ class HttpMethodDirector {
         }
         return clean;
     }
-    
 
     private void authenticateHost(final HttpMethod method) throws AuthenticationException {
         // Clean up existing authentication headers
@@ -259,8 +238,8 @@ class HttpMethodDirector {
             // User defined authentication header(s) present
             return;
         }
-        AuthState authstate = method.getHostAuthState();
-        AuthScheme authscheme = authstate.getAuthScheme();
+        final AuthState authstate = method.getHostAuthState();
+        final AuthScheme authscheme = authstate.getAuthScheme();
         if (authscheme == null) {
             return;
         }
@@ -269,32 +248,25 @@ class HttpMethodDirector {
             if (host == null) {
                 host = conn.getHost();
             }
-            int port = conn.getPort();
-            AuthScope authscope = new AuthScope(
-                host, port, 
-                authscheme.getRealm(), 
-                authscheme.getSchemeName());  
+            final int port = conn.getPort();
+            final AuthScope authscope = new AuthScope(host, port, authscheme.getRealm(), authscheme.getSchemeName());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Authenticating with " + authscope);
             }
-            Credentials credentials = this.state.getCredentials(authscope);
+            final Credentials credentials = state.getCredentials(authscope);
             if (credentials != null) {
-                String authstring = authscheme.authenticate(credentials, method);
+                final String authstring = authscheme.authenticate(credentials, method);
                 if (authstring != null) {
                     method.addRequestHeader(new Header(WWW_AUTH_RESP, authstring, true));
                 }
-            } else {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Required credentials not available for " + authscope);
-                    if (method.getHostAuthState().isPreemptive()) {
-                        LOG.warn("Preemptive authentication requested but no default " +
-                            "credentials available"); 
-                    }
+            } else if (LOG.isWarnEnabled()) {
+                LOG.warn("Required credentials not available for " + authscope);
+                if (method.getHostAuthState().isPreemptive()) {
+                    LOG.warn("Preemptive authentication requested but no default " + "credentials available");
                 }
             }
         }
     }
-
 
     private void authenticateProxy(final HttpMethod method) throws AuthenticationException {
         // Clean up existing authentication headers
@@ -302,44 +274,37 @@ class HttpMethodDirector {
             // User defined authentication header(s) present
             return;
         }
-        AuthState authstate = method.getProxyAuthState();
-        AuthScheme authscheme = authstate.getAuthScheme();
+        final AuthState authstate = method.getProxyAuthState();
+        final AuthScheme authscheme = authstate.getAuthScheme();
         if (authscheme == null) {
             return;
         }
         if (authstate.isAuthRequested() || !authscheme.isConnectionBased()) {
-            AuthScope authscope = new AuthScope(
-                conn.getProxyHost(), conn.getProxyPort(), 
-                authscheme.getRealm(), 
-                authscheme.getSchemeName());  
+            final AuthScope authscope = new AuthScope(conn.getProxyHost(), conn.getProxyPort(), authscheme.getRealm(), authscheme.getSchemeName());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Authenticating with " + authscope);
             }
-            Credentials credentials = this.state.getProxyCredentials(authscope);
+            final Credentials credentials = state.getProxyCredentials(authscope);
             if (credentials != null) {
-                String authstring = authscheme.authenticate(credentials, method);
+                final String authstring = authscheme.authenticate(credentials, method);
                 if (authstring != null) {
                     method.addRequestHeader(new Header(PROXY_AUTH_RESP, authstring, true));
                 }
-            } else {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Required proxy credentials not available for " + authscope);
-                    if (method.getProxyAuthState().isPreemptive()) {
-                        LOG.warn("Preemptive authentication requested but no default " +
-                            "proxy credentials available"); 
-                    }
+            } else if (LOG.isWarnEnabled()) {
+                LOG.warn("Required proxy credentials not available for " + authscope);
+                if (method.getProxyAuthState().isPreemptive()) {
+                    LOG.warn("Preemptive authentication requested but no default " + "proxy credentials available");
                 }
             }
         }
     }
-    
-    
+
     /**
      * Applies connection parameters specified for a given method
-     * 
+     *
      * @param method HTTP method
-     * 
-     * @throws IOException if an I/O occurs setting connection parameters 
+     *
+     * @throws IOException if an I/O occurs setting connection parameters
      */
     private void applyConnectionParams(final HttpMethod method) throws IOException {
         int timeout = 0;
@@ -347,28 +312,27 @@ class HttpMethodDirector {
         Object param = method.getParams().getParameter(HttpMethodParams.SO_TIMEOUT);
         if (param == null) {
             // if not, use the default value
-            param = this.conn.getParams().getParameter(HttpConnectionParams.SO_TIMEOUT);
+            param = conn.getParams().getParameter(HttpConnectionParams.SO_TIMEOUT);
         }
         if (param != null) {
-            timeout = ((Integer)param).intValue();
+            timeout = (Integer) param;
         }
-        this.conn.setSocketTimeout(timeout);                    
+        conn.setSocketTimeout(timeout);
     }
-    
+
     /**
      * Executes a method with the current hostConfiguration.
      *
-     * @throws IOException if an I/O (transport) error occurs. Some transport exceptions 
-     * can be recovered from.
-     * @throws HttpException  if a protocol exception occurs. Usually protocol exceptions 
-     * cannot be recovered from.
+     * @throws IOException   if an I/O (transport) error occurs. Some transport exceptions can be
+     *                       recovered from.
+     * @throws HttpException if a protocol exception occurs. Usually protocol exceptions cannot be
+     *                       recovered from.
      */
-    private void executeWithRetry(final HttpMethod method) 
-        throws IOException, HttpException {
-        
+    private void executeWithRetry(final HttpMethod method) throws IOException, HttpException {
+
         /** How many times did this transparently handle a recoverable exception? */
         int execCount = 0;
-        // loop until the method is successfully processed, the retryHandler 
+        // loop until the method is successfully processed, the retryHandler
         // returns false or a non-recoverable exception is thrown
         try {
             while (true) {
@@ -378,15 +342,14 @@ class HttpMethodDirector {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Attempt number " + execCount + " to process request");
                     }
-                    if (this.conn.getParams().isStaleCheckingEnabled()) {
-                        this.conn.closeIfStale();
+                    if (conn.getParams().isStaleCheckingEnabled()) {
+                        conn.closeIfStale();
                     }
-                    if (!this.conn.isOpen()) {
+                    if (!conn.isOpen()) {
                         // this connection must be opened before it can be used
                         // This has nothing to do with opening a secure tunnel
-                        this.conn.open();
-                        if (this.conn.isProxied() && this.conn.isSecure() 
-                        && !(method instanceof ConnectMethod)) {
+                        conn.open();
+                        if (conn.isProxied() && conn.isSecure() && !(method instanceof ConnectMethod)) {
                             // we need to create a secure tunnel before we can execute the real method
                             if (!executeConnect()) {
                                 // abort, the connect method failed
@@ -394,50 +357,39 @@ class HttpMethodDirector {
                             }
                         }
                     }
-                    applyConnectionParams(method);                    
-                    method.execute(state, this.conn);
+                    applyConnectionParams(method);
+                    method.execute(state, conn);
                     break;
-                } catch (HttpException e) {
+                } catch (final HttpException e) {
                     // filter out protocol exceptions which cannot be recovered from
                     throw e;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.debug("Closing the connection.");
-                    this.conn.close();
+                    conn.close();
                     // test if this method should be retried
                     // ========================================
                     // this code is provided for backward compatibility with 2.0
                     // will be removed in the next major release
                     if (method instanceof HttpMethodBase) {
-                        MethodRetryHandler handler = 
-                            ((HttpMethodBase)method).getMethodRetryHandler();
+                        final MethodRetryHandler handler = ((HttpMethodBase) method).getMethodRetryHandler();
                         if (handler != null) {
-                            if (!handler.retryMethod(
-                                    method,
-                                    this.conn, 
-                                    new HttpRecoverableException(e.getMessage()),
-                                    execCount, 
-                                    method.isRequestSent())) {
-                                LOG.debug("Method retry handler returned false. "
-                                        + "Automatic recovery will not be attempted");
+                            if (!handler.retryMethod(method, conn, new HttpRecoverableException(e.getMessage()), execCount, method.isRequestSent())) {
+                                LOG.debug("Method retry handler returned false. " + "Automatic recovery will not be attempted");
                                 throw e;
                             }
                         }
                     }
                     // ========================================
-                    HttpMethodRetryHandler handler = 
-                        (HttpMethodRetryHandler)method.getParams().getParameter(
-                                HttpMethodParams.RETRY_HANDLER);
+                    HttpMethodRetryHandler handler = (HttpMethodRetryHandler) method.getParams().getParameter(HttpMethodParams.RETRY_HANDLER);
                     if (handler == null) {
                         handler = new DefaultHttpMethodRetryHandler();
                     }
                     if (!handler.retryMethod(method, e, execCount)) {
-                        LOG.debug("Method retry handler returned false. "
-                                + "Automatic recovery will not be attempted");
+                        LOG.debug("Method retry handler returned false. " + "Automatic recovery will not be attempted");
                         throw e;
                     }
                     if (LOG.isInfoEnabled()) {
-                        LOG.info("I/O exception ("+ e.getClass().getName() +") caught when processing request: "
-                                + e.getMessage());
+                        LOG.info("I/O exception (" + e.getClass().getName() + ") caught when processing request: " + e.getMessage());
                     }
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(e.getMessage(), e);
@@ -445,205 +397,187 @@ class HttpMethodDirector {
                     LOG.info("Retrying request");
                 }
             }
-        } catch (IOException e) {
-            if (this.conn.isOpen()) {
+        } catch (final IOException e) {
+            if (conn.isOpen()) {
                 LOG.debug("Closing the connection.");
-                this.conn.close();
+                conn.close();
             }
             releaseConnection = true;
             throw e;
-        } catch (RuntimeException e) {
-            if (this.conn.isOpen) {
+        } catch (final RuntimeException e) {
+            if (conn.isOpen) {
                 LOG.debug("Closing the connection.");
-                this.conn.close();
+                conn.close();
             }
             releaseConnection = true;
             throw e;
         }
     }
-    
+
     /**
      * Executes a ConnectMethod to establish a tunneled connection.
-     * 
+     *
      * @return <code>true</code> if the connect was successful
-     * 
+     *
      * @throws IOException
      * @throws HttpException
      */
-    private boolean executeConnect() 
-        throws IOException, HttpException {
+    private boolean executeConnect() throws IOException, HttpException {
 
-        this.connectMethod = new ConnectMethod(this.hostConfiguration);
-        this.connectMethod.getParams().setDefaults(this.hostConfiguration.getParams());
-        
+        connectMethod = new ConnectMethod(hostConfiguration);
+        connectMethod.getParams().setDefaults(hostConfiguration.getParams());
+
         int code;
         for (;;) {
-            if (!this.conn.isOpen()) {
-                this.conn.open();
+            if (!conn.isOpen()) {
+                conn.open();
             }
-            if (this.params.isAuthenticationPreemptive()
-                    || this.state.isAuthenticationPreemptive()) {
+            if (params.isAuthenticationPreemptive() || state.isAuthenticationPreemptive()) {
                 LOG.debug("Preemptively sending default basic credentials");
-                this.connectMethod.getProxyAuthState().setPreemptive();
-                this.connectMethod.getProxyAuthState().setAuthAttempted(true);
+                connectMethod.getProxyAuthState().setPreemptive();
+                connectMethod.getProxyAuthState().setAuthAttempted(true);
             }
             try {
-                authenticateProxy(this.connectMethod);
-            } catch (AuthenticationException e) {
+                authenticateProxy(connectMethod);
+            } catch (final AuthenticationException e) {
                 LOG.error(e.getMessage(), e);
             }
-            applyConnectionParams(this.connectMethod);                    
-            this.connectMethod.execute(state, this.conn);
-            code = this.connectMethod.getStatusCode();
+            applyConnectionParams(connectMethod);
+            connectMethod.execute(state, conn);
+            code = connectMethod.getStatusCode();
             boolean retry = false;
-            AuthState authstate = this.connectMethod.getProxyAuthState(); 
+            final AuthState authstate = connectMethod.getProxyAuthState();
             authstate.setAuthRequested(code == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
             if (authstate.isAuthRequested()) {
-                if (processAuthenticationResponse(this.connectMethod)) {
+                if (processAuthenticationResponse(connectMethod)) {
                     retry = true;
                 }
             }
             if (!retry) {
                 break;
             }
-            if (this.connectMethod.getResponseBodyAsStream() != null) {
-                this.connectMethod.getResponseBodyAsStream().close();
+            if (connectMethod.getResponseBodyAsStream() != null) {
+                connectMethod.getResponseBodyAsStream().close();
             }
         }
-        if ((code >= 200) && (code < 300)) {
-            this.conn.tunnelCreated();
+        if (code >= 200 && code < 300) {
+            conn.tunnelCreated();
             // Drop the connect method, as it is no longer needed
-            this.connectMethod = null;
+            connectMethod = null;
             return true;
         } else {
-            this.conn.close();
+            conn.close();
             return false;
         }
     }
 
     /**
      * Fake response
+     *
      * @param method
      * @return
      */
-    
-    private void fakeResponse(final HttpMethod method)
-        throws IOException, HttpException {
+
+    private void fakeResponse(final HttpMethod method) throws IOException, HttpException {
         // What is to follow is an ugly hack.
         // I REALLY hate having to resort to such
         // an appalling trick
         // The only feasible solution is to split monolithic
         // HttpMethod into HttpRequest/HttpResponse pair.
-        // That would allow to execute CONNECT method 
-        // behind the scene and return CONNECT HttpResponse 
-        // object in response to the original request that 
-        // contains the correct status line, headers & 
+        // That would allow to execute CONNECT method
+        // behind the scene and return CONNECT HttpResponse
+        // object in response to the original request that
+        // contains the correct status line, headers &
         // response body.
         LOG.debug("CONNECT failed, fake the response for the original method");
         // Pass the status, headers and response stream to the wrapped
         // method.
         // To ensure that the connection is not released more than once
-        // this method is still responsible for releasing the connection. 
+        // this method is still responsible for releasing the connection.
         // This will happen when the response body is consumed, or when
-        // the wrapped method closes the response connection in 
+        // the wrapped method closes the response connection in
         // releaseConnection().
         if (method instanceof HttpMethodBase) {
-            ((HttpMethodBase) method).fakeResponse(
-                this.connectMethod.getStatusLine(),
-                this.connectMethod.getResponseHeaderGroup(),
-                this.connectMethod.getResponseBodyAsStream()
-            );
-            method.getProxyAuthState().setAuthScheme(
-                this.connectMethod.getProxyAuthState().getAuthScheme());
-            this.connectMethod = null;
+            ((HttpMethodBase) method).fakeResponse(connectMethod.getStatusLine(), connectMethod.getResponseHeaderGroup(),
+                    connectMethod.getResponseBodyAsStream());
+            method.getProxyAuthState().setAuthScheme(connectMethod.getProxyAuthState().getAuthScheme());
+            connectMethod = null;
         } else {
             releaseConnection = true;
-            LOG.warn(
-                "Unable to fake response on method as it is not derived from HttpMethodBase.");
+            LOG.warn("Unable to fake response on method as it is not derived from HttpMethodBase.");
         }
     }
-    
+
     /**
      * Process the redirect response.
-     * 
+     *
      * @return <code>true</code> if the redirect was successful
      */
-    private boolean processRedirectResponse(final HttpMethod method)
-     throws RedirectException {
-        //get the location header to find out where to redirect to
-        Header locationHeader = method.getResponseHeader("location");
+    private boolean processRedirectResponse(final HttpMethod method) throws RedirectException {
+        // get the location header to find out where to redirect to
+        final Header locationHeader = method.getResponseHeader("location");
         if (locationHeader == null) {
             // got a redirect response, but no location header
-            LOG.error("Received redirect response " + method.getStatusCode()
-                    + " but no location header");
+            LOG.error("Received redirect response " + method.getStatusCode() + " but no location header");
             return false;
         }
-        String location = locationHeader.getValue();
+        final String location = locationHeader.getValue();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Redirect requested to location '" + location + "'");
         }
-        
-        //rfc2616 demands the location value be a complete URI
-        //Location       = "Location" ":" absoluteURI
+
+        // rfc2616 demands the location value be a complete URI
+        // Location = "Location" ":" absoluteURI
         URI redirectUri = null;
         URI currentUri = null;
 
         try {
-            currentUri = new URI(
-                this.conn.getProtocol().getScheme(),
-                null,
-                this.conn.getHost(), 
-                this.conn.getPort(), 
-                method.getPath()
-            );
+            currentUri = new URI(conn.getProtocol().getScheme(), null, conn.getHost(), conn.getPort(), method.getPath());
             redirectUri = new URI(location, true);
             if (redirectUri.isRelativeURI()) {
-                if (this.params.isParameterTrue(HttpClientParams.REJECT_RELATIVE_REDIRECT)) {
+                if (params.isParameterTrue(HttpClientParams.REJECT_RELATIVE_REDIRECT)) {
                     LOG.warn("Relative redirect location '" + location + "' not allowed");
                     return false;
-                } else { 
-                    //location is incomplete, use current values for defaults
+                } else {
+                    // location is incomplete, use current values for defaults
                     LOG.debug("Redirect URI is not absolute - parsing as relative");
                     redirectUri = new URI(currentUri, redirectUri);
                 }
             } else {
                 // Reset the default params
-                method.getParams().setDefaults(this.params);
+                method.getParams().setDefaults(params);
             }
             method.setURI(redirectUri);
             hostConfiguration.setHost(redirectUri);
-        } catch (URIException ex) {
-            throw new InvalidRedirectLocationException(
-                    "Invalid redirect location: " + location, location, ex);
+        } catch (final URIException ex) {
+            throw new InvalidRedirectLocationException("Invalid redirect location: " + location, location, ex);
         }
 
-        if (this.params.isParameterFalse(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS)) {
-            if (this.redirectLocations == null) {
-                this.redirectLocations = new HashSet();
+        if (params.isParameterFalse(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS)) {
+            if (redirectLocations == null) {
+                redirectLocations = new HashSet<>();
             }
-            this.redirectLocations.add(currentUri);
+            redirectLocations.add(currentUri);
             try {
-                if(redirectUri.hasQuery()) {
+                if (redirectUri.hasQuery()) {
                     redirectUri.setQuery(null);
                 }
-            } catch (URIException e) {
+            } catch (final URIException e) {
                 // Should never happen
                 return false;
             }
 
-            if (this.redirectLocations.contains(redirectUri)) {
-                CircularRedirectException ce = new CircularRedirectException("Circular redirect to '" +
-                    redirectUri + "'");
+            if (redirectLocations.contains(redirectUri)) {
+                final CircularRedirectException ce = new CircularRedirectException("Circular redirect to '" + redirectUri + "'");
                 ce.setRedirectUrl(redirectUri.toString());
             }
         }
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Redirecting from '" + currentUri.getEscapedURI()
-                + "' to '" + redirectUri.getEscapedURI());
+            LOG.debug("Redirecting from '" + currentUri.getEscapedURI() + "' to '" + redirectUri.getEscapedURI());
         }
-        //And finally invalidate the actual authentication scheme
-        method.getHostAuthState().invalidate(); 
+        // And finally invalidate the actual authentication scheme
+        method.getHostAuthState().invalidate();
         return true;
     }
 
@@ -652,24 +586,20 @@ class HttpMethodDirector {
      *
      * @param method the current {@link HttpMethod HTTP method}
      *
-     * @return <tt>true</tt> if the authentication challenge can be responsed to,
-     *   (that is, at least one of the requested authentication scheme is supported, 
-     *   and matching credentials have been found), <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if the authentication challenge can be responsed to, (that is, at least one
+     *         of the requested authentication scheme is supported, and matching credentials have been
+     *         found), <tt>false</tt> otherwise.
      */
     private boolean processAuthenticationResponse(final HttpMethod method) {
-        LOG.trace("enter HttpMethodBase.processAuthenticationResponse("
-            + "HttpState, HttpConnection)");
+        LOG.trace("enter HttpMethodBase.processAuthenticationResponse(" + "HttpState, HttpConnection)");
 
         try {
-            switch (method.getStatusCode()) {
-                case HttpStatus.SC_UNAUTHORIZED:
-                    return processWWWAuthChallenge(method);
-                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                    return processProxyAuthChallenge(method);
-                default:
-                    return false;
-            }
-        } catch (Exception e) {
+            return switch (method.getStatusCode()) {
+            case HttpStatus.SC_UNAUTHORIZED -> processWWWAuthChallenge(method);
+            case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED -> processProxyAuthChallenge(method);
+            default -> false;
+            };
+        } catch (final Exception e) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(e.getMessage(), e);
             }
@@ -677,20 +607,17 @@ class HttpMethodDirector {
         }
     }
 
-    private boolean processWWWAuthChallenge(final HttpMethod method)
-        throws MalformedChallengeException, AuthenticationException  
-    {
-        AuthState authstate = method.getHostAuthState();
-        Map challenges = AuthChallengeParser.parseChallenges(
-            method.getResponseHeaders(WWW_AUTH_CHALLENGE));
+    private boolean processWWWAuthChallenge(final HttpMethod method) throws MalformedChallengeException, AuthenticationException {
+        final AuthState authstate = method.getHostAuthState();
+        final Map challenges = AuthChallengeParser.parseChallenges(method.getResponseHeaders(WWW_AUTH_CHALLENGE));
         if (challenges.isEmpty()) {
             LOG.debug("Authentication challenge(s) not found");
-            return false; 
+            return false;
         }
         AuthScheme authscheme = null;
         try {
-            authscheme = this.authProcessor.processChallenge(authstate, challenges);
-        } catch (AuthChallengeException e) {
+            authscheme = authProcessor.processChallenge(authstate, challenges);
+        } catch (final AuthChallengeException e) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(e.getMessage());
             }
@@ -702,19 +629,15 @@ class HttpMethodDirector {
         if (host == null) {
             host = conn.getHost();
         }
-        int port = conn.getPort();
-        AuthScope authscope = new AuthScope(
-            host, port, 
-            authscheme.getRealm(), 
-            authscheme.getSchemeName());
-        
+        final int port = conn.getPort();
+        final AuthScope authscope = new AuthScope(host, port, authscheme.getRealm(), authscheme.getSchemeName());
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Authentication scope: " + authscope);
         }
         if (authstate.isAuthAttempted() && authscheme.isComplete()) {
             // Already tried and failed
-            Credentials credentials = promptForCredentials(
-                authscheme, method.getParams(), authscope);
+            final Credentials credentials = promptForCredentials(authscheme, method.getParams(), authscope);
             if (credentials == null) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Failure authenticating with " + authscope);
@@ -725,14 +648,13 @@ class HttpMethodDirector {
             }
         } else {
             authstate.setAuthAttempted(true);
-            Credentials credentials = this.state.getCredentials(authscope);
+            Credentials credentials = state.getCredentials(authscope);
             if (credentials == null) {
-                credentials = promptForCredentials(
-                    authscheme, method.getParams(), authscope);
+                credentials = promptForCredentials(authscheme, method.getParams(), authscope);
             }
             if (credentials == null) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("No credentials available for " + authscope); 
+                    LOG.info("No credentials available for " + authscope);
                 }
                 return false;
             } else {
@@ -741,20 +663,17 @@ class HttpMethodDirector {
         }
     }
 
-    private boolean processProxyAuthChallenge(final HttpMethod method)
-        throws MalformedChallengeException, AuthenticationException
-    {  
-        AuthState authstate = method.getProxyAuthState();
-        Map proxyChallenges = AuthChallengeParser.parseChallenges(
-            method.getResponseHeaders(PROXY_AUTH_CHALLENGE));
+    private boolean processProxyAuthChallenge(final HttpMethod method) throws MalformedChallengeException, AuthenticationException {
+        final AuthState authstate = method.getProxyAuthState();
+        final Map proxyChallenges = AuthChallengeParser.parseChallenges(method.getResponseHeaders(PROXY_AUTH_CHALLENGE));
         if (proxyChallenges.isEmpty()) {
             LOG.debug("Proxy authentication challenge(s) not found");
-            return false; 
+            return false;
         }
         AuthScheme authscheme = null;
         try {
-            authscheme = this.authProcessor.processChallenge(authstate, proxyChallenges);
-        } catch (AuthChallengeException e) {
+            authscheme = authProcessor.processChallenge(authstate, proxyChallenges);
+        } catch (final AuthChallengeException e) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(e.getMessage());
             }
@@ -762,18 +681,14 @@ class HttpMethodDirector {
         if (authscheme == null) {
             return false;
         }
-        AuthScope authscope = new AuthScope(
-            conn.getProxyHost(), conn.getProxyPort(), 
-            authscheme.getRealm(), 
-            authscheme.getSchemeName());  
+        final AuthScope authscope = new AuthScope(conn.getProxyHost(), conn.getProxyPort(), authscheme.getRealm(), authscheme.getSchemeName());
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Proxy authentication scope: " + authscope);
         }
         if (authstate.isAuthAttempted() && authscheme.isComplete()) {
             // Already tried and failed
-            Credentials credentials = promptForProxyCredentials(
-                authscheme, method.getParams(), authscope);
+            final Credentials credentials = promptForProxyCredentials(authscheme, method.getParams(), authscope);
             if (credentials == null) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Failure authenticating with " + authscope);
@@ -784,14 +699,13 @@ class HttpMethodDirector {
             }
         } else {
             authstate.setAuthAttempted(true);
-            Credentials credentials = this.state.getProxyCredentials(authscope);
+            Credentials credentials = state.getProxyCredentials(authscope);
             if (credentials == null) {
-                credentials = promptForProxyCredentials(
-                    authscheme, method.getParams(), authscope);
+                credentials = promptForProxyCredentials(authscheme, method.getParams(), authscope);
             }
             if (credentials == null) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("No credentials available for " + authscope); 
+                    LOG.info("No credentials available for " + authscope);
                 }
                 return false;
             } else {
@@ -802,48 +716,44 @@ class HttpMethodDirector {
 
     /**
      * Tests if the {@link HttpMethod method} requires a redirect to another location.
-     * 
+     *
      * @param method HTTP method
-     * 
+     *
      * @return boolean <tt>true</tt> if a retry is needed, <tt>false</tt> otherwise.
      */
     private boolean isRedirectNeeded(final HttpMethod method) {
         switch (method.getStatusCode()) {
-            case HttpStatus.SC_MOVED_TEMPORARILY:
-            case HttpStatus.SC_MOVED_PERMANENTLY:
-            case HttpStatus.SC_SEE_OTHER:
-            case HttpStatus.SC_TEMPORARY_REDIRECT:
-                LOG.debug("Redirect required");
-                if (method.getFollowRedirects()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            default:
+        case HttpStatus.SC_MOVED_TEMPORARILY:
+        case HttpStatus.SC_MOVED_PERMANENTLY:
+        case HttpStatus.SC_SEE_OTHER:
+        case HttpStatus.SC_TEMPORARY_REDIRECT:
+            LOG.debug("Redirect required");
+            if (method.getFollowRedirects()) {
+                return true;
+            } else {
                 return false;
-        } //end of switch
+            }
+        default:
+            return false;
+        } // end of switch
     }
 
     /**
      * Tests if the {@link HttpMethod method} requires authentication.
-     * 
+     *
      * @param method HTTP method
-     * 
+     *
      * @return boolean <tt>true</tt> if a retry is needed, <tt>false</tt> otherwise.
      */
     private boolean isAuthenticationNeeded(final HttpMethod method) {
-        method.getHostAuthState().setAuthRequested(
-                method.getStatusCode() == HttpStatus.SC_UNAUTHORIZED);
-        method.getProxyAuthState().setAuthRequested(
-                method.getStatusCode() == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
-        if (method.getHostAuthState().isAuthRequested() || 
-            method.getProxyAuthState().isAuthRequested()) {
+        method.getHostAuthState().setAuthRequested(method.getStatusCode() == HttpStatus.SC_UNAUTHORIZED);
+        method.getProxyAuthState().setAuthRequested(method.getStatusCode() == HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED);
+        if (method.getHostAuthState().isAuthRequested() || method.getProxyAuthState().isAuthRequested()) {
             LOG.debug("Authorization required");
-            if (method.getDoAuthentication()) { //process authentication response
+            if (method.getDoAuthentication()) { // process authentication response
                 return true;
-            } else { //let the client handle the authenticaiton
-                LOG.info("Authentication requested but doAuthentication is "
-                        + "disabled");
+            } else { // let the client handle the authenticaiton
+                LOG.info("Authentication requested but doAuthentication is " + "disabled");
                 return false;
             }
         } else {
@@ -851,24 +761,18 @@ class HttpMethodDirector {
         }
     }
 
-    private Credentials promptForCredentials(
-        final AuthScheme authScheme,
-        final HttpParams params, 
-        final AuthScope authscope)
-    {
+    private Credentials promptForCredentials(final AuthScheme authScheme, final HttpParams params, final AuthScope authscope) {
         LOG.debug("Credentials required");
         Credentials creds = null;
-        CredentialsProvider credProvider = 
-            (CredentialsProvider)params.getParameter(CredentialsProvider.PROVIDER);
+        final CredentialsProvider credProvider = (CredentialsProvider) params.getParameter(CredentialsProvider.PROVIDER);
         if (credProvider != null) {
             try {
-                creds = credProvider.getCredentials(
-                    authScheme, authscope.getHost(), authscope.getPort(), false);
-            } catch (CredentialsNotAvailableException e) {
+                creds = credProvider.getCredentials(authScheme, authscope.getHost(), authscope.getPort(), false);
+            } catch (final CredentialsNotAvailableException e) {
                 LOG.warn(e.getMessage());
             }
             if (creds != null) {
-                this.state.setCredentials(authscope, creds);
+                state.setCredentials(authscope, creds);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(authscope + " new credentials given");
                 }
@@ -879,24 +783,18 @@ class HttpMethodDirector {
         return creds;
     }
 
-    private Credentials promptForProxyCredentials(
-        final AuthScheme authScheme,
-        final HttpParams params,
-        final AuthScope authscope) 
-    {
+    private Credentials promptForProxyCredentials(final AuthScheme authScheme, final HttpParams params, final AuthScope authscope) {
         LOG.debug("Proxy credentials required");
         Credentials creds = null;
-        CredentialsProvider credProvider = 
-            (CredentialsProvider)params.getParameter(CredentialsProvider.PROVIDER);
+        final CredentialsProvider credProvider = (CredentialsProvider) params.getParameter(CredentialsProvider.PROVIDER);
         if (credProvider != null) {
             try {
-                creds = credProvider.getCredentials(
-                    authScheme, authscope.getHost(), authscope.getPort(), true);
-            } catch (CredentialsNotAvailableException e) {
+                creds = credProvider.getCredentials(authScheme, authscope.getHost(), authscope.getPort(), true);
+            } catch (final CredentialsNotAvailableException e) {
                 LOG.warn(e.getMessage());
             }
             if (creds != null) {
-                this.state.setProxyCredentials(authscope, creds);
+                state.setProxyCredentials(authscope, creds);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(authscope + " new credentials given");
                 }
@@ -932,6 +830,6 @@ class HttpMethodDirector {
      * @return
      */
     public HttpParams getParams() {
-        return this.params;
+        return params;
     }
 }

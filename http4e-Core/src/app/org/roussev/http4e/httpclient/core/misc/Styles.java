@@ -50,15 +50,15 @@ public class Styles {
 
     private static Styles styles = null;
 
-    private Styles(Shell shell) {
-        ITheme theme = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme();
-        FontRegistry fontRegistry = theme.getFontRegistry();
-        Font font = fontRegistry.get("org.eclipse.debug.ui.consoleFont");
-        FontData fd = font.getFontData()[0];
+    private Styles(final Shell shell) {
+        final ITheme theme = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme();
+        final FontRegistry fontRegistry = theme.getFontRegistry();
+        final Font font = fontRegistry.get("org.eclipse.debug.ui.consoleFont");
+        final FontData fd = font.getFontData()[0];
         fontStyle = new FontStyle(fd.getName(), fd.getHeight(), fd.getStyle());
     }
 
-    public static Styles getInstance(Shell shell) {
+    public static Styles getInstance(final Shell shell) {
         if (styles == null) {
             styles = new Styles(shell);
         }
@@ -90,7 +90,7 @@ public class Styles {
         int height;
         int style;
 
-        FontStyle(String name, int height, int style
+        FontStyle(final String name, final int height, final int style
         /* , boolean strikeout,boolean underline */) {
             this.name = name;
             this.height = height;

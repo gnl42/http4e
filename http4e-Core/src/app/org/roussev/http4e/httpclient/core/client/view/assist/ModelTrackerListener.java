@@ -19,7 +19,7 @@ package org.roussev.http4e.httpclient.core.client.view.assist;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public interface ModelTrackerListener {
-   
-   void fireExecute(String key, String value);
+
+    void fireExecute(String key, String value);
 
 }

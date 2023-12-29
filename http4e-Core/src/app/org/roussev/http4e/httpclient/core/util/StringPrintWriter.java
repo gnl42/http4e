@@ -21,32 +21,29 @@ import java.io.StringWriter;
 /**
  * A PrintWriter that maintains a String as its backing store.
  * 
- * Usage: StringPrintWriter out = new StringPrintWriter();
- * printTo(out); System.out.println( out.getString() );
+ * Usage: StringPrintWriter out = new StringPrintWriter(); printTo(out); System.out.println(
+ * out.getString() );
  */
 class StringPrintWriter extends PrintWriter {
 
-   public StringPrintWriter() {
-      super(new StringWriter());
-   }
+    public StringPrintWriter() {
+        super(new StringWriter());
+    }
 
+    public StringPrintWriter(final int initialSize) {
+        super(new StringWriter(initialSize));
+    }
 
-   public StringPrintWriter( int initialSize) {
-      super(new StringWriter(initialSize));
-   }
-
-
-   /**
-    * &ltp&gtSince toString() returns information *about* this object, we want a
-    * separate method to extract just the contents of the internal buffer as a
-    * String.
-    * </p>
-    * 
-    * @return the contents of the internal string buffer
-    */
-   public String getString(){
-      flush();
-      return ((StringWriter) out).toString();
-   }
+    /**
+     * &ltp&gtSince toString() returns information *about* this object, we want a separate method to
+     * extract just the contents of the internal buffer as a String.
+     * </p>
+     * 
+     * @return the contents of the internal string buffer
+     */
+    public String getString() {
+        flush();
+        return ((StringWriter) out).toString();
+    }
 
 }

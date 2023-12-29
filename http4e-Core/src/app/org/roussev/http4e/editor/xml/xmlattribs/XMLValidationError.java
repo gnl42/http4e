@@ -20,44 +20,38 @@ package org.roussev.http4e.editor.xml.xmlattribs;
  */
 public class XMLValidationError {
 
-   private String errorMessage;
-   private int    lineNumber;
-   private int    columnNumber;
+    private String errorMessage;
+    private int lineNumber;
+    private int columnNumber;
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-   public String getErrorMessage(){
-      return errorMessage;
-   }
+    public void setErrorMessage(final String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 
+    public int getLineNumber() {
+        return lineNumber;
+    }
 
-   public void setErrorMessage( String errorMessage){
-      this.errorMessage = errorMessage;
-   }
+    public void setLineNumber(final int lineNumber) {
+        this.lineNumber = lineNumber;
+    }
 
+    public int getColumnNumber() {
+        return columnNumber;
+    }
 
-   public int getLineNumber(){
-      return lineNumber;
-   }
+    public void setColumnNumber(final int columnNumber) {
+        this.columnNumber = columnNumber;
+    }
 
-
-   public void setLineNumber( int lineNumber){
-      this.lineNumber = lineNumber;
-   }
-
-
-   public int getColumnNumber(){
-      return columnNumber;
-   }
-
-
-   public void setColumnNumber( int columnNumber){
-      this.columnNumber = columnNumber;
-   }
-
-
-   public String toString(){
-      StringBuilder buf = new StringBuilder();
-      buf.append("Error on ").append(" line ").append(lineNumber).append(", column ").append(columnNumber).append(": ").append(errorMessage);
-      return buf.toString();
-   }
+    @Override
+    public String toString() {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("Error on ").append(" line ").append(lineNumber).append(", column ").append(columnNumber).append(": ").append(errorMessage);
+        return buf.toString();
+    }
 }

@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Control;
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 interface IControlView {
-   
-   Control getControl();
+
+    Control getControl();
 
 }

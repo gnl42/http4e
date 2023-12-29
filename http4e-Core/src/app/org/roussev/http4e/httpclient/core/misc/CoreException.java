@@ -20,73 +20,69 @@ package org.roussev.http4e.httpclient.core.misc;
  */
 public class CoreException extends RuntimeException {
 
-   private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-   public final static String GENERAL = "general.failure";
-   public final static String FILE_NOT_FOUND = "file.nf";
-   public final static String GIF_ANIMATION_FAILURE = "gif.animation";
-   public final static String IO_EXCEPTION = "io.exception";
-   public final static String UNSUPPORTED_ENCODING = "unsupported.encoding";
-   public final static String HTTP_FAILURE = "http.error";
-   public final static String HTTP_METHOD_NOT_IMPLEMENTED = "method.not.implemented";
-   public final static String INVALID_URI = "invalid.uri";
-   public final static String SSL = "ssl";
+    public final static String GENERAL = "general.failure";
+    public final static String FILE_NOT_FOUND = "file.nf";
+    public final static String GIF_ANIMATION_FAILURE = "gif.animation";
+    public final static String IO_EXCEPTION = "io.exception";
+    public final static String UNSUPPORTED_ENCODING = "unsupported.encoding";
+    public final static String HTTP_FAILURE = "http.error";
+    public final static String HTTP_METHOD_NOT_IMPLEMENTED = "method.not.implemented";
+    public final static String INVALID_URI = "invalid.uri";
+    public final static String SSL = "ssl";
 
-   private String code;
-   private String message;
-   private Throwable cause;
-   
-   
-   public CoreException( String code) {
-      super(code);
-      this.code = code;
-   }
-   
-   public CoreException( String code, String message) {
-      this.code = code;
-      this.message = message;
-   }
-   
-   public CoreException( String code, String message, Throwable cause) {
-      this.code = code;
-      this.message = message;
-      this.cause = cause;
-   }
-   
-   public CoreException( String code, Throwable cause) {
-      this.code = code;
-      this.cause = cause;
-   }
-   
-   
-   public static CoreException getInstance(String code, String message, Exception e){
-      if (e instanceof CoreException) {
-         return (CoreException)e;
-      }
-      return new CoreException(code, message, e);
-   }
-   
-   public static CoreException getInstance(String code, Exception e){
-      if (e instanceof CoreException) {
-         return (CoreException)e;  
-      }
-      return new CoreException(code, e);
-   }   
-   
-   public String getCode(){
-      return code;
-   }
-   
-   public String getMessage() {
-       return "Code[" + getCode() + "] " + message + (message==null?"":" "+message);
-   }
+    private final String code;
+    private String message;
+    private Throwable cause;
 
-   
-   public Throwable getCause(){
-      return (cause!=null)? cause : super.getCause();
-   }
-   
-   
+    public CoreException(final String code) {
+        super(code);
+        this.code = code;
+    }
 
-   
+    public CoreException(final String code, final String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    public CoreException(final String code, final String message, final Throwable cause) {
+        this.code = code;
+        this.message = message;
+        this.cause = cause;
+    }
+
+    public CoreException(final String code, final Throwable cause) {
+        this.code = code;
+        this.cause = cause;
+    }
+
+    public static CoreException getInstance(final String code, final String message, final Exception e) {
+        if (e instanceof CoreException) {
+            return (CoreException) e;
+        }
+        return new CoreException(code, message, e);
+    }
+
+    public static CoreException getInstance(final String code, final Exception e) {
+        if (e instanceof CoreException) {
+            return (CoreException) e;
+        }
+        return new CoreException(code, e);
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    @Override
+    public String getMessage() {
+        return "Code[" + getCode() + "] " + message + (message == null ? "" : " " + message);
+    }
+
+    @Override
+    public Throwable getCause() {
+        return cause != null ? cause : super.getCause();
+    }
+
 }

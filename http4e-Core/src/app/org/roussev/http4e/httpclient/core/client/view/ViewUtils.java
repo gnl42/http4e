@@ -32,39 +32,40 @@ import org.roussev.http4e.httpclient.core.util.ResourceUtils;
  */
 class ViewUtils {
 
-   static ViewForm buildViewForm( final String title, final ItemModel model, final Composite parent){
-      final ViewForm vForm = new ViewForm(parent, SWT.NONE);
+    static ViewForm buildViewForm(final String title, final ItemModel model, final Composite parent) {
+        final ViewForm vForm = new ViewForm(parent, SWT.NONE);
 
-      // -- Label(vForm)
-      final CLabel label = new CLabel(vForm, SWT.NONE);
-      label.setText(CoreConstants.TITLE_SPACE + title + CoreConstants.TITLE_SPACE);
-      label.setAlignment(SWT.LEFT);
-      label.setBackground(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.TITLE_LINE));
-      label.addMouseListener(new MouseAdapter() {
-         public void mouseDoubleClick( MouseEvent e){
-            int eventType = ModelEvent.UNKNOWN;
-            if (CoreConstants.TITLE_HEADERS.equals(title)) {
-               eventType = ModelEvent.HEADERS_RESIZED;
+        // -- Label(vForm)
+        final CLabel label = new CLabel(vForm, SWT.NONE);
+        label.setText(CoreConstants.TITLE_SPACE + title + CoreConstants.TITLE_SPACE);
+        label.setAlignment(SWT.LEFT);
+        label.setBackground(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.TITLE_LINE));
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDoubleClick(final MouseEvent e) {
+                int eventType = ModelEvent.UNKNOWN;
+                if (CoreConstants.TITLE_HEADERS.equals(title)) {
+                    eventType = ModelEvent.HEADERS_RESIZED;
 
-            } else if (CoreConstants.TITLE_PARAMETERS.equals(title)) {
-               eventType = ModelEvent.PARAMS_RESIZED;
+                } else if (CoreConstants.TITLE_PARAMETERS.equals(title)) {
+                    eventType = ModelEvent.PARAMS_RESIZED;
 
-            } else if (CoreConstants.TITLE_BODY.equals(title)) {
-               eventType = ModelEvent.BODY_RESIZED;
+                } else if (CoreConstants.TITLE_BODY.equals(title)) {
+                    eventType = ModelEvent.BODY_RESIZED;
 
-            } else if (CoreConstants.TITLE_REQUEST.equals(title)) {
-               eventType = ModelEvent.REQUEST_RESIZED;
+                } else if (CoreConstants.TITLE_REQUEST.equals(title)) {
+                    eventType = ModelEvent.REQUEST_RESIZED;
 
-            } else if (CoreConstants.TITLE_RESPONSE.equals(title)) {
-               eventType = ModelEvent.RESPONSE_RESIZED;
+                } else if (CoreConstants.TITLE_RESPONSE.equals(title)) {
+                    eventType = ModelEvent.RESPONSE_RESIZED;
+                }
+                model.fireExecute(new ModelEvent(eventType, model));
             }
-            model.fireExecute(new ModelEvent(eventType, model));
-         }
-      });
+        });
 
-      vForm.setTopLeft(label);
+        vForm.setTopLeft(label);
 
-      return vForm;
-   }
-   
+        return vForm;
+    }
+
 }

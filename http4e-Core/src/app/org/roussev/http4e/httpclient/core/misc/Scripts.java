@@ -22,20 +22,18 @@ package org.roussev.http4e.httpclient.core.misc;
  */
 public interface Scripts {
 
-   String POPUP_WINDOW = "function popup_window(url, width, height, options){  " +
-       "var w = (width) ? width : 400;" +
-       "var h = (height) ? height : 400;" +
-       "var t = (screen.height) ? (screen.height - h) / 2 : 0;" +
-       "var l = (screen.width) ? (screen.width - w) / 2 : 0;" +
-       "var opt = (options) ? options : 'toolbar = 1, location = 1, directories = 1, status = 1, menubar = 1, scrollbars = 1, copyhistory = no, resizable = 1';" + 
-       "var popped = window.open(url, 'popupwindow', 'top = '+t+', left = '+l+', width = '+w+', height = '+h+',' + opt);" +
-       "popped.focus();" + 
-       "};";
+    String POPUP_WINDOW = """
+            function popup_window(url, width, height, options){\s\s\
+            var w = (width) ? width : 400;\
+            var h = (height) ? height : 400;\
+            var t = (screen.height) ? (screen.height - h) / 2 : 0;\
+            var l = (screen.width) ? (screen.width - w) / 2 : 0;\
+            var opt = (options) ? options : 'toolbar = 1, location = 1, directories = 1, status = 1, menubar = 1, scrollbars = 1, copyhistory = no, resizable = 1';\
+            var popped = window.open(url, 'popupwindow', 'top = '+t+', left = '+l+', width = '+w+', height = '+h+',' + opt);\
+            popped.focus();\
+            };""";
 
-   String HEADER = "<html><head><title>Exported Call</title><style type='text/css'></style></head><body><code><pre>";
-   String FOOTER = "</pre></code></body></html>";
-
+    String HEADER = "<html><head><title>Exported Call</title><style type='text/css'></style></head><body><code><pre>";
+    String FOOTER = "</pre></code></body></html>";
 
 }
-
-
