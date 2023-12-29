@@ -16,6 +16,7 @@
 package org.roussev.http4e.httpclient.core.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -39,34 +40,34 @@ import org.roussev.http4e.httpclient.core.client.view.assist.AssistConstants;
 import org.roussev.http4e.httpclient.core.misc.CoreException;
 
 /**
- * A class with misc utils. 
- * 
+ * A class with misc utils.
+ *
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class JunkUtils {
- 
+
    private static String XML_LINE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-   
+
    private final static ApacheHttpListener httpListener = new ApacheHttpListener(){
-      public void write( byte[] data){ 
+      public void write( byte[] data){
          // blank
       }
 
       public void close(){
          // blank
-      }                 
+      }
    };
-   
-   
+
+
    private final static ResponseReader responseReader = new ResponseReader() {
 
       public void read(HttpMethod httpMethod) {
 //          HttpUtils.dumpResponse(httpMethod, System.out);
       }
    };
-  
 
-   public static boolean isXwwwFormType(ItemModel model){ 
+
+   public static boolean isXwwwFormType(ItemModel model){
       List<String> headers = model.getHeaderValuesIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE);
       if(headers == null){
          return false;
@@ -74,14 +75,14 @@ public class JunkUtils {
       try {
          String lastContType = (String)headers.get(headers.size()-1);
          return AssistConstants.CONTENT_TYPE_X_WWW_FORM.equalsIgnoreCase(lastContType);
-         
+
       } catch (Exception ignore) {}
-      
+
       return false;
    }
-  
 
-   public static boolean isMultiartFormType(ItemModel model){ 
+
+   public static boolean isMultiartFormType(ItemModel model){
       List<String> headers = model.getHeaderValuesIgnoreCase(AssistConstants.HEADER_CONTENT_TYPE);
       if(headers == null){
          return false;
@@ -89,43 +90,43 @@ public class JunkUtils {
       try {
          String lastContType = (String)headers.get(headers.size()-1);
          return AssistConstants.CONTENT_TYPE_MULTIPART.equalsIgnoreCase(lastContType);
-         
+
       } catch (Exception ignore) {}
-      
+
       return false;
    }
-   
-   
+
+
    public static void hexText(StyledText styledText, String text){
       try {
          styledText.setText( HexUtils.toHex(text.getBytes(CoreConstants.UTF8)));
-      } catch (UnsupportedEncodingException e) {
+      } catch (IOException e) {
          throw CoreException.getInstance(CoreException.UNSUPPORTED_ENCODING, e);
       }
    }
-   
+
    public static String prettyText(String text){
-      
+
          int inx = text.indexOf(CoreConstants.CRLF+CoreConstants.CRLF);
          if(inx > 5){
-            text = text.substring(inx+4, text.length());         
+            text = text.substring(inx+4, text.length());
          }
-         
+
          text = text.trim();
-         
+
          if(text.startsWith("<?xml")){
             return prettyXml(text, null);
-            
+
          } else if(text.startsWith("<")){
             return prettyXml(text, XML_LINE);
-            
+
          } else if(text.startsWith("[") || text.startsWith("{")){
             return jsonText(text, true);
-            
+
          }  else {
             return text;
-         }      
-   } 
+         }
+   }
 
    public static String jsonText( String txt, boolean bypassXML){
 
@@ -136,14 +137,14 @@ public class JunkUtils {
             txt = txt.substring(4, txt.length());
          }
          return toJSON(txt, isGWTok, isGWTerr);
-         
+
       } catch (JSONException e) {
-//         ExceptionHandler.handle(e); 
+//         ExceptionHandler.handle(e);
          if(bypassXML){
             return txt;
          } else {
             String line = txt.startsWith("<?xml")? null:XML_LINE;
-            return prettyXml(txt, line);            
+            return prettyXml(txt, line);
          }
 
       } catch (Exception e) {
@@ -152,22 +153,22 @@ public class JunkUtils {
             return txt;
          } else {
             String line = txt.startsWith("<?xml")? null:XML_LINE;
-            return prettyXml(txt, line);            
+            return prettyXml(txt, line);
          }
       }
 
    }
-   
+
    private static String toJSON(String txt, boolean isGWTok, boolean isGWTerr) throws JSONException{
-      
+
       String res = null;
-      
+
       if(txt.startsWith("[")){
          JSONArray arr = new JSONArray(txt);
-         res = arr.toString(4);         
+         res = arr.toString(4);
       } else {
          JSONObject obj = new JSONObject(txt);
-         res = obj.toString(4);         
+         res = obj.toString(4);
       }
       if (isGWTok) {
          return "//OK" + res;
@@ -177,16 +178,16 @@ public class JunkUtils {
          return res;
       }
    }
-   
+
 
    public static String prettyXml(String xml, String firstLine){
       try {
-         
+
          ByteArrayOutputStream out = new ByteArrayOutputStream();
          Serializer serializer = new Serializer(out);
          serializer.setIndent(2);
          if(firstLine != null){
-            serializer.write(new Builder().build(firstLine + xml, ""));            
+            serializer.write(new Builder().build(firstLine + xml, ""));
          } else {
             serializer.write(new Builder().build(xml, ""));
          }
@@ -194,20 +195,20 @@ public class JunkUtils {
          if(firstLine != null){
             return ret.substring(firstLine.length() , ret.length()).trim();
          } else {
-            return ret;            
+            return ret;
          }
       } catch (Exception e) {
 //         ExceptionHandler.handle(e);
          return xml;
       }
    }
-   
+
    public static String getHdToken(String url, String md){
-      final HttpClient client = new HttpClient();      
+      final HttpClient client = new HttpClient();
       PostMethod post = new PostMethod(url);
       post.setRequestHeader("content-type", "application/x-www-form-urlencoded");
       post.setParameter("v", md);
-      
+
       post.setApacheHttpListener(httpListener);
       try {
          HttpUtils.execute(client, post, responseReader);
@@ -223,5 +224,5 @@ public class JunkUtils {
       }
       return null;
    }
-   
+
 }

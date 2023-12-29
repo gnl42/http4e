@@ -15,6 +15,7 @@
  */
 package org.roussev.http4e.httpclient.core.client.view;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.eclipse.swt.custom.StyledText;
@@ -38,44 +39,44 @@ class HexManager {
 
    HexManager(final StyledText swtText, ToolItem swtItem){
       this.swtText = swtText;
-      this.swtItem = swtItem;      
+      this.swtItem = swtItem;
       this.swtItem.addSelectionListener(new SelectionAdapter() {
          public void widgetSelected( SelectionEvent e){
             if(!isHex){
                asHex();
-               isHex = true; 
-            } else {    
-               asString(); 
-               isHex = false;          
+               isHex = true;
+            } else {
+               asString();
+               isHex = false;
             }
          }
       });
    }
-   
+
    public void rebind(){
-      isHex = false; 
+      isHex = false;
       swtItem.setSelection(false);
-      this.text = swtText.getText(); 
+      this.text = swtText.getText();
    }
-   
+
    private void asHex(){
-      this.text = swtText.getText(); 
+      this.text = swtText.getText();
       try {
          swtText.setText( HexUtils.toHex(text.getBytes(CoreConstants.UTF8)));
-      } catch (UnsupportedEncodingException e) {
+      } catch (IOException e) {
          throw CoreException.getInstance(CoreException.UNSUPPORTED_ENCODING, e);
       }
    }
-   
+
    private void asString(){
       swtText.setText(text);
    }
-   
+
    public void setText(String txt){
       swtText.setText(txt);
       rebind();
    }
-   
+
    public String getText(){
       return swtText.getText();
    }
