@@ -20,7 +20,7 @@ package org.roussev.http4e.httpclient.core;
  */
 public interface CoreMessages {
 
-   String VERSION             = "5.0.12";
+   String VERSION             = "5.0.13";
    String PLUGIN_NAME         = "HTTP4e Client";
    String PLUGIN_NAME_SHORT   = "http4e";
    String PLUGIN_ABOUT        = "Version: " + VERSION;

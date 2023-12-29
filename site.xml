@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.roussev.http4e.feature_5.0.12.jar" id="org.roussev.http4e.feature" version="5.0.12">
+   <feature id="org.roussev.http4e.feature" version="5.0.13.qualifier">
       <category name="Eclipse HttpClient (HTTP4e)"/>
    </feature>
    <category-def name="Eclipse HttpClient (HTTP4e)" label="Eclipse HttpClient (HTTP4e)">
@@ -16,13 +16,13 @@ http://nextinterfaces.com/http4e
 
 
 ### Key Features
-* Multiple Tabs 
+* Multiple Tabs
 * Auto Suggest (CTRL + SPACE)
 * Response view format into Raw, Pretty, JSON, HEX, Browser DOM
 * SSL/HTTPS and Unicode support
 * Basic/Digest authentication
 * Proxy support
-* Parameterization of Headers/HTTP-Params 
+* Parameterization of Headers/HTTP-Params
 * HTTP code export to Java, JavaScript, Prototype, jQuery, Flex, ActionScript, C#, VisualBasic, Ruby, Python, PHP, Cocoa and JMeter
 * One click HTML Report generation
 * Multipart Form support

@@ -15,6 +15,8 @@
  */
 package org.roussev.http4e.editor.xml;
 
+import java.util.Objects;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -25,11 +27,10 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.IPresentationDamager;
 import org.eclipse.jface.text.presentation.IPresentationRepairer;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.custom.StyleRange;
 
 /**
- *  
+ *
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class NonRuleBasedDamagerRepairer	implements IPresentationDamager, IPresentationRepairer {
@@ -38,12 +39,12 @@ public class NonRuleBasedDamagerRepairer	implements IPresentationDamager, IPrese
 	protected IDocument fDocument;
 	/** The default text attribute if non is returned as data by the current token */
 	protected TextAttribute fDefaultTextAttribute;
-	
+
 	/**
 	 * Constructor for NonRuleBasedDamagerRepairer.
 	 */
 	public NonRuleBasedDamagerRepairer(TextAttribute defaultTextAttribute) {
-		Assert.isNotNull(defaultTextAttribute);
+		Objects.requireNonNull(defaultTextAttribute);
 
 		fDefaultTextAttribute = defaultTextAttribute;
 	}

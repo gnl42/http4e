@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse HttpClient (HTTP4e)
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: org.roussev.http4e.ui;singleton:=true
-Bundle-Version: 5.0.12
+Bundle-Version: 5.0.13.qualifier
 Bundle-Activator: org.roussev.http4e.httpclient.ui.HdPlugin
 Bundle-Vendor: NEXTinterfaces.com
 Bundle-Localization: plugin
