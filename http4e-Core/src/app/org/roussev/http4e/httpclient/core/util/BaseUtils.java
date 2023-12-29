@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
@@ -36,7 +37,6 @@ import org.roussev.http4e.httpclient.core.client.model.FolderModel;
 import org.roussev.http4e.httpclient.core.client.model.ItemModel;
 import org.roussev.http4e.httpclient.core.client.view.Utils;
 import org.roussev.http4e.httpclient.core.misc.CoreException;
-import org.roussev.http4e.java6.Properties6;
 import org.roussev.http4e.jmeter.ExportSessionsTransformer;
 import org.roussev.http4e.jmeter.ExportTemplateTransformer;
 import org.roussev.http4e.jmeter.HttpToJmxTransformer;
@@ -141,8 +141,8 @@ public class BaseUtils {
         return str != null ? str : val;
     }
 
-    public static Properties6 loadProperties(final String propResource) {
-        Properties6 properties = null;
+    public static Properties loadProperties(final String propResource) {
+        Properties properties = null;
         if (propResource == null) {
             throw new IllegalArgumentException("propertiesResource not provided !");
         }
@@ -160,7 +160,7 @@ public class BaseUtils {
                 if (is == null || is.available() < 1) {
                     throw new RuntimeException("Properties '" + propResource + "' not initilized. Skipping..");
                 }
-                properties = new Properties6();
+                properties = new Properties();
                 final InputStreamReader inR = new InputStreamReader(is, "UTF8");
                 final BufferedReader bufR = new BufferedReader(inR);
                 properties.load(bufR);

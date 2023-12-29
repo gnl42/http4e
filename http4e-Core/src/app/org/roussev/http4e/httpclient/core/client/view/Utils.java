@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ViewForm;
@@ -25,7 +26,6 @@ import org.roussev.http4e.httpclient.core.client.model.ProxyItem;
 import org.roussev.http4e.httpclient.core.misc.CoreException;
 import org.roussev.http4e.httpclient.core.util.HttpBean;
 import org.roussev.http4e.httpclient.core.util.ParseUtils;
-import org.roussev.http4e.java6.Properties6;
 
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
@@ -124,7 +124,7 @@ public class Utils {
     public static void textToModelHeaders(final String text, final ItemModel iModel) {
         iModel.clearHeaders();
         if (text != null && !text.trim().equals("")) {
-            final Properties6 p = new Properties6();
+            final Properties p = new Properties();
             try {
                 final InputStreamReader inR = new InputStreamReader(new ByteArrayInputStream(text.getBytes("UTF8")), "UTF8");
                 final BufferedReader buf = new BufferedReader(inR);
@@ -146,7 +146,7 @@ public class Utils {
     public static void textToModelParams(final String text, final ItemModel iModel) {
         iModel.clearParameters();
         if (!CoreConstants.EMPTY_TEXT.equals(text)) {
-            final Properties6 p = new Properties6();
+            final Properties p = new Properties();
             try {
                 final InputStreamReader inR = new InputStreamReader(new ByteArrayInputStream(text.getBytes("UTF8")), "UTF8");
                 final BufferedReader buf = new BufferedReader(inR);

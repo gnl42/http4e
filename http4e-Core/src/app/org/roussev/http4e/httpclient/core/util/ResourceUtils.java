@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
@@ -37,11 +38,10 @@ import org.roussev.http4e.httpclient.core.ExceptionHandler;
 import org.roussev.http4e.httpclient.core.client.view.Utils;
 import org.roussev.http4e.httpclient.core.misc.ResourceCache;
 import org.roussev.http4e.httpclient.core.misc.Styles.FontStyle;
-import org.roussev.http4e.java6.Properties6;
 
 /**
  * A resource(Images, Fonts, etc) utilities class.
- * 
+ *
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class ResourceUtils {
@@ -139,8 +139,8 @@ public class ResourceUtils {
         }
     }
 
-    public static Properties6 getBundleProperties(final String pluginID, final String uri) {
-        final Properties6 properties = new Properties6();
+    public static Properties getBundleProperties(final String pluginID, final String uri) {
+        final Properties properties = new Properties();
         try {
             final InputStreamReader inR = new InputStreamReader(getBundleResourceStream(pluginID, uri), "UTF8");
             final BufferedReader bufR = new BufferedReader(inR);
