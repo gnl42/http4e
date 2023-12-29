@@ -43,7 +43,7 @@ import org.roussev.http4e.jmeter.HttpToJmxTransformer;
 import org.roussev.http4e.jmeter.LiveHttpHeadersParser;
 
 public class BaseUtils {
-   
+
    public static String getJavaVersion(){
       String ver = null;
       try {
@@ -64,7 +64,7 @@ public class BaseUtils {
       }
       return ver;
    }
-   
+
    public static void writeToPrefs( String prefName, byte[] prefData){
       try {
          Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
@@ -301,7 +301,7 @@ public class BaseUtils {
       bean.filterCSharpSpecialHeaders();
       new ExportTemplateTransformer("/resources/vb.vm", bean).doWrite(writer);
    }
-   
+
    public static void writeFlex( ItemModel iModel, Writer writer) throws FileNotFoundException{
       HttpBean bean = Utils.modelToHttpBean(iModel);
       bean.filterJava();
@@ -371,13 +371,13 @@ public class BaseUtils {
          } else {
             bean.setContentType("");
          }
-         
+
          httpBeans.add(bean);
          inx++;
       }
 
       ExportSessionsTransformer t = new ExportSessionsTransformer("/resources/http4e-sessions.vm", httpBeans);
-      t.doWrite(writer);      
+      t.doWrite(writer);
    }
 
 
@@ -395,7 +395,7 @@ public class BaseUtils {
       bean.filterXml();
       new ExportTemplateTransformer("/resources/http4e-item.vm", bean).doWrite(writer);
    }
-   
+
    public static void writeHttp4eSessions(String file, FolderModel folderModel){
 
       try {
@@ -413,8 +413,8 @@ public class BaseUtils {
 
          FileWriter fstream = new FileWriter(exportedFile.getParent() + File.separator + "index-sessions.txt");
          BufferedWriter outTxt = new BufferedWriter(fstream);
-         
-         
+
+
          int inx = 0;
          for (ItemModel im : folderModel.getItemModels()) {
             try {
@@ -444,18 +444,18 @@ public class BaseUtils {
       } catch (IOException e) {
          ExceptionHandler.handle(e);
       }
-      
+
 //      try {
 //         FileOutputStream fos = new FileOutputStream(file);
 //         ZipOutputStream zos = new ZipOutputStream(fos);
 //         ZipEntry ze= new ZipEntry(zipFile.getParent() + File.separator + "index.html");
 //         zos.putNextEntry(ze);
 //         zos.closeEntry();
-//         
+//
 //         ze= new ZipEntry(rawDir + File.separator + "http4e.ser");
 //         zos.putNextEntry(ze);
 //         zos.closeEntry();
-//         
+//
 //         inx = 0;
 //         for (ItemModel im : folderModel.getItemModels()) {
 //            ze= new ZipEntry(zipFile.getParent() + File.separator + "raw" + File.separator + "00" + inx + "_http4e.html");
@@ -471,15 +471,15 @@ public class BaseUtils {
 //         e.printStackTrace();
 //       }
    }
-   
-   
+
+
    public static List<ItemModel> importHttp4eSessions(String file, FolderModel folderModel){
       try {
          byte[] data = Base64.decodeBase64(getContents(new File(file)).getBytes("UTF8"));
          List<ItemModel> items = new FolderModel(null, null).deserialize(data);
-         
+
          return items;
-         
+
       } catch (Exception e) {
          return new ArrayList<ItemModel>();
       }
@@ -487,7 +487,7 @@ public class BaseUtils {
 
    public static List<ItemModel> importLiveHttpHeaders(String file, FolderModel folderModel){
       try {
-         
+
          LiveHttpHeadersParser parser = new LiveHttpHeadersParser();
          parser.parse(file);
          List<ItemModel> items = new ArrayList<ItemModel>();
@@ -495,14 +495,14 @@ public class BaseUtils {
          for (HttpBean b : beans) {
             ItemModel iModel = toItemModel(folderModel, b);
             items.add(iModel);
-         }         
+         }
          return items;
-         
+
       } catch (Exception e) {
          return new ArrayList<ItemModel>();
       }
    }
-   
+
    public static ItemModel toItemModel(FolderModel folderModel, HttpBean b){
       ItemModel iModel = new ItemModel(folderModel);
       Map<String, String> headers = b.getHeaders();
@@ -513,15 +513,15 @@ public class BaseUtils {
       iModel.setHttpMethod(b.getMethod());
       iModel.setBody(b.getBody());
       iModel.setUrl(b.getUrl());
-      
+
 //      lastBean.setProtocol("https");
 //      doMethod(methodBuff.toString(), lastBean);
 //      doHeaders(headBuff.toString(), lastBean);
 //      doBody(bodyBuff.toString(), lastBean);
-      
+
       return iModel;
    }
-   
+
    static public String getContents( File aFile){
       // ...checks on aFile are elided
       StringBuilder contents = new StringBuilder();
@@ -550,7 +550,7 @@ public class BaseUtils {
 
       return contents.toString();
    }
-   
+
    public static void main( String[] args){
 
 //    FolderModel folderModel = new FolderModel(null, null);
@@ -560,10 +560,10 @@ public class BaseUtils {
 //    ItemModel iModel = new ItemModel(folderModel, item);
 //    iModel.setBody("aasdsad xd fsdfgsdfg sd sdf sdfg ");
 //    iModel.setHttpMethod("POST");
-//    iModel.addHeader("Content-type", "text/xml");      
+//    iModel.addHeader("Content-type", "text/xml");
 //    folderModel.putItem(iModel);
 //    iModel.setUrl("http://localhost:8080/helloworld/test/ad/xcbv?aa=1");
-   
+
 //    String file = "C:/Users/Mitko/Desktop/tmp/http4e-sesions.zip";
    }
 
