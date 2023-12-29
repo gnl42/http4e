@@ -23,8 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.util.Base64;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.CircularRedirectException;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
@@ -334,7 +334,7 @@ public class HttpPerformer {
 
         if (authItem.isBasic()) {
             try {
-                final byte[] base64Str = Base64.encodeBase64((user + ":" + pass).getBytes("UTF8"));
+                final byte[] base64Str = Base64.getEncoder().encode((user + ":" + pass).getBytes("UTF8"));
                 httpmethod.setRequestHeader("Authorization", "Basic " + new String(base64Str, "UTF8"));
             } catch (final UnsupportedEncodingException e) {
                 ExceptionHandler.handle(e);

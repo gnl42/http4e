@@ -21,13 +21,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.commons.codec.binary.Base64;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
 import org.roussev.http4e.httpclient.core.CoreConstants;
@@ -70,7 +70,7 @@ public class BaseUtils {
             final Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
             final Preferences prefs = pl.getPluginPreferences();
 
-            final String str64 = new String(Base64.encodeBase64(prefData), "UTF8");
+            final String str64 = new String(Base64.getEncoder().encode(prefData), "UTF8");
             prefs.setValue(prefName, str64);
             pl.savePluginPreferences();
 
@@ -84,7 +84,7 @@ public class BaseUtils {
             final Plugin pl = (Plugin) CoreContext.getContext().getObject("p");
             final Preferences prefs = pl.getPluginPreferences();
             final String str64 = prefs.getString(prefName);
-            final byte[] data = Base64.decodeBase64(str64.getBytes("UTF8"));
+            final byte[] data = Base64.getDecoder().decode(str64.getBytes("UTF8"));
             return data;
 
         } catch (final Exception ignore) {
@@ -412,7 +412,7 @@ public class BaseUtils {
                 }
             }
             final byte[] data = folderModel.serialize();
-            final String str64 = new String(Base64.encodeBase64(data), "UTF8");
+            final String str64 = new String(Base64.getEncoder().encode(data), "UTF8");
             try (BufferedWriter out = new BufferedWriter(new FileWriter(exportedFile))) {
                 out.write(str64);
             }
@@ -450,7 +450,7 @@ public class BaseUtils {
 
     public static List<ItemModel> importHttp4eSessions(final String file, final FolderModel folderModel) {
         try {
-            final byte[] data = Base64.decodeBase64(getContents(new File(file)).getBytes("UTF8"));
+            final byte[] data = Base64.getDecoder().decode(getContents(new File(file)).getBytes("UTF8"));
             final List<ItemModel> items = new FolderModel(null, null).deserialize(data);
 
             return items;

@@ -19,6 +19,7 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -27,8 +28,6 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * Cryptography utilities including Encription/Decryption, Computing MAC (message authentication
@@ -196,7 +195,7 @@ public class CryptUtils {
 
         String res = null;
         try {
-            res = new String(Base64.encodeBase64(data), "UTF8"); // new sun.misc.BASE64Encoder().encode(data);
+            res = new String(Base64.getEncoder().encode(data), "UTF8"); // new sun.misc.BASE64Encoder().encode(data);
             res = URLEncoder.encode(res, "UTF8");
         } catch (final Exception e) {
             // System.err.println("Failed to encode '" + data + "' using charset '"
@@ -213,7 +212,7 @@ public class CryptUtils {
         byte[] digestBytes;
         try {
             data = URLDecoder.decode(data, "UTF8");
-            digestBytes = Base64.decodeBase64(data.getBytes("UTF8"));// new
+            digestBytes = Base64.getDecoder().decode(data.getBytes("UTF8"));// new
             // sun.misc.BASE64Decoder().decodeBuffer(data);
         } catch (final Exception e) {
             // System.err.println("Failed to decode '" + data + "' using charset '"

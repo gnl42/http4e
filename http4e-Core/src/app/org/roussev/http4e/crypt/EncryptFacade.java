@@ -3,17 +3,16 @@ package org.roussev.http4e.crypt;
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import org.apache.commons.codec.binary.Base64;
-
 /**
  * A facade class hiding symmetric and asymmetric encryption algorithms.
- * 
+ *
  * @author Atanas Roussev
  */
 
@@ -46,7 +45,7 @@ public class EncryptFacade {
     /**
      * Constructor used to create this object. Responsible for setting and initializing this object's
      * encrypter and decrypter Chipher instances given a Secret Key and algorithm.
-     * 
+     *
      * @param key       Secret Key used to initialize both the encrypter and decrypter instances.
      * @param algorithm Which algorithm to use for creating the encrypter and decrypter instances.
      */
@@ -58,7 +57,7 @@ public class EncryptFacade {
     /**
      * Constructor used to create this object. Responsible for setting and initializing this object's
      * encrypter and decrypter Chipher instances given a Secret Key and AlgorithmParameterSpec.
-     * 
+     *
      * @param key           Secret Key used to initialize both the encrypter and decrypter instances.
      * @param parameterSpec AlgorithmParameterSpec.
      */
@@ -71,7 +70,7 @@ public class EncryptFacade {
     /**
      * Constructor used to create this object. Responsible for setting and initializing this object's
      * encrypter and decrypter Chipher instances given a Pass Phrase and algorithm.
-     * 
+     *
      * @param passPhrase Pass Phrase used to initialize both the encrypter and decrypter instances.
      */
     public EncryptFacade(final String passPhrase) {
@@ -194,7 +193,7 @@ public class EncryptFacade {
 
     /**
      * Takes a encrypted String as an argument, decrypts and returns the decrypted String.
-     * 
+     *
      * @param str Encrypted String to be decrypted
      * @return <code>String</code> Decrypted version of the provided String
      */
@@ -213,7 +212,7 @@ public class EncryptFacade {
 
     /**
      * Takes a single String as an argument and returns an Encrypted version of that String.
-     * 
+     *
      * @param str String to be encrypted
      * @return <code>String</code> Encrypted version of the provided String
      */
@@ -226,7 +225,7 @@ public class EncryptFacade {
             final byte[] enc = getEncryptCypher().doFinal(utf8);
 
             // Encode bytes to base64 to get a string
-            return new String(Base64.encodeBase64(enc));// new sun.misc.BASE64Encoder().encode(enc);
+            return new String(Base64.getEncoder().encode(enc));// new sun.misc.BASE64Encoder().encode(enc);
 
         } catch (final Exception e) {
             // System.err.println("Failed to encrypt: '" + str + "' using
@@ -237,7 +236,7 @@ public class EncryptFacade {
 
     /**
      * Takes a encrypted String as an argument, decrypts and returns the decrypted String.
-     * 
+     *
      * @param str Encrypted String to be decrypted
      * @return <code>String</code> Decrypted version of the provided String
      */
@@ -246,7 +245,7 @@ public class EncryptFacade {
         try {
 
             // Decode base64 to get bytes
-            final byte[] dec = Base64.decodeBase64(str.getBytes()); // new sun.misc.BASE64Decoder().decodeBuffer(str);
+            final byte[] dec = Base64.getDecoder().decode(str.getBytes()); // new sun.misc.BASE64Decoder().decodeBuffer(str);
 
             // Decrypt
             final byte[] utf8 = getDecryptCypher().doFinal(dec);

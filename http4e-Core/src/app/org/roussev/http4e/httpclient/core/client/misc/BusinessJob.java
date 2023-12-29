@@ -131,6 +131,7 @@ public class BusinessJob {
             doExecute(httpMethod, model.getCurrentProxy(), model.getAvailableKeystore(), composite);
 
         } catch (final Throwable e) {
+            e.printStackTrace();
             abort(true);
 
         } finally {
