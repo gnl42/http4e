@@ -16,3 +16,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui.editors,
  org.roussev.http4e.core
+Import-Package: org.apache.commons.lang3.text

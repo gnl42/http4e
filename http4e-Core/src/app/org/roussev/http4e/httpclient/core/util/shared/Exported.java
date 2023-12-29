@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.roussev.http4e.httpclient.core.util.BaseUtils;
 
-/** 
+/**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
 public class Exported {
@@ -19,12 +19,12 @@ public class Exported {
    public Exported( java.io.InputStream srcStream, String method, String url, String body, Map headers, Map parameters) {
       try {
 
-         boolean headersOnly = "GET".equalsIgnoreCase(method) 
-         || "HEAD".equalsIgnoreCase(method) 
-         || "OPTIONS".equalsIgnoreCase(method) 
-         || "TRACE".equalsIgnoreCase(method) 
+         boolean headersOnly = "GET".equalsIgnoreCase(method)
+         || "HEAD".equalsIgnoreCase(method)
+         || "OPTIONS".equalsIgnoreCase(method)
+         || "TRACE".equalsIgnoreCase(method)
          || "DELETE".equalsIgnoreCase(method);
-         
+
          byte[] data = new byte[srcStream.available()];
          srcStream.read(data);
          buff = new StringBuilder(new String(data));
@@ -38,7 +38,7 @@ public class Exported {
          if (!BaseUtils.isEmpty(url)) {
             buffMain.append("\n        bean.url=\"" + url + "\";");
          }
-         
+
          if (headers != null && headers.size() > 0) {
             for (Iterator iter = headers.keySet().iterator(); iter.hasNext();) {
                String key = (String) iter.next();
@@ -52,13 +52,13 @@ public class Exported {
                   buffMain.append("\n        bean.addHeader(\"" + StringEscapeUtils.escapeJava(key) + "\", \"\");");
                }
             }
-         }  
-         
+         }
+
          if ( !headersOnly && !BaseUtils.isEmpty(body)) {
             buffMain.append("\n        bean.body=\"" + StringEscapeUtils.escapeJava(body) + "\";");
          }
-         
-         
+
+
          buffMain.append("\n        HttpRunner httpRunner = new HttpRunner();");
          buffMain.append("\n        HttpRunner.ResponseReader responseReader = new HttpRunner.ResponseReader() {");
          buffMain.append("\n            public void read(HttpMethod httpMethod) {");
@@ -77,9 +77,9 @@ public class Exported {
 
          int inx = buff.indexOf(MAINCLASS_POINTER);
          buff.replace(inx, inx + MAINCLASS_POINTER.length(), "");
-         
+
          buff.insert(inx, buffMain);
-         
+
       } catch (Exception e) {
          e.printStackTrace();
       }

@@ -3,7 +3,7 @@ package org.roussev.http4e.httpclient.core.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.roussev.http4e.httpclient.core.ExceptionHandler;
 
 public class HttpBean {
@@ -19,7 +19,7 @@ public class HttpBean {
    private Map<String, String> headers = new HashMap<String, String>();
    private Map<String, String> params  = new HashMap<String, String>();
    private Map<String, String> csharpSpecialHeaders = new HashMap<String, String>();
-   
+
 
    private String              request;
    private String              response;
@@ -93,11 +93,11 @@ public class HttpBean {
    public void setMethod( String method){
       this.method = method;
    }
-   
+
    public String getContentType(){
       return contentType;
    }
-   
+
    public void setContentType( String contentType){
       this.contentType = contentType;
    }
@@ -106,48 +106,48 @@ public class HttpBean {
       return port;
    }
 
-   
+
    public int getId(){
       return id;
    }
 
 
-   public String getBodyShort(){      
+   public String getBodyShort(){
       if(body == null || body.length() < 15){
          return body;
       }
-      
+
       String res = "";
       try {
          res = body.substring(0, 15) + "..";
       } catch (Exception e) {
          // ignore
       }
-      
+
       return res;
    }
 
 
-   
-   
+
+
    public String getRequest(){
       return request;
    }
 
 
-   
+
    public void setRequest( String request){
       this.request = request;
    }
 
 
-   
+
    public String getResponse(){
       return response;
    }
 
 
-   
+
    public void setResponse( String response){
       this.response = response;
    }
@@ -165,7 +165,7 @@ public class HttpBean {
          return port;
       }
    }
-   
+
    public boolean isSecure(){
       return "https".equalsIgnoreCase(protocol);
    }
@@ -175,9 +175,9 @@ public class HttpBean {
       if (port != null && port.trim().length() > 0) {
          aPort = ":" + port;
       }
-      
-      String aURI = (path == null) ? "" : path; 
-      
+
+      String aURI = (path == null) ? "" : path;
+
       return protocol + "://" + domain + aPort + aURI;
    }
 
@@ -186,7 +186,7 @@ public class HttpBean {
       if (port != null && port.trim().length() > 0) {
          aPort = ":" + port;
       }
-      
+
       return protocol + "://" + domain + aPort;
    }
 
@@ -199,9 +199,9 @@ public class HttpBean {
       if (port != null && port.trim().length() > 0) {
          aPort = ":" + port;
       }
-      
-      String aURI = (path == null) ? "" : path; 
-      
+
+      String aURI = (path == null) ? "" : path;
+
       String uriNoQuery = "";
       try {
          String[] strip = aURI.split("\\?");
@@ -209,14 +209,14 @@ public class HttpBean {
       } catch (Exception e) {
          ExceptionHandler.handle(e);
       }
-      
+
       return protocol + "://" + domain + aPort + uriNoQuery;
    }
 
    public String getQueryTerm(){
-     
-      String aURI = (path == null) ? "" : path; 
-      
+
+      String aURI = (path == null) ? "" : path;
+
       String queryTerm = "";
       try {
          String[] strip = aURI.split("\\?");
@@ -226,7 +226,7 @@ public class HttpBean {
       } catch (Exception e) {
          ExceptionHandler.handle(e);
       }
-      
+
       return queryTerm;
    }
 
@@ -243,7 +243,7 @@ public class HttpBean {
          buff.append("&");
       }
       //String result = URLEncoder.encode(buff.toString());
-      
+
       return buff.toString()/*result*/;
    }
 
@@ -254,108 +254,108 @@ public class HttpBean {
       }
       return domain;
    }
-   
+
    public String getJquery(){
       return "$.ajax";
    }
-   
+
    public String getPhpMethod(){
       String res = null;
-      
+
       if("GET".equalsIgnoreCase(method)){
          res = "$responseCode = $client->get( $url, $headers)";
-         
+
       } else if("POST".equalsIgnoreCase(method)){
          res = "$responseCode = $client->post( $url, $body, $headers)";
-         
+
       } else if("PUT".equalsIgnoreCase(method)){
          res = "$responseCode = $client->put( $url, $body, $headers)";
-         
+
       } else if("DELETE".equalsIgnoreCase(method)){
          res = "$responseCode = $client->delete( $url, $headers)";
-         
+
       } else if("HEAD".equalsIgnoreCase(method)){
          res = "$responseCode = $client->head( $url, $headers)";
 
       } else if("OPTIONS".equalsIgnoreCase(method)){
          res = "//OPTIONS is not supported by HTTP_Client";
-         
+
       } else if("TRACE".equalsIgnoreCase(method)){
          res = "//TRACE is not supported by HTTP_Client";
-         
+
       } else {
          res = "// \"" + method + "\" Method Not Allowed.";
       }
-      
+
       return res;
    }
-   
+
    public String getRubyMethod(){
       String res = null;
-      
+
       if("GET".equalsIgnoreCase(method)){
          res = "puts client.get(headers)";
-         
+
       } else if("POST".equalsIgnoreCase(method)){
          res = "puts client.post(body, headers)";
-         
+
       } else if("PUT".equalsIgnoreCase(method)){
          res = "puts client.put(body, headers)";
-         
+
       } else if("DELETE".equalsIgnoreCase(method)){
          res = "puts client.delete(headers)";
-         
+
       } else if("HEAD".equalsIgnoreCase(method)){
          res = "#//HEAD is not supported by Rest-Client";
 
       } else if("OPTIONS".equalsIgnoreCase(method)){
          res = "#//OPTIONS is not supported by Rest-Client";
-         
+
       } else if("TRACE".equalsIgnoreCase(method)){
          res = "#//TRACE is not supported by Rest-Client";
-         
+
       } else {
          res = "// \"" + method + "\" Method Not Allowed.";
       }
-      
+
       return res;
    }
-   
+
    public String getActionScriptService(){
-      
+
       String res = null;
-      
+
       if("GET".equalsIgnoreCase(method)){
          res = "http.doGet(getURI(), getParams());";
-         
+
       } else if("POST".equalsIgnoreCase(method)){
          res = "http.doPost(getURI(), getBody(), getContentType(), getParams());";
-         
+
       } else if("PUT".equalsIgnoreCase(method)){
          res = "http.doPut(getURI(), getBody(), getContentType(), getParams());";
-         
+
       } else if("DELETE".equalsIgnoreCase(method)){
          res = "http.doDelete(getURI(), getParams());";
-         
+
       } else if("HEAD".equalsIgnoreCase(method)){
          res = "http.doHead(getURI(), getParams());";
-         
+
       } else if("OPTIONS".equalsIgnoreCase(method)){
          res = "http.doOptions(getURI(), getBody(), getParams());";
-         
+
       } else {
          res = "// \"" + method + "\" Method Not Allowed.";
       }
-      
+
       return res;
    }
-   
+
    public void filterXml(){
       setBody(StringEscapeUtils.escapeXml(body));
       setDomain(StringEscapeUtils.escapeXml(domain));
       setPath(StringEscapeUtils.escapeXml(path));
       setPort(StringEscapeUtils.escapeXml(port));
-      
+
       for (String key : getHeaders().keySet()) {
          String val = getHeaders().get(key);
          getHeaders().put(key, StringEscapeUtils.escapeXml(val));
@@ -375,7 +375,7 @@ public class HttpBean {
       setDomain(StringEscapeUtils.escapeJava(domain));
       setPath(StringEscapeUtils.escapeJava(path));
       setPort(StringEscapeUtils.escapeJava(port));
-      
+
       for (String key : getHeaders().keySet()) {
          String val = getHeaders().get(key);
          getHeaders().put(key, StringEscapeUtils.escapeJava(val));
@@ -388,25 +388,25 @@ public class HttpBean {
    }
 
    public void filterJavaSrcipt(){
-      setBody(StringEscapeUtils.escapeJavaScript(body));
-      setDomain(StringEscapeUtils.escapeJavaScript(domain));
-      setPath(StringEscapeUtils.escapeJavaScript(path));
-      setPort(StringEscapeUtils.escapeJavaScript(port));
-      
+      setBody(StringEscapeUtils.escapeEcmaScript(body));
+      setDomain(StringEscapeUtils.escapeEcmaScript(domain));
+      setPath(StringEscapeUtils.escapeEcmaScript(path));
+      setPort(StringEscapeUtils.escapeEcmaScript(port));
+
       for (String key : getHeaders().keySet()) {
          String val = getHeaders().get(key);
-         getHeaders().put(key, StringEscapeUtils.escapeJavaScript(val));
+         getHeaders().put(key, StringEscapeUtils.escapeEcmaScript(val));
       }
 
       for (String key : getParams().keySet()) {
          String val = getParams().get(key);
-         getParams().put(key, StringEscapeUtils.escapeJavaScript(val));
+         getParams().put(key, StringEscapeUtils.escapeEcmaScript(val));
       }
    }
-   
+
    /**
     * Returns the list of special headers being used at current HTTP call
-    */   
+    */
    public void filterCSharpSpecialHeaders(){
       Map<String, String> reservedHeaders = new HashMap<String, String>();
       reservedHeaders.put("Accept", "Accept");
@@ -421,7 +421,7 @@ public class HttpBean {
       reservedHeaders.put("Referer", "Referer");
       reservedHeaders.put("Transfer-Encoding", "TransferEncoding");
       reservedHeaders.put("User-Agent", "UserAgent");
-      
+
       Map<String, String> removedHeaders = new HashMap<String, String>();
       for (String key : reservedHeaders.keySet()) {
          if(headers.containsKey(key)){
@@ -431,12 +431,12 @@ public class HttpBean {
       }
       csharpSpecialHeaders.putAll(removedHeaders);
    }
-   
+
 
    public Map<String, String> getCSharpSpecialHeaders(){
-      return csharpSpecialHeaders;      
+      return csharpSpecialHeaders;
    }
-   
+
    @Override
    public String toString(){
       return "HttpBean{" + " \nmethod=" + method + ", \nprotocol=" + protocol + ", \ndomain=" + domain + ", \nport=" + port + ", \npath=" + path + ", \nbody=" + body + ", \nheaders=" + headers + "}";

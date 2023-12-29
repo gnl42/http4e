@@ -17,7 +17,7 @@ package org.roussev.http4e.httpclient.core.client.model;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.text.StrTokenizer;
+import org.apache.commons.lang3.text.StrTokenizer;
 
 /**
  * <p>

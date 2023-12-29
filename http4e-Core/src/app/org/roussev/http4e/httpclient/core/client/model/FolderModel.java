@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.text.StrTokenizer;
+import org.apache.commons.lang3.text.StrTokenizer;
 import org.roussev.http4e.httpclient.core.CoreConstants;
 import org.roussev.http4e.httpclient.core.CoreContext;
 import org.roussev.http4e.httpclient.core.CoreObjects;
