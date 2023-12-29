@@ -29,7 +29,8 @@ Import-Package: org.apache.commons.codec;version="1.3.0",
  org.apache.velocity,
  org.apache.velocity.app;version="1.6.3",
  org.apache.velocity.context;version="1.6.3",
- org.apache.velocity.exception;version="1.6.3"
+ org.apache.velocity.exception;version="1.6.3",
+ org.json
 Bundle-ClassPath: .,
  target/lib/commons-codec.jar,
  target/lib/commons-httpclient.jar

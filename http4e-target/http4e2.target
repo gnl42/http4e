@@ -47,6 +47,11 @@
 					<artifactId>velocity</artifactId>
 					<version>1.6.3</version>
 				</dependency>
+				<dependency>
+					<groupId>org.json</groupId>
+					<artifactId>json</artifactId>
+					<version>20231013</version>
+				</dependency>
 			</dependencies>
 			<instructions><![CDATA[
 Bundle-Name:           Bundle derived from maven artifact ${mvnGroupId}:${mvnArtifactId}:${mvnVersion}
