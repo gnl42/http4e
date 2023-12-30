@@ -69,20 +69,22 @@ public class ExportMenuAction extends Action implements IMenuCreator {
         addActionToMenu(menu, getHTTP4eAction());
         addActionToMenu(menu, getJMeterAction());
         addActionToMenu(menu, getPrintAction());
-        new MenuItem(menu, SWT.SEPARATOR);
-        addActionToMenu(menu, getEmptyAction());
-        addActionToMenu(menu, getJavaHttp4Action());
-        addActionToMenu(menu, getJavaHttp3Action());
-        addActionToMenu(menu, getJSAction());
-        addActionToMenu(menu, getPrototypeAction());
-        addActionToMenu(menu, getJqueryAction());
-        addActionToMenu(menu, getFlexAction());
-        addActionToMenu(menu, getCsAction());
-        addActionToMenu(menu, getVbAction());
-        addActionToMenu(menu, getRubyAction());
-        addActionToMenu(menu, getPythonAction());
-        addActionToMenu(menu, getPHPAction());
-        addActionToMenu(menu, getOCAction());
+        if (false) {
+            new MenuItem(menu, SWT.SEPARATOR);
+            addActionToMenu(menu, getEmptyAction());
+            addActionToMenu(menu, getJavaHttp4Action());
+            addActionToMenu(menu, getJavaHttp3Action());
+            addActionToMenu(menu, getJSAction());
+            addActionToMenu(menu, getPrototypeAction());
+            addActionToMenu(menu, getJqueryAction());
+            addActionToMenu(menu, getFlexAction());
+            addActionToMenu(menu, getCsAction());
+            addActionToMenu(menu, getVbAction());
+            addActionToMenu(menu, getRubyAction());
+            addActionToMenu(menu, getPythonAction());
+            addActionToMenu(menu, getPHPAction());
+            addActionToMenu(menu, getOCAction());
+        }
         return menu;
     }
 
