@@ -2,8 +2,7 @@
 <feature
       id="me.glindholm.plugin.http4e2.feature"
       label="Eclipse HTTP Client (HTTP4e2)"
-      version="1.0.0.qualifier"
-      provider-name="nextinterfaces.com">
+      version="1.0.0.qualifier">
 
    <description url="http://www.nextinterfaces.com/http4e/">
       HTTP4e2 is an Eclipse plugin that helps you quickly build HTTP packets enabling you to efficiently test and create Rest Service and Web Service calls.
@@ -21,12 +20,11 @@ Eclipse HttpClient (HTTP4e2) features:
  - Build on top of Apache HttpClient
  - Proxy Configuration Preferences
  - SSL HTTPS support
- - Build on top of industrial proven Apache HttpClient
  - HTTP tampering
  - Great usability and great UI
 Requirements:
-Java 5+
-Eclipse 3.2+
+Java 17
+Eclipse 2023-06
    </description>
 
    <copyright url="http://nextinterfaces.com/http4e/license/">
@@ -53,21 +51,27 @@ specific language governing permissions and limitations under the License.
    </license>
 
    <url>
-      <update label="Eclipse HttpClient (http4e) Update Site" url="http://http4e.nextinterfaces.com/install/"/>
+      <update label="Eclipse HttpClient (http4e) Update Site" url="https://gnl42.github.io/http4e2-update/"/>
    </url>
 
    <plugin
          id="me.glindholm.plugin.http4e2.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="me.glindholm.plugin.http4e2.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
+
+   <plugin
+         id="nu.xom"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.apache.velocity.velocity"
+         version="0.0.0"/>
+
+   <plugin
+         id="json"
+         version="0.0.0"/>
 
 </feature>

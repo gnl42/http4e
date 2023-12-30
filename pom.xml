@@ -11,29 +11,45 @@
 	<description>http4e parent</description>
 
 	<properties>
-		<java.version>17</java.version>
-		<maven.version>3.0</maven.version>
 		<tycho.version>4.0.4</tycho.version>
 		<tycho.test.jvmArgs>-Xmx512m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Required properties for releasing -->
+		<github-update-repo>git@github.com:gnl42/http4e2-update.git</github-update-repo>
+		<github-local-clone>${project.build.directory}/checkout</github-local-clone>
+		<releases-directory>${github-local-clone}/releases</releases-directory>
+		<current-release-directory>${releases-directory}/${qualifiedVersion}</current-release-directory>
+		<!-- The label for the Composite sites -->
+		<site.label>HTTP4e2</site.label>
 	</properties>
 
-<!--	<repositories>-->
-<!--		<repository>-->
-<!--			<id>luna</id>-->
-<!--			<layout>p2</layout>-->
-<!--			<url>http://download.eclipse.org/releases/luna</url>-->
-<!--		</repository>-->
-<!--	</repositories>-->
+	<scm>
+		<connection> scm:git:git@github.com:gnl42/http4e2.git</connection>
+		<url> scm:git:git@github.com:gnl42/http4e2.git</url>
+		<developerConnection>scm:git:git@github.com:gnl42/http4e2.git</developerConnection>
+		<tag>1.0.0</tag>
+	</scm>
 
-<!--	<pluginRepositories>-->
-<!--		<pluginRepository>-->
-<!--			<id>sonatype-public</id>-->
-<!--			<url>-->
-<!--				http://repository.sonatype.org/content/groups/sonatype-public-grid</url>-->
-<!--		</pluginRepository>-->
-<!--	</pluginRepositories>-->
-
+	<developers>
+		<developer>
+			<name>George Lindholm</name>
+			<roles>
+				<role>Maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Atanas Roussev</name>
+			<organization>nextinterfaces.com</organization>
+			<url>http://nextinterfaces.com/http4e</url>
+			<roles>
+				<role>Author</role>
+			</roles>
+			<timezone></timezone>
+		</contributor>
+	</contributors>
 
 	<build>
 		<pluginManagement>
