@@ -2,7 +2,7 @@
 <feature
       id="me.glindholm.plugin.http4e2.feature"
       label="Eclipse HTTP Client (HTTP4e2)"
-      version="5.0.13.qualifier"
+      version="1.0.0.qualifier"
       provider-name="nextinterfaces.com">
 
    <description url="http://www.nextinterfaces.com/http4e/">

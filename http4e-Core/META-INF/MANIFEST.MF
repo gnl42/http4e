@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse HttpClient (HTTP4e2) Core
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: me.glindholm.plugin.http4e2.core
-Bundle-Version: 5.0.13.qualifier
+Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: NEXTinterfaces.com
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui;bundle-version="[3.2.0,4.0.0)",

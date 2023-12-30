@@ -20,7 +20,7 @@ package me.glindholm.plugin.http4e2.httpclient.core;
  */
 public interface CoreMessages {
 
-    String VERSION = "5.0.13";
+    String VERSION = "1.0.0";
     String PLUGIN_NAME = "HTTP4e2 Client";
     String PLUGIN_NAME_SHORT = "http4e2";
     String PLUGIN_ABOUT = "Version: " + VERSION;

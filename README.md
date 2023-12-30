@@ -54,7 +54,7 @@ And look into `http4e-Site/target`
 
 To update version
 ```bash
-mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=5.0.13-SNAPSHOT
+mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=1.0.0-SNAPSHOT
 ```
 
 
