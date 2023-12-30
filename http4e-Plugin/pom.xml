@@ -9,13 +9,12 @@
 		<artifactId>http4e</artifactId>
 		<version>5.0.13-SNAPSHOT</version>
 	</parent>
-	<artifactId>org.roussev.http4e.ui</artifactId>
+	<artifactId>me.glindholm.plugin.http4e2.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>[bundle] Eclipse HttpClient (HTTP4e)</name>
+	<name>[bundle] Eclipse HttpClient (HTTP4e2)</name>
 	<organization>
 		<name>NEXTinterfaces.com</name>
 	</organization>
 	<build>
-		<sourceDirectory>src\app</sourceDirectory>
 	</build>
 </project>

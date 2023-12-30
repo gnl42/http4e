@@ -7,10 +7,10 @@
     <artifactId>http4e</artifactId>
     <version>5.0.13-SNAPSHOT</version>
   </parent>
-  <artifactId>org.roussev.http4e.feature</artifactId>
+  <artifactId>me.glindholm.plugin.http4e2.feature</artifactId>
   <version>5.0.13-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
-  <name>[feature] Eclipse HTTP Client (HTTP4e)</name>
+  <name>[feature] Eclipse HTTP Client (HTTP4e2)</name>
   <organization>
     <name>nextinterfaces.com</name>
   </organization>

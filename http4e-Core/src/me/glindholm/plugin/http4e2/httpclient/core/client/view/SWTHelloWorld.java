@@ -1,0 +1,48 @@
+package me.glindholm.plugin.http4e2.httpclient.core.client.view;
+
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
+import me.glindholm.plugin.http4e2.editor.xml.XMLConfiguration;
+import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.DocumentUtils;
+import me.glindholm.plugin.http4e2.httpclient.core.misc.ColorManagerAdaptor;
+import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
+
+public class SWTHelloWorld {
+
+    private static StyledText buildEditorText(final Composite parent) {
+        final SourceViewer sourceViewer = new SourceViewer(parent, null, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+
+        final XMLConfiguration sourceConf = new XMLConfiguration(new ColorManagerAdaptor(ResourceUtils.getResourceCache()));
+        sourceViewer.configure(sourceConf);
+        sourceViewer.setDocument(DocumentUtils.createDocument2());
+
+        return sourceViewer.getTextWidget();
+    }
+
+    public static void main(final String[] args) {
+
+        final Shell shell = new Shell();
+        shell.setLayout(new FillLayout());
+        shell.setSize(200, 100);
+        final Display display = shell.getDisplay();
+
+        // JsonTextEditor editor = new JsonTextEditor();
+        // editor.gete
+
+        final StyledText styledText = buildEditorText(shell);
+
+        shell.open();
+
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+    }
+}

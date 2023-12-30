@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.roussev.http4e.feature"
-      label="Eclipse HTTP Client (HTTP4e)"
+      id="me.glindholm.plugin.http4e2.feature"
+      label="Eclipse HTTP Client (HTTP4e2)"
       version="5.0.13.qualifier"
       provider-name="nextinterfaces.com">
 
    <description url="http://www.nextinterfaces.com/http4e/">
-      HTTP4e is an Eclipse plugin that helps you quickly build HTTP packets enabling you to efficiently test and create Rest Service and Web Service calls.
-Eclipse HttpClient (HTTP4e) features:
+      HTTP4e2 is an Eclipse plugin that helps you quickly build HTTP packets enabling you to efficiently test and create Rest Service and Web Service calls.
+Eclipse HttpClient (HTTP4e2) features:
  - Making an HTTP call directly from Eclipse IDE
  - Visual Editor Panels for headers, parameters and http packet body
  - Tabbed browsing (allowing replaying different RESTful, HTTP calls on separate tabs)
@@ -40,7 +40,7 @@ Apache License, Version 2.0
 
 Copyright 2017 NEXTinterfaces.com
 
-The Eclipse HttpClient (HTTP4e) software is licensed under the Apache License, v. 2.0 (the &quot;License&quot;);
+The Eclipse HttpClient (HTTP4e2) software is licensed under the Apache License, v. 2.0 (the &quot;License&quot;);
 you may not use this file except in compliance with the License. You may obtain a
 copy of the License at
 
@@ -57,14 +57,14 @@ specific language governing permissions and limitations under the License.
    </url>
 
    <plugin
-         id="org.roussev.http4e.core"
+         id="me.glindholm.plugin.http4e2.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.roussev.http4e.ui"
+         id="me.glindholm.plugin.http4e2.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
