@@ -1,7 +1,9 @@
-/classes
-/.class
-/.build
-
 # maven stuff
-target
+.classpath
+.project
+.settings/
+target/
 .polyglot.build.properties
+.polyglot.META-INF
+.polyglot.feature.xml
+

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>me.glindholm.plugin.http4e2</groupId>
+		<artifactId>http4e</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>me.glindholm.plugin.http4e2.ui</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<name>[bundle] Eclipse HttpClient (HTTP4e2)</name>
+	<organization>
+		<name>NEXTinterfaces.com</name>
+	</organization>
+	<build>
+	</build>
+<version>6.0.0-SNAPSHOT</version>
+</project>

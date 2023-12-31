@@ -30,18 +30,18 @@ def request(method, url, headers, body, params = nil)
       else
         raise Exception.new("Invalid HTTP method")
     end
-    
+
     # // req.basic_auth "username", "password"
-    
+
     # // Using req.set_form_data will override your "Content-Type" to "application/x-www-form-urlencoded"
     # // req.set_form_data(params) if not params == nil
-    
-    # // Use either body params with Content-Type=application/x-www-form-urlencoded or 
+
+    # // Use either body params with Content-Type=application/x-www-form-urlencoded or
     # // req.set_form_data to apply the params directly
     req.body = body
-    
+
     resp = http.request(req)
-    
+
     # // handle the response
     print resp.code + " " + resp.message + " " + resp.body
   end
@@ -51,19 +51,19 @@ end
 if __FILE__ == $0
 
   url = '$httpBean.url'
-  body = '$httpBean.body'  
+  body = '$httpBean.body'
   headers = {
 #foreach( $hKey in $httpBean.headers.keySet() )
-              '$hKey' => '$httpBean.headers.get($hKey)', 
+              '$hKey' => '$httpBean.headers.get($hKey)',
 #end
             }
    params = {}
-  
+
   # // Executing Rest-client
   client = RestClient::Resource.new url
-  $httpBean.rubyMethod  
-  
+  $httpBean.rubyMethod
+
   # // Executing Net::HTTP
   request("$httpBean.method", url, headers, body, params)
-  
+
 end

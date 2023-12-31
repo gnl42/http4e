@@ -6,14 +6,14 @@
          point="org.eclipse.ui.views">  
       <category
             name="HTTP"
-            id="org.roussev.http4e.ui">
+            id="me.glindholm.plugin.http4e2.ui">
       </category>
       <view
-            name="HTTP4e Client"
+            name="HTTP4e2 Client"
             icon="icons/logo.png"
-            category="org.roussev.http4e.ui"
-            class="org.roussev.http4e.httpclient.ui.HdViewPart"
-            id="org.roussev.http4e.ui.HdViewPart"
+            category="me.glindholm.plugin.http4e2.ui"
+            class="me.glindholm.plugin.http4e2.httpclient.ui.HdViewPart"
+            id="me.glindholm.plugin.http4e2.ui.HdViewPart"
             >
       </view>
    </extension>
@@ -22,15 +22,15 @@
          point="org.eclipse.ui.preferencePages">
       <page
             category="HTTP"
-            class="org.roussev.http4e.httpclient.ui.preferences.HTTPClientPreferencePage"
-            id="org.roussev.http4e.ui.preferences.HTTPClient"
+            class="me.glindholm.plugin.http4e2.httpclient.ui.preferences.HTTPClientPreferencePage"
+            id="me.glindholm.plugin.http4e2.ui.preferences.HTTPClient"
             name="HTTP4E">
       </page>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.roussev.http4e.httpclient.ui.preferences.PreferenceInitializer">
+            class="me.glindholm.plugin.http4e2.httpclient.ui.preferences.PreferenceInitializer">
       </initializer>
    </extension>
 	-->
@@ -39,10 +39,10 @@
    <extension
          point="org.eclipse.ui.viewActions">
       <viewContribution
-            targetID="org.roussev.http4e.ui.HdViewPart"
-            id="org.roussev.http4e.ui.HdViewPart.pushbutton">
+            targetID="me.glindholm.plugin.http4e2.ui.HdViewPart"
+            id="me.glindholm.plugin.http4e2.ui.HdViewPart.pushbutton">
          <action
-               class="org.roussev.http4e.httpclient.ui.actions.HdActionDelegate"
+               class="me.glindholm.plugin.http4e2.httpclient.ui.actions.HdActionDelegate"
                enablesFor="*"
                icon="icons/tab-open.png"
                id="add.tab"

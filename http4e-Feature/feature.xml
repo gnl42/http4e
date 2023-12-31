@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.roussev.http4e.feature"
-      label="Eclipse HTTP Client (HTTP4e)"
-      version="5.0.12"
-      provider-name="nextinterfaces.com">
+      id="me.glindholm.plugin.http4e2.feature"
+      label="Eclipse HTTP Client (HTTP4e2)"
+      version="6.0.0.qualifier">
 
-   <description url="http://www.nextinterfaces.com/http4e/">
-      HTTP4e is an Eclipse plugin that helps you quickly build HTTP packets enabling you to efficiently test and create Rest Service and Web Service calls.
-Eclipse HttpClient (HTTP4e) features:
+   <description url="">
+      HTTP4e2 is an Eclipse plugin that helps you quickly build HTTP packets enabling you to efficiently test and create Rest Service and Web Service calls.
+Eclipse HttpClient (HTTP4e2) features:
  - Making an HTTP call directly from Eclipse IDE
  - Visual Editor Panels for headers, parameters and http packet body
  - Tabbed browsing (allowing replaying different RESTful, HTTP calls on separate tabs)
@@ -21,53 +20,58 @@ Eclipse HttpClient (HTTP4e) features:
  - Build on top of Apache HttpClient
  - Proxy Configuration Preferences
  - SSL HTTPS support
- - Build on top of industrial proven Apache HttpClient
  - HTTP tampering
  - Great usability and great UI
 Requirements:
-Java 5+
-Eclipse 3.2+
+Java 17
+Eclipse 2023-06
    </description>
 
-   <copyright url="http://nextinterfaces.com/http4e/license/">
-      (c) http://www.nextinterfaces.com/http4e/ 2017.  (see http://nextinterfaces.com/http4e/license/ for licensing)
+   <copyright url="https://nextinterfaces.com/http4e/license/">
+      (c) https://www.nextinterfaces.com/ 2017.
    </copyright>
 
-   <license url="http://nextinterfaces.com/http4e/license/">
+   <license url="https://nextinterfaces.com/http4e/license/">
       LICENSE AGREEMENT
 
 Apache License, Version 2.0
 
 Copyright 2017 NEXTinterfaces.com
 
-The Eclipse HttpClient (HTTP4e) software is licensed under the Apache License, v. 2.0 (the &quot;License&quot;); 
-you may not use this file except in compliance with the License. You may obtain a 
+The Eclipse HttpClient (HTTP4e2) software is licensed under the Apache License, v. 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License. You may obtain a
 copy of the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software distributed 
-under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR 
-CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
    </license>
 
    <url>
-      <update label="Eclipse HttpClient (http4e) Update Site" url="http://http4e.nextinterfaces.com/install/"/>
+      <update label="Eclipse HttpClient (http4e) Update Site" url="https://gnl42.github.io/http4e2-update/"/>
    </url>
 
    <plugin
-         id="org.roussev.http4e.core"
-         download-size="1000"
-         install-size="1000"
-         version="5.0.12"
-         unpack="false"/>
+         id="me.glindholm.plugin.http4e2.core"
+         version="0.0.0"/>
 
    <plugin
-         id="org.roussev.http4e.ui"
-         download-size="400"
-         install-size="400"
-         version="5.0.12"
-         unpack="false"/>
+         id="me.glindholm.plugin.http4e2.ui"
+         version="0.0.0"/>
+
+   <plugin
+         id="nu.xom"
+         version="0.0.0"/>
+
+   <plugin
+         id="json"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.apache.velocity.engine-core"
+         version="0.0.0"/>
 
 </feature>

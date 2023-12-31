@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse HttpClient (HTTP4e)
-Bundle-SymbolicName: org.roussev.http4e.ui;singleton:=true
-Bundle-Version: 5.0.12
-Bundle-Activator: org.roussev.http4e.httpclient.ui.HdPlugin
+Bundle-Name: Eclipse HttpClient (HTTP4e2)
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: me.glindholm.plugin.http4e2.ui;singleton:=true
+Bundle-Version: 6.0.0.qualifier
+Bundle-Activator: me.glindholm.plugin.http4e2.httpclient.ui.HdPlugin
 Bundle-Vendor: NEXTinterfaces.com
 Bundle-Localization: plugin
 Eclipse-LazyStart: true
@@ -14,4 +15,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui.editors,
- org.roussev.http4e.core
+ me.glindholm.plugin.http4e2.core
+Import-Package: org.apache.commons.lang3.text
