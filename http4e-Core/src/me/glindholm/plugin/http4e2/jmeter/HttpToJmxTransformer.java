@@ -3,17 +3,20 @@ package me.glindholm.plugin.http4e2.jmeter;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.context.InternalContextAdapterImpl;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.RuntimeInstance;
+import org.apache.velocity.runtime.parser.node.SimpleNode;
+import org.slf4j.impl.SimpleLoggerFactory;
 
 import me.glindholm.plugin.http4e2.httpclient.core.ExceptionHandler;
 import me.glindholm.plugin.http4e2.httpclient.core.util.HttpBean;
@@ -31,33 +34,20 @@ public class HttpToJmxTransformer {
     }
 
     public void doWrite(final Writer writer) {
-        try {
+        try (InputStreamReader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream(templateFile), StandardCharsets.UTF_8)) {
+            RuntimeInstance runtimeInstance = new RuntimeInstance();
+            runtimeInstance.init();
 
-            final Properties p = new Properties();
-            // p.setProperty( "resource.loader", "file" );
-            // p.setProperty( "file.resource.loader.path", "./src" );
-            // p.setProperty( "file.resource.loader.class",
-            // "org.apache.velocity.runtime.resource.loader.FileResourceLoader" );
+            Template template = new Template();
+            SimpleNode simpleNode = runtimeInstance.parse(reader, template);
 
-            p.setProperty("resource.loader", "class");
-            p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-
-            Velocity.init(p);
+            simpleNode.init(new InternalContextAdapterImpl(new VelocityContext()), runtimeInstance);
+            template.setData(simpleNode);
 
             final VelocityContext context = new VelocityContext();
             context.put("httpbeans", httpBeans);
 
-            Template template = null;
-
-            try {
-                template = Velocity.getTemplate(templateFile);
-            } catch (final ResourceNotFoundException | ParseErrorException e) {
-                ExceptionHandler.handle(e);
-            }
-
-            if (template != null) {
-                template.merge(context, writer);
-            }
+            template.merge(context, writer);
             /*
              * flush and cleanup
              */

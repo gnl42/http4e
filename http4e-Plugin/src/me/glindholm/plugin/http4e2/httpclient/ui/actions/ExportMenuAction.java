@@ -69,7 +69,7 @@ public class ExportMenuAction extends Action implements IMenuCreator {
         addActionToMenu(menu, getHTTP4eAction());
         addActionToMenu(menu, getJMeterAction());
         addActionToMenu(menu, getPrintAction());
-        if (false) {
+        if (true) {
             new MenuItem(menu, SWT.SEPARATOR);
             addActionToMenu(menu, getEmptyAction());
             addActionToMenu(menu, getJavaHttp4Action());

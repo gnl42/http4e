@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -223,16 +224,16 @@ public class BaseUtils {
         try {
             final File f = new File(new File(fileName).getParent() + File.separatorChar + "http4e-jmx.csv");
             if (!f.exists()) {
-                final FileWriter fstream = new FileWriter(f);
-                final BufferedWriter out = new BufferedWriter(fstream);
-                out.write("################################################\n");
-                out.write("## Configure varA, varB entries as bellow\n");
-                out.write("## aa=xxx, bb=xxx\n");
-                out.write("################################################\n");
-                out.write("JSESSIONID=xxxxxxxxxx,userId=1\n");
-                out.write("JSESSIONID=yyyyyyyyyy,userId=2\n");
-                out.write("JSESSIONID=zzzzzzzzzz,userId=3\n");
-                out.close();
+                try (FileWriter fstream = new FileWriter(f);
+                        BufferedWriter out = new BufferedWriter(fstream)) {
+                    out.write("################################################\n");
+                    out.write("## Configure varA, varB entries as bellow\n");
+                    out.write("## aa=xxx, bb=xxx\n");
+                    out.write("################################################\n");
+                    out.write("JSESSIONID=xxxxxxxxxx,userId=1\n");
+                    out.write("JSESSIONID=yyyyyyyyyy,userId=2\n");
+                    out.write("JSESSIONID=zzzzzzzzzz,userId=3\n");
+                }
             }
         } catch (final Exception ignore) {
             //
