@@ -5,10 +5,10 @@ HTTP4e2 is an Eclipse HTTP Client plugin simplifying REST and Web Service testin
 
 
 ### More information
-http://nextinterfaces.com/http4e
+https://nextinterfaces.com/http4e
 
 
-![alt tag](http://nextinterfaces.com/http4e/images/main.png)
+![alt tag](https://nextinterfaces.com/http4e/images/main.png)
 
 ### Key Features
 * Multiple Tabs 
@@ -24,7 +24,7 @@ http://nextinterfaces.com/http4e
 
 
 ### Install URL
-http://nextinterfaces.com/http4e/install
+https://nextinterfaces.com/http4e/install
 
 Build Instructions
 --------------

@@ -29,7 +29,7 @@ import me.glindholm.plugin.http4e2.httpclient.core.util.HttpBean;
 import me.glindholm.plugin.http4e2.httpclient.core.util.ParseUtils;
 
 /**
- * @author Atanas Roussev (http://nextinterfaces.com)
+ * @author Atanas Roussev (https://nextinterfaces.com)
  */
 public class Utils {
 

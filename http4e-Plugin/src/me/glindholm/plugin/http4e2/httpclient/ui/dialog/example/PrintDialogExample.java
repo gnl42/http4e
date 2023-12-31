@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 Eclipse HttpClient (http4e) http://nextinterfaces.com
+ *  Copyright 2017 Eclipse HttpClient (http4e) https://nextinterfaces.com
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * @author Atanas Roussev (http://nextinterfaces.com)
+ * @author Atanas Roussev (https://nextinterfaces.com)
  */
 public class PrintDialogExample {
     Display d;

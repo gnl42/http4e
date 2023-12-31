@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 Eclipse HttpClient (http4e) http://nextinterfaces.com
+ *  Copyright 2017 Eclipse HttpClient (http4e) https://nextinterfaces.com
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
 /**
  * Tab Item GUI
  *
- * @author Atanas Roussev (http://nextinterfaces.com)
+ * @author Atanas Roussev (https://nextinterfaces.com)
  */
 @SuppressWarnings({ "unchecked", "serial" })
 class ItemView implements ModelListener, Serializable {

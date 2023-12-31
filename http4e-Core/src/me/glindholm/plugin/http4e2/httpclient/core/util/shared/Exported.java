@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import me.glindholm.plugin.http4e2.httpclient.core.util.BaseUtils;
 
 /**
- * @author Atanas Roussev (http://nextinterfaces.com)
+ * @author Atanas Roussev (https://nextinterfaces.com)
  */
 public class Exported {
 

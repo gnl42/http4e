@@ -32,7 +32,7 @@ import me.glindholm.plugin.http4e2.httpclient.ui.actions.ParameterizeAction;
 import me.glindholm.plugin.http4e2.httpclient.ui.actions.ProxyAction;
 
 /**
- * @author Atanas Roussev (http://nextinterfaces.com)
+ * @author Atanas Roussev (https://nextinterfaces.com)
  */
 public class HdViewPart extends ViewPart {
 
