@@ -2,9 +2,9 @@
 <feature
       id="me.glindholm.plugin.http4e2.feature"
       label="Eclipse HTTP Client (HTTP4e2)"
-      version="1.0.0.qualifier">
+      version="6.0.0.qualifier">
 
-   <description url="http://www.nextinterfaces.com/http4e/">
+   <description url="">
       HTTP4e2 is an Eclipse plugin that helps you quickly build HTTP packets enabling you to efficiently test and create Rest Service and Web Service calls.
 Eclipse HttpClient (HTTP4e2) features:
  - Making an HTTP call directly from Eclipse IDE
@@ -28,7 +28,7 @@ Eclipse 2023-06
    </description>
 
    <copyright url="https://nextinterfaces.com/http4e/license/">
-      (c) http://www.nextinterfaces.com/http4e/ 2017.  (see https://nextinterfaces.com/http4e/license/ for licensing)
+      (c) https://www.nextinterfaces.com/ 2017.
    </copyright>
 
    <license url="https://nextinterfaces.com/http4e/license/">

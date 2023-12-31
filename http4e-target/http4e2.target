@@ -19,13 +19,13 @@
 		</location>
 		<location includeDependencyDepth="direct" includeDependencyScopes="compile,runtime" includeSource="true" missingManifest="generate" type="Maven">
 
-			<feature id="org.nodeclipse.http4e2" label="maven-feature" version="1.0.0.qualifier">
+			<feature id="me.glindholm.plugin.http4e2" label="maven-feature" version="6.0.0.qualifier">
 
-   
 
-   
 
-   
+
+
+
 				<description url="http://www.example.com/description">
       [Enter Feature Description here.]
    </description>
