@@ -13,10 +13,8 @@ import java.util.Collection;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.InternalContextAdapterImpl;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.RuntimeInstance;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
-import org.slf4j.impl.SimpleLoggerFactory;
 
 import me.glindholm.plugin.http4e2.httpclient.core.ExceptionHandler;
 import me.glindholm.plugin.http4e2.httpclient.core.util.HttpBean;
