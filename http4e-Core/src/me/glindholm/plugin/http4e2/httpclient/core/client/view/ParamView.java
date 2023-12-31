@@ -88,7 +88,7 @@ class ParamView {
         if (CoreConstants.EMPTY_TEXT.equals(getParamText())) {
             st.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
         } else {
-            st.setForeground(ResourceUtils.getColor(Styles.DARK_RGB_TEXT));
+            st.setForeground(ResourceUtils.getColor(Styles.BLACK_RGB_TEXT));
         }
     }
 
@@ -98,7 +98,7 @@ class ParamView {
             if (CoreConstants.EMPTY_TEXT.equals(getParamText())) {
                 st.setText(CoreConstants.EMPTY_TEXT);
             }
-            st.setForeground(ResourceUtils.getColor(Styles.DARK_RGB_TEXT));
+            st.setForeground(ResourceUtils.getColor(Styles.BLACK_RGB_TEXT));
         }
     }
 

@@ -205,7 +205,7 @@ class ItemView implements ModelListener, Serializable {
 
         } else if (e.getType() == ModelEvent.HEADERS_FOCUS_GAINED) {
             if (CoreConstants.EMPTY_TEXT.equals(headerView.getHeaderText())) {
-                headerView.setForeground(Styles.DARK_RGB_TEXT);
+                headerView.setForeground(Styles.BLACK_RGB_TEXT);
                 headerView.setText(CoreConstants.EMPTY_TEXT);
             }
 

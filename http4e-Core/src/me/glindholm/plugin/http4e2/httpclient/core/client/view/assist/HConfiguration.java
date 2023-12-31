@@ -149,7 +149,7 @@ public class HConfiguration extends SourceViewerConfiguration {
     private RuleBasedScanner getCommentScanner() {
         if (commentScanner == null) {
             commentScanner = new HCommentScanner();
-            commentScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.COMMENT))));
+            commentScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.PROC_INSTR))));
         }
         return commentScanner;
     }
@@ -157,7 +157,7 @@ public class HConfiguration extends SourceViewerConfiguration {
     private RuleBasedScanner getValueScanner() {
         if (valueScanner == null) {
             valueScanner = new HValueScanner();
-            valueScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.STRING))));
+            valueScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.WHITE_RGB_TEXT))));
         }
         return valueScanner;
     }
@@ -165,7 +165,7 @@ public class HConfiguration extends SourceViewerConfiguration {
     private RuleBasedScanner getDefaultScanner() {
         if (defaultScanner == null) {
             defaultScanner = new HDefaultScanner();
-            defaultScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.KEY))));
+            defaultScanner.setDefaultReturnToken(new Token(new TextAttribute(ResourceUtils.getColor(Styles.WHITE_RGB_TEXT))));
         }
         return defaultScanner;
     }

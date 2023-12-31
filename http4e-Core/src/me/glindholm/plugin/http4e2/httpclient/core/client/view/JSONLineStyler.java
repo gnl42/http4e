@@ -73,7 +73,7 @@ public class JSONLineStyler implements LineStyleListener {
         // tokenColors[OTHER] = 0;
         // tokenColors[NUMBER] = 0;
 
-        colors = new Color[] { ResourceUtils.getColor(Styles.DARK_RGB_TEXT), // black
+        colors = new Color[] { ResourceUtils.getColor(Styles.BLACK_RGB_TEXT), // black
                 ResourceUtils.getColor(Styles.KEY), // red
                 ResourceUtils.getColor(Styles.KEY_GREEN), // green
                 ResourceUtils.getColor(Styles.KEY_GREEN) // blue

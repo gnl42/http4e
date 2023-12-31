@@ -85,7 +85,7 @@ public class PrinterFacade {
                 gc = new GC(printer);
 
                 font = printer.getSystemFont(); // ResourceUtils.getFont(Styles.getInstance().FONT_COURIER);
-                // foregroundColor = ResourceUtils.getColor(Styles.DARK_RGB_TEXT);
+                // foregroundColor = ResourceUtils.getColor(Styles.BLACK_RGB_TEXT);
                 // backgroundColor =
                 // ResourceUtils.getColor(Styles.BACKGROUND_ENABLED);
 
