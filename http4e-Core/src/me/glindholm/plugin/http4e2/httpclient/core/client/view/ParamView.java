@@ -104,17 +104,20 @@ class ParamView {
 
     void setEditable(final boolean editable) {
         final StyledText st = (StyledText) textView.getControl();
+        Color fg = ResourceUtils.getColor(Styles.GRAY_RGB_TEXT);
+        Color bg = ResourceUtils.getColor(Styles.BACKGROUND_DISABLED);
+        fg= bg = null;
         if (editable) {
             // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-            st.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-            st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
+            st.setForeground(fg);
+            st.setBackground(bg);
             st.setEditable(true);
             attachManager.setEnabled(true);
 
         } else {
             // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-            st.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
-            st.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+            st.setForeground(fg);
+            st.setBackground(ResourceUtils.getColor(Styles.GREY_DISABLED));
             st.setEditable(false);
             attachManager.setEnabled(false);
         }

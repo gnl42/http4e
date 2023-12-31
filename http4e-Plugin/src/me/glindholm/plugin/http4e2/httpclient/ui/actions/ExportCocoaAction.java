@@ -52,7 +52,7 @@ public class ExportCocoaAction extends Action {
 
             final StringWriter writer = new StringWriter();
             BaseUtils.writeObjectiveC(iModel, writer);
-
+            
             final ExportDialog dialog = new ExportDialog(view, "Cocoa REST client", "Your call exported as Cocoa/Objective-C HTTP client call.",
                     writer.toString());
             dialog.open();

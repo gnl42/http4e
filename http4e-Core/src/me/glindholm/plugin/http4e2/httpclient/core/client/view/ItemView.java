@@ -116,7 +116,7 @@ class ItemView implements ModelListener, Serializable {
         if (Utils.isHttpS(urlCombo.getText())) {
             urlCombo.setBackground(ResourceUtils.getColor(Styles.SSL));
         } else {
-            urlCombo.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
+            urlCombo.setBackground(ResourceUtils.getColor(Styles.HTTP_RGB_TEXT));
         }
     }
 
@@ -263,7 +263,7 @@ class ItemView implements ModelListener, Serializable {
                     paramView.setEditable(true);
                     bodyView.setEditable(false, false, false);
                     paramView.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_FORM_TYPE));
-                    bodyView.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+                    bodyView.setBackground(ResourceUtils.getColor(Styles.GREY_DISABLED));
                     paramView.getTitleLabel().setText(CoreConstants.TITLE_PARAMETERS_MULTIPART);
                     bodyView.getTitleLabel().setText(CoreConstants.TITLE_BODY);
 

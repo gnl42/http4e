@@ -63,7 +63,7 @@ class BodyView {
 
         // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
         // bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-        bodyText.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+        bodyText.setBackground(ResourceUtils.getColor(Styles.GREY_DISABLED));
 
         bodyText.addMouseListener(new MouseAdapter() {
 
@@ -134,10 +134,15 @@ class BodyView {
     }
 
     void setEditable(final boolean editable, final boolean isXwwwForm, final boolean isPost) {
+        Color fg = ResourceUtils.getColor(Styles.GRAY_RGB_TEXT);
+        Color bg = ResourceUtils.getColor(Styles.BACKGROUND_DISABLED);
+        fg= bg = null;
+
+
         if (editable) {
             // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-            bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-            bodyText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
+            bodyText.setForeground(fg);
+            bodyText.setBackground(bg);
             bodyText.setEditable(true);
             // attachManager.setEnabled(true);
             if (isXwwwForm && isPost) {
@@ -153,8 +158,8 @@ class BodyView {
 
         } else {
             // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-            bodyText.setForeground(ResourceUtils.getColor(Styles.LIGHT_RGB_TEXT));
-            bodyText.setBackground(ResourceUtils.getColor(Styles.PINK_DISABLED));
+            bodyText.setForeground(fg);
+            bodyText.setBackground(ResourceUtils.getColor(Styles.GREY_DISABLED));
             bodyText.setEditable(false);
             attachManager.setEnabled(false);
         }

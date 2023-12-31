@@ -29,6 +29,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import me.glindholm.plugin.http4e2.httpclient.core.misc.Styles;
+import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
+
 /**
  * @author Atanas Roussev (http://nextinterfaces.com)
  */
@@ -98,10 +101,12 @@ public class ExportJavaViewer {
         spec.verticalAlignment = GridData.FILL;
         spec.grabExcessVerticalSpace = true;
         text.setLayoutData(spec);
-        text.addLineStyleListener(lineStyler);
+//        text.addLineStyleListener(lineStyler);
         text.setEditable(false);
-        final Color bg = Display.getDefault().getSystemColor(SWT.COLOR_WHITE);
-        text.setBackground(bg);
+
+        final Color bg = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN);
+        text.setForeground(null);
+        text.setBackground(null);
     }
 
 //   void displayError( String msg, Shell shell){
@@ -114,10 +119,10 @@ public class ExportJavaViewer {
         // Guard against superfluous mouse move events -- defer action until
         // later
         final Display display = text.getDisplay();
-        display.asyncExec(() -> text.setText(sourceString));
-
+//        display.asyncExec(() -> text.setText(sourceString));
+        text.setText(sourceString);
         // parse the block comments up front since block comments can go across
         // lines - inefficient way of doing this
-        lineStyler.parseBlockComments(sourceString);
+//        lineStyler.parseBlockComments(sourceString);
     }
 }

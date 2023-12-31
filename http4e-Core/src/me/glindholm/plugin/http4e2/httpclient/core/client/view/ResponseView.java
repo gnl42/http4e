@@ -24,6 +24,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
@@ -69,9 +70,13 @@ class ResponseView {
 
         browser = new Browser(vForm, SWT.NONE);
 
+        Color fg = ResourceUtils.getColor(Styles.GRAY_RGB_TEXT);
+        Color bg = ResourceUtils.getColor(Styles.BACKGROUND_DISABLED);
+        fg= bg = null;
+
         responseText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
-        responseText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-        responseText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
+        responseText.setForeground(fg);
+        responseText.setBackground(bg);
         responseText.setEditable(false);
         responseText.addMouseListener(new MouseAdapter() {
             @Override
@@ -82,8 +87,8 @@ class ResponseView {
         responseText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
 
         jsonText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
-        jsonText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-        jsonText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
+        jsonText.setForeground(fg);
+        jsonText.setBackground(bg);
         jsonText.setEditable(false);
         jsonText.addMouseListener(new MouseAdapter() {
             @Override

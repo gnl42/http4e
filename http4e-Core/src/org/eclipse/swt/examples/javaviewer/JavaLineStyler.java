@@ -156,58 +156,59 @@ public class JavaLineStyler implements LineStyleListener {
 
     public void parseBlockComments(String text) {
         blockComments = new ArrayList<>();
-        StringReader buffer = new StringReader(text);
-        int ch;
-        boolean blkComment = false;
-        int cnt = 0;
-        int[] offsets = new int[2];
-        boolean done = false;
+        try (StringReader buffer = new StringReader(text)) {
+            int ch;
+            boolean blkComment = false;
+            int cnt = 0;
+            int[] offsets = new int[2];
+            boolean done = false;
 
-        try {
-            while (!done) {
-                switch (ch = buffer.read()) {
-                case -1: {
-                    if (blkComment) {
-                        offsets[1] = cnt;
-                        blockComments.add(offsets);
-                    }
-                    done = true;
-                    break;
-                }
-                case '/': {
-                    ch = buffer.read();
-                    if ((ch == '*') && (!blkComment)) {
-                        offsets = new int[2];
-                        offsets[0] = cnt;
-                        blkComment = true;
-                        cnt++;
-                    } else {
-                        cnt++;
-                    }
-                    cnt++;
-                    break;
-                }
-                case '*': {
-                    if (blkComment) {
-                        ch = buffer.read();
-                        cnt++;
-                        if (ch == '/') {
-                            blkComment = false;
+            try {
+                while (!done) {
+                    switch (ch = buffer.read()) {
+                    case -1: {
+                        if (blkComment) {
                             offsets[1] = cnt;
                             blockComments.add(offsets);
                         }
+                        done = true;
+                        break;
                     }
-                    cnt++;
-                    break;
+                    case '/': {
+                        ch = buffer.read();
+                        if ((ch == '*') && (!blkComment)) {
+                            offsets = new int[2];
+                            offsets[0] = cnt;
+                            blkComment = true;
+                            cnt++;
+                        } else {
+                            cnt++;
+                        }
+                        cnt++;
+                        break;
+                    }
+                    case '*': {
+                        if (blkComment) {
+                            ch = buffer.read();
+                            cnt++;
+                            if (ch == '/') {
+                                blkComment = false;
+                                offsets[1] = cnt;
+                                blockComments.add(offsets);
+                            }
+                        }
+                        cnt++;
+                        break;
+                    }
+                    default: {
+                        cnt++;
+                        break;
+                    }
+                    }
                 }
-                default: {
-                    cnt++;
-                    break;
-                }
-                }
+            } catch (IOException e) {
+                // ignore errors
             }
-        } catch (IOException e) {
-            // ignore errors
         }
     }
 

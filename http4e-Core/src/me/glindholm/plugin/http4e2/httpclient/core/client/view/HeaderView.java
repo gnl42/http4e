@@ -28,6 +28,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -45,6 +46,7 @@ import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.DocumentUt
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.HConfiguration;
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.HContentAssistProcessor;
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.ModelTrackerListener;
+import me.glindholm.plugin.http4e2.httpclient.core.misc.Styles;
 import me.glindholm.plugin.http4e2.httpclient.core.util.BaseUtils;
 import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
 
@@ -192,7 +194,11 @@ class HeaderView {
     }
 
     void setForeground(final RGB style) {
-        headersText.setForeground(ResourceUtils.getColor(style));
+        Color fg = ResourceUtils.getColor(Styles.GRAY_RGB_TEXT);
+        Color bg = ResourceUtils.getColor(Styles.BACKGROUND_DISABLED);
+        fg= bg = null;
+
+        headersText.setForeground(fg);
     }
 
 }

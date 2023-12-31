@@ -45,8 +45,9 @@ public class Styles {
     public static final RGB BACKGROUND_ENABLED = new RGB(255, 255, 255);
     public static final RGB BACKGROUND_DISABLED = new RGB(253, 253, 240);
     public static final RGB BACKGROUND_FIND = new RGB(242, 242, 234);
-    public static final RGB SSL = new RGB(245, 246, 190);
-    public static final RGB PINK_DISABLED = new RGB(255, 219, 234);
+    public static final RGB SSL = new RGB(0, 0, 128);
+    public static final RGB GREY_DISABLED = new RGB(220, 220, 220);
+    public static final RGB HTTP_RGB_TEXT = new RGB(105, 0, 105);
 
     private static Styles styles = null;
 
