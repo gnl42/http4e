@@ -160,8 +160,8 @@ class ItemView implements ModelListener, Serializable {
                 return;
             }
             if (!isPost()) {
-                final String textParams = ParseUtils.doUrlToParam2(urlCombo.getText(), ParseUtils.linesToMap2(paramView.getParamText()), true);
-                paramView.setParamText(textParams);
+                final String textParams = ParseUtils.doUrlToParam2(urlCombo.getText(), ParseUtils.linesToMap2(paramView.getViewText()), true);
+                paramView.setText(textParams);
             }
 
             urlCombo.add(urlCombo.getText());
@@ -204,7 +204,7 @@ class ItemView implements ModelListener, Serializable {
             doDispose();
 
         } else if (e.getType() == ModelEvent.HEADERS_FOCUS_GAINED) {
-            if (CoreConstants.EMPTY_TEXT.equals(headerView.getHeaderText())) {
+            if (CoreConstants.EMPTY_TEXT.equals(headerView.getViewText())) {
                 headerView.setForeground(Styles.BLACK_RGB_TEXT);
                 headerView.setText(CoreConstants.EMPTY_TEXT);
             }
@@ -220,7 +220,7 @@ class ItemView implements ModelListener, Serializable {
             paramView.setFocus(true);
 
         } else if (e.getType() == ModelEvent.PARAMS_FOCUS_LOST) {
-            final List<String> translated = ParseUtils.paramToUrlAndBody(paramView.getParamText());
+            final List<String> translated = ParseUtils.paramToUrlAndBody(paramView.getViewText());
             if (isParamsEditable()) {
                 if (isPost()) {
                     if (!bodyView.getText().startsWith(CoreConstants.FILE_PREFIX)) {
@@ -233,8 +233,8 @@ class ItemView implements ModelListener, Serializable {
 
         } else if (e.getType() == ModelEvent.URL_FOCUS_LOST) {
             if (!isPost()) {
-                final String textParams = ParseUtils.doUrlToParam2(urlCombo.getText(), ParseUtils.linesToMap2(paramView.getParamText()), true);
-                paramView.setParamText(textParams);
+                final String textParams = ParseUtils.doUrlToParam2(urlCombo.getText(), ParseUtils.linesToMap2(paramView.getViewText()), true);
+                paramView.setText(textParams);
             }
 
         } else if (e.getType() == ModelEvent.CONTENT_TYPE_CHANGE) {
@@ -243,7 +243,7 @@ class ItemView implements ModelListener, Serializable {
                 if (isXwwwType()) {
                     // change from nonedit-to-edit , pull data from body
                     if (!paramView.isEditable()) {
-                        paramView.setParamText(ParseUtils.bodyToParam2(bodyView.getText()));
+                        paramView.setText(ParseUtils.bodyToParam2(bodyView.getText()));
                     }
 
                     paramView.setEditable(true);
@@ -256,7 +256,7 @@ class ItemView implements ModelListener, Serializable {
                 } else if (isMultipartType()) {
                     paramView.setMultipart(true);
                     if (!paramView.isEditable()) {
-                        paramView.setParamText(ParseUtils.bodyToParam2(bodyView.getText()));
+                        paramView.setText(ParseUtils.bodyToParam2(bodyView.getText()));
                     }
                     bodyView.setText("");
 
@@ -268,7 +268,7 @@ class ItemView implements ModelListener, Serializable {
                     bodyView.getTitleLabel().setText(CoreConstants.TITLE_BODY);
 
                 } else {
-                    // paramView.setParamText(CoreConstants.EMPTY_TEXT);
+                    // paramView.setViewText(CoreConstants.EMPTY_TEXT);
                     paramView.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
                     bodyView.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
                     paramView.getTitleLabel().setText(CoreConstants.TITLE_PARAMETERS);
@@ -296,20 +296,20 @@ class ItemView implements ModelListener, Serializable {
             }
             if (state.getState() == ItemState.POST_ENABLED) {
                 if (isXwwwType()) {
-                    bodyView.setText(ParseUtils.toUrlParams(paramView.getParamText(), false));
+                    bodyView.setText(ParseUtils.toUrlParams(paramView.getViewText(), false));
                 }
                 urlCombo.setText(ParseUtils.appendParamsToUrl(urlCombo.getText(), CoreConstants.EMPTY_TEXT));
 
             } else if (state.getState() == ItemState.POST_DISABLED) {
                 // bodyView.setText(CoreConstants.EMPTY_TEXT);
-                final String translatedParams = ParseUtils.paramToUrlAndBody(paramView.getParamText()).get(0);
+                final String translatedParams = ParseUtils.paramToUrlAndBody(paramView.getViewText()).get(0);
                 urlCombo.setText(ParseUtils.appendParamsToUrl(urlCombo.getText(), translatedParams));
             }
             model.fireExecute(new ModelEvent(ModelEvent.CONTENT_TYPE_CHANGE, model));
 
         } else if (e.getType() == ModelEvent.BODY_FOCUS_LOST) {
             if (isParamsEditable() && !isPut()) {
-                paramView.setParamText(ParseUtils.bodyToParam2(bodyView.getText()));
+                paramView.setText(ParseUtils.bodyToParam2(bodyView.getText()));
             }
 
         } else if (e.getType() == ModelEvent.HEADERS_RESIZED) {
@@ -625,7 +625,7 @@ class ItemView implements ModelListener, Serializable {
         tabeNameText.setText(CoreMessages.EMPTY_TITLE_NAME);
         tabeNameText.setTextLimit(20);
         tabeNameText.setToolTipText("Tab Name");
-        tabeNameText.setForeground(ResourceUtils.getResourceCache().getColor(GRAY_RGB_TEXT));
+        tabeNameText.setForeground(ResourceUtils.getColor(GRAY_RGB_TEXT));
         tabeNameText.addFocusListener(new FocusListener() {
 
             @Override
@@ -659,12 +659,12 @@ class ItemView implements ModelListener, Serializable {
     }
 
     private boolean isXwwwType() {
-        Utils.textToModelHeaders(headerView.getHeaderText(), model);
+        Utils.textToModelHeaders(headerView.getViewText(), model);
         return JunkUtils.isXwwwFormType(model);
     }
 
     private boolean isMultipartType() {
-        Utils.textToModelHeaders(headerView.getHeaderText(), model);
+        Utils.textToModelHeaders(headerView.getViewText(), model);
         return JunkUtils.isMultiartFormType(model);
     }
 
@@ -681,8 +681,8 @@ class ItemView implements ModelListener, Serializable {
 
     @Override
     public String toString() {
-        return "ItemView{" + "httpCombo=" + httpCombo.getText() + ",urlCombo=" + urlCombo.getText() + ",headersText=" + headerView.getHeaderText()
-                + ",paramsText=" + paramView.getParamText() + ",bodyText=" + bodyView.getText() + "}";
+        return "ItemView{" + "httpCombo=" + httpCombo.getText() + ",urlCombo=" + urlCombo.getText() + ",styledText=" + headerView.getViewText() + ",paramsText="
+                + paramView.getViewText() + ",bodyText=" + bodyView.getText() + "}";
     }
 
 }

@@ -38,6 +38,7 @@ import me.glindholm.plugin.http4e2.httpclient.core.CoreObjects;
 import me.glindholm.plugin.http4e2.httpclient.core.ExceptionHandler;
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.Utils;
 import me.glindholm.plugin.http4e2.httpclient.core.misc.ResourceCache;
+import me.glindholm.plugin.http4e2.httpclient.core.misc.Styles;
 import me.glindholm.plugin.http4e2.httpclient.core.misc.Styles.FontStyle;
 
 /**
@@ -109,8 +110,7 @@ public class ResourceUtils {
 
     public static byte[] getBundleResourceBytes(final String pluginID, final String uri) {
         byte[] data = {};
-        try {
-            final InputStream in = getBundleResourceStream(pluginID, uri);
+        try (final InputStream in = getBundleResourceStream(pluginID, uri)) {
             data = new byte[in.available()];
             in.read(data);
         } catch (final Exception e) {

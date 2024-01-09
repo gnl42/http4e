@@ -16,7 +16,6 @@
 package me.glindholm.plugin.http4e2.httpclient.core.misc;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -52,26 +51,16 @@ public class ResourceCache {
         if (imageDescriptor == null) {
             return null;
         }
-        Image image = imageMap.get(imageDescriptor);
-        if (image == null) {
-            image = imageDescriptor.createImage();
-            imageMap.put(imageDescriptor, image);
-        }
-        return image;
+        return imageMap.computeIfAbsent(imageDescriptor, i -> imageDescriptor.createImage());
     }
 
     public Image getImage(final String name) {
-        Image image = imageMap.get(name);
-        if (image == null) {
-            image = new Image(Display.getCurrent(), name);
-            imageMap.put(name, image);
-        }
-        return image;
+        return imageMap.computeIfAbsent(name, i -> new Image(Display.getCurrent(), name));
     }
 
     public void disposeImages() {
-        for (final Iterator<Image> iter = imageMap.values().iterator(); iter.hasNext();) {
-            iter.next().dispose();
+        for (final Image image : imageMap.values()) {
+            image.dispose();
         }
         imageMap.clear();
     }
@@ -104,28 +93,29 @@ public class ResourceCache {
      */
     private Font getFont(final String name, final int size, final int style, final boolean strikeout, final boolean underline) {
         final String fontName = name + '|' + size + '|' + style + '|' + strikeout + '|' + underline;
-        Font font = fontMap.get(fontName);
-        if (font == null) {
-            final FontData fontData = new FontData(name, size, style);
-            if (strikeout || underline) {
-                try {
-                    final Class<?> logFontClass = Class.forName("org.eclipse.swt.internal.win32.LOGFONT");
-                    final Object logFont = FontData.class.getField("data").get(fontData);
-                    if (logFont != null && logFontClass != null) {
-                        if (strikeout) {
-                            logFontClass.getField("lfStrikeOut").set(logFont, Byte.valueOf((byte) 1));
-                        }
-                        if (underline) {
-                            logFontClass.getField("lfUnderline").set(logFont, Byte.valueOf((byte) 1));
-                        }
+        return fontMap.computeIfAbsent(fontName, f -> createFont(name, size, style, strikeout, underline));
+    }
+
+    private static Font createFont(final String name, final int size, final int style, final boolean strikeout, final boolean underline) {
+        Font font;
+        final FontData fontData = new FontData(name, size, style);
+        if (strikeout || underline) {
+            try {
+                final Class<?> logFontClass = Class.forName("org.eclipse.swt.internal.win32.LOGFONT");
+                final Object logFont = FontData.class.getField("data").get(fontData);
+                if (logFont != null && logFontClass != null) {
+                    if (strikeout) {
+                        logFontClass.getField("lfStrikeOut").set(logFont, Byte.valueOf((byte) 1));
                     }
-                } catch (final Throwable e) {
-                    ExceptionHandler.warn("Unable to set underline or strikeout" + " (probably on a non-Windows platform). " + e);
+                    if (underline) {
+                        logFontClass.getField("lfUnderline").set(logFont, Byte.valueOf((byte) 1));
+                    }
                 }
+            } catch (final Throwable e) {
+                ExceptionHandler.warn("Unable to set underline or strikeout" + " (probably on a non-Windows platform). " + e);
             }
-            font = new Font(Display.getCurrent(), fontData);
-            fontMap.put(fontName, font);
         }
+        font = new Font(Display.getCurrent(), fontData);
         return font;
     }
 
@@ -133,8 +123,8 @@ public class ResourceCache {
      * Dispose all of the cached fonts
      */
     public void disposeFonts() {
-        for (final Iterator<Font> iter = fontMap.values().iterator(); iter.hasNext();) {
-            iter.next().dispose();
+        for (final Font font : fontMap.values()) {
+            font.dispose();
         }
         fontMap.clear();
     }
@@ -150,17 +140,12 @@ public class ResourceCache {
     public Color getColor(final RGB rgb) {
         final String key = rgb.blue + "|" + rgb.green + "|" + rgb.red;
 
-        Color color = colorMap.get(key);
-        if (color == null) {
-            color = new Color(Display.getCurrent(), rgb);
-            colorMap.put(key, color);
-        }
-        return color;
+        return colorMap.computeIfAbsent(key, c -> new Color(Display.getCurrent(), rgb));
     }
 
     public void disposeColors() {
-        for (final Iterator<Color> iter = colorMap.values().iterator(); iter.hasNext();) {
-            iter.next().dispose();
+        for (final Color color : colorMap.values()) {
+            color.dispose();
         }
         colorMap.clear();
     }
@@ -176,21 +161,15 @@ public class ResourceCache {
      * @return Cursor The system cursor matching the specific ID
      */
     public Cursor getCursor(final int id) {
-        final Integer key = id;
-        Cursor cursor = cursorMap.get(key);
-        if (cursor == null) {
-            cursor = new Cursor(Display.getDefault(), id);
-            cursorMap.put(key, cursor);
-        }
-        return cursor;
+        return cursorMap.computeIfAbsent(id, c -> new Cursor(Display.getDefault(), id));
     }
 
     /**
      * Dispose all of the cached cursors
      */
     public void disposeCursors() {
-        for (final Iterator<Cursor> iter = cursorMap.values().iterator(); iter.hasNext();) {
-            iter.next().dispose();
+        for (final Cursor cursor : cursorMap.values()) {
+            cursor.dispose();
         }
         cursorMap.clear();
     }

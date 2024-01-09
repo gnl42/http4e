@@ -36,6 +36,8 @@ import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.DocumentUt
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.HConfiguration;
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.HContentAssistProcessor;
 import me.glindholm.plugin.http4e2.httpclient.core.client.view.assist.ModelTrackerListener;
+import me.glindholm.plugin.http4e2.httpclient.core.misc.Styles;
+import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
 
 /**
  * @author Atanas Roussev (https://nextinterfaces.com)
@@ -52,6 +54,9 @@ class ParamTextView implements IControlView {
         final Menu popupMenu = new Menu(styledText);
         new ClipboardMenu(styledText, popupMenu);
         styledText.setMenu(popupMenu);
+
+//        styledText.setForeground(ResourceUtils.getColor(Styles.BLACK_RGB_TEXT));
+//        styledText.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_DISABLED));
 
         styledText.addMouseListener(new MouseAdapter() {
 

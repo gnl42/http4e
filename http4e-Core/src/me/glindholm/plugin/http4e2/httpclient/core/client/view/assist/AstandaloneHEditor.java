@@ -67,9 +67,9 @@ public class AstandaloneHEditor {
                     final IContentAssistant ca = sourceConf.getContentAssistant(sourceViewer);
                     ca.showPossibleCompletions();
 
-                    st.setBackground(ResourceUtils.getColor(Styles.SSL));
+//                    st.setBackground(ResourceUtils.getColor(Styles.SSL));
                 }
-                st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
+//                st.setBackground(ResourceUtils.getColor(Styles.BACKGROUND_ENABLED));
             }
         });
 

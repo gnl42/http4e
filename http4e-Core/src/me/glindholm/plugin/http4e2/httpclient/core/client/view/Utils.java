@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -111,8 +110,8 @@ public class Utils {
         iModel.clearHeaders();
         iModel.clearParameters();
 
-        textToModelHeaders(iView.headerView.getHeaderText(), iModel);
-        String txt = iView.paramView.getParamText();
+        textToModelHeaders(iView.headerView.getViewText(), iModel);
+        String txt = iView.paramView.getViewText();
         txt = txt.replace('\\', '/');
         textToModelParams(txt, iModel);
 
@@ -137,8 +136,8 @@ public class Utils {
                 throw new CoreException(CoreException.IO_EXCEPTION, e);
             }
 
-            for (final Iterator iter = p.entrySet().iterator(); iter.hasNext();) {
-                final Map.Entry<String, String> me = (Map.Entry<String, String>) iter.next();
+            for (final Object element : p.entrySet()) {
+                final Map.Entry<String, String> me = (Map.Entry<String, String>) element;
                 iModel.addHeader(me.getKey(), me.getValue());
             }
         }
@@ -159,8 +158,8 @@ public class Utils {
                 throw new CoreException(CoreException.IO_EXCEPTION, e);
             }
 
-            for (final Iterator iter = p.entrySet().iterator(); iter.hasNext();) {
-                final Map.Entry<String, String> me = (Map.Entry<String, String>) iter.next();
+            for (final Object element : p.entrySet()) {
+                final Map.Entry<String, String> me = (Map.Entry<String, String>) element;
                 iModel.addParameter(me.getKey(), me.getValue());
             }
         }
@@ -178,7 +177,7 @@ public class Utils {
         if (iModel.getParameters().isEmpty()) {
             iModel.fireExecute(new ModelEvent(ModelEvent.PARAMS_FOCUS_LOST, iModel));
         } else {
-            iView.paramView.setParamText(listToString(iModel.getParameters()));
+            iView.paramView.setText(listToString(iModel.getParameters()));
         }
 
         iView.bodyView.setText(iModel.getBody());
@@ -282,8 +281,7 @@ public class Utils {
         final StringBuilder sb = new StringBuilder();
         final int size = map.size();
         int cnt = 0;
-        for (final Iterator<String> it = map.keySet().iterator(); it.hasNext();) {
-            final String key = it.next();
+        for (final String key : map.keySet()) {
             cnt++;
             sb.append(key + CoreConstants._EQ);
             final List<String> values = map.get(key);

@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 import me.glindholm.plugin.http4e2.editor.xml.ColorManager;
+import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
 
 /**
  * @author Atanas Roussev (https://nextinterfaces.com)
@@ -38,6 +39,6 @@ public class ColorManagerAdaptor implements ColorManager {
 
     @Override
     public Color getColor(final RGB rgb) {
-        return cache.getColor(rgb);
+        return ResourceUtils.getColor(rgb);
     }
 }

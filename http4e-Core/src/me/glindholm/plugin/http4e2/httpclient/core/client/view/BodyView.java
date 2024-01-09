@@ -15,154 +15,17 @@
  */
 package me.glindholm.plugin.http4e2.httpclient.core.client.view;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 
 import me.glindholm.plugin.http4e2.httpclient.core.CoreConstants;
-import me.glindholm.plugin.http4e2.httpclient.core.CoreImages;
 import me.glindholm.plugin.http4e2.httpclient.core.client.model.ItemModel;
-import me.glindholm.plugin.http4e2.httpclient.core.client.model.ModelEvent;
-import me.glindholm.plugin.http4e2.httpclient.core.misc.Styles;
-import me.glindholm.plugin.http4e2.httpclient.core.util.ResourceUtils;
 
 /**
  * @author Atanas Roussev (https://nextinterfaces.com)
  */
-class BodyView {
-
-    StyledText bodyText;
-    AttachManager attachManager;
-    CLabel titleLabel;
+class BodyView extends AbstractView {
 
     BodyView(final ItemModel model, final Composite parent) {
-
-        final ViewForm vForm = ViewUtils.buildViewForm(CoreConstants.TITLE_BODY, model, parent);
-        titleLabel = (CLabel) vForm.getChildren()[0];
-        bodyText = new StyledText(vForm, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-        vForm.setContent(bodyText);
-
-        bodyText.setEditable(false);
-
-        // Font font = Display.getCurrent().getSystemFont();
-        // font.getFontData()[0].height = 12;
-        // bodyText.setFont(font);
-        bodyText.setFont(ResourceUtils.getFont(Styles.getInstance(parent.getShell()).getFontMonospaced()));
-        bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-
-        // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-        // bodyText.setForeground(ResourceUtils.getColor(Styles.GRAY_RGB_TEXT));
-        bodyText.setBackground(ResourceUtils.getColor(Styles.GREY_DISABLED));
-
-        bodyText.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseDoubleClick(final MouseEvent e) {
-                model.fireExecute(new ModelEvent(ModelEvent.BODY_RESIZED, model));
-            }
-        });
-        bodyText.addFocusListener(new FocusListener() {
-
-            private String prevBody = model.getBody();
-
-            @Override
-            public void focusGained(final FocusEvent e) {
-                if (!prevBody.equals(bodyText.getText())) {
-                    prevBody = bodyText.getText();
-                    model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_GAINED, model));
-                }
-            }
-
-            @Override
-            public void focusLost(final FocusEvent e) {
-                if (!prevBody.equals(bodyText.getText())) {
-                    prevBody = bodyText.getText();
-                    model.fireExecute(new ModelEvent(ModelEvent.BODY_FOCUS_LOST, model));
-                }
-            }
-        });
-
-        bodyText.addKeyListener(new ExecuteKeyListener(() -> model.fireExecute(new ModelEvent(ModelEvent.REQUEST_START, model))));
-
-        final ToolBar bar = new ToolBar(vForm, SWT.FLAT);
-
-        final ToolItem clearBtn = new ToolItem(bar, SWT.PUSH);
-        clearBtn.setImage(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.DELETE));
-        clearBtn.setToolTipText("Clear");
-        clearBtn.addSelectionListener(new SelectionListener() {
-
-            @Override
-            public void widgetDefaultSelected(final SelectionEvent e) {
-            }
-
-            @Override
-            public void widgetSelected(final SelectionEvent e) {
-                BodyView.this.setText("");
-            }
-        });
-        attachManager = new AttachManager(model, bodyText, bar);
-
-        vForm.setTopCenter(bar);
+        super(CoreConstants.TITLE_BODY, false, true, model, parent);
     }
-
-    String getText() {
-        return bodyText.getText();
-    }
-
-    CLabel getTitleLabel() {
-        return titleLabel;
-    }
-
-    void setText(final String txt) {
-        bodyText.setText(txt);
-    }
-
-    void setBackground(final Color color) {
-        final StyledText st = bodyText;
-        st.setBackground(color);
-    }
-
-    void setEditable(final boolean editable, final boolean isXwwwForm, final boolean isPost) {
-        Color fg = ResourceUtils.getColor(Styles.GRAY_RGB_TEXT);
-        Color bg = ResourceUtils.getColor(Styles.BACKGROUND_DISABLED);
-        fg= bg = null;
-
-
-        if (editable) {
-            // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-            bodyText.setForeground(fg);
-            bodyText.setBackground(bg);
-            bodyText.setEditable(true);
-            // attachManager.setEnabled(true);
-            if (isXwwwForm && isPost) {
-                attachManager.setEnabled(false);
-            } else {
-                attachManager.setEnabled(true);
-            }
-            // if(isXwwForm && isPost){
-            // attachManager.setEnabled(false);
-            // } else {
-            // attachManager.setEnabled(true);
-            // }
-
-        } else {
-            // bodyText.setFont(ResourceUtils.getFont(Styles.FONT_COURIER));
-            bodyText.setForeground(fg);
-            bodyText.setBackground(ResourceUtils.getColor(Styles.GREY_DISABLED));
-            bodyText.setEditable(false);
-            attachManager.setEnabled(false);
-        }
-    }
-
 }

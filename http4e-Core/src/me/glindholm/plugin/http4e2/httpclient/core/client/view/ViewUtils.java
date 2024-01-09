@@ -40,7 +40,7 @@ class ViewUtils {
         final CLabel label = new CLabel(vForm, SWT.NONE);
         label.setText(CoreConstants.TITLE_SPACE + title + CoreConstants.TITLE_SPACE);
         label.setAlignment(SWT.LEFT);
-        label.setBackground(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.TITLE_LINE));
+//        label.setBackground(ResourceUtils.getImage(CoreConstants.PLUGIN_CORE, CoreImages.TITLE_LINE));
         label.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(final MouseEvent e) {
